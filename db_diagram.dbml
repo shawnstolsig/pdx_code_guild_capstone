@@ -1,0 +1,212 @@
+// > many-to-one; < one-to-many; - one-to-one
+
+// ref: >   represents foreignkey
+
+Table User  [headercolor: #27ae60] {
+  id int [pk, increment] // auto-increment
+  username varchar
+  password varchar
+  
+  is_superuser boolean
+  is_staff boolean
+  is_active boolean
+  date_joined timestamp
+  last_login timestamp
+  
+  first_name varchar
+  last_name varchar
+  email varchar
+}
+
+Table Manager  [headercolor: #27ae60] {
+  id int [pk, increment]
+  user int [ref: - User.id]   // one to one
+  organization int [ref: > Organization.id]  
+  department int [ref: > Department.id] 
+  
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Employee  [headercolor: #27ae60] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]  
+  department int [ref: > Department.id] 
+  roles int [ref: > Role.id] 
+  cohort int [ref: > Cohort.id]
+  
+  company_id int
+  first_name varchar
+  last_name varchar
+  full_name varchar
+  hire_date datetime
+  
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Organization  [headercolor: #c0392b] {
+  id int [pk, increment]
+  
+  name varchar
+  description varchar
+  
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Department  [headercolor: #d35400] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]  
+  
+  name varchar
+  description varchar
+  
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Workspace  [headercolor: #8e44ad] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]
+  department int [ref: > Department.id]
+  svg int [ref: - SVGElement.id]
+  
+  name varchar
+  description varchar
+
+  
+  created_at timestamp
+  updated_at timestampcode 
+}
+
+Table Zone  [headercolor: #8e44ad] {
+  id int [pk, increment]
+  workspace int [ref: > Workspace.id]
+  department int [ref: > Department.id]
+  svg int [ref: - SVGElement.id]
+  
+  name varchar
+  description varchar
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Node  [headercolor: #8e44ad] {
+  department int [ref: > Department.id]
+  id int [pk, increment]
+  workspace int [ref: > Workspace.id]
+  zone int [ref: > Zone.id]
+  role int [ref: > Role.id]
+  svg int [ref: - SVGElement.id]  
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Cohort  [headercolor: #27ae60] {
+  id int [pk, increment]
+  code varchar  // a shortend, code representation of cohort (ie, DA5)
+  description varchar // a text descrption of the cohort  (ie, Sun-Wed, Days, Thursday overtime day)
+  organization int [ref: > Organization.id]  
+  
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Role {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]
+  department int [ref: > Department.id]
+  
+  name varchar
+  description varchar
+  rate int  // will be used for calculating widget throughput
+  last_staffed int // this will be used for rotation...what is the pk of the person staffed last?  
+  
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table FlowpathNode  [headercolor: #2c3e50] {
+  id int [pk, increment]
+  input int [ref: - Node.id]
+  output int [ref: - Node.id]
+  svg int [ref: - SVGElement.id]
+    
+  volume int // how many widgets/hour through this flowpath
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table FlowpathZone  [headercolor: #2c3e50] {
+  id int [pk, increment]
+  input int [ref: - Zone.id]
+  output int [ref: - Zone.id]
+  svg int [ref: - SVGElement.id]  
+  
+  volume int  // how many widgets/hour flowing through this flowpath
+
+
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table FlowpathWorkspace  [headercolor: #2c3e50] {
+  id int [pk, increment]
+  input int [ref: - Workspace.id]
+  output int [ref: - Workspace.id]
+  // no SVG relationship since only one Workspace rendered at a time  
+  
+  volume int  // how many widgets/hour flowing through this flowpath
+    
+  created_at timestamp
+  updated_at timestamp
+}
+
+// a Shift is going to be a collection of Jobs
+Table Shift  [headercolor: #16a085] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]
+  department int [ref: > Department.id]
+  
+  start datetime
+  end datetime
+  
+  created_at timestamp
+  updated_at timestamp
+}
+
+// a matching of Employee to Node 
+Table Job  [headercolor: #16a085] {
+  id int [pk, increment]
+  shift int [ref: > Shift.id]
+  employee int [ref: > Employee.id]
+  node int [ref: > Node.id]
+  role int [ref: > Role.id]
+  
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table SVGElement {
+  id int [pk, increment]
+  svg_shape varchar
+  svg_stroke int
+  svg_stroke_width int
+  svg_m int // for path d attribute....moveto
+  svg_l int // for path l attribute....lineto
+  svg_points varchar
+  svg_x int
+  svg_y int
+  svg_height int
+  svg_width int
+  svg_fill_r int
+  svg_fill_g int
+  svg_fill_b int
+  svg_opacity float
+
+}
+
