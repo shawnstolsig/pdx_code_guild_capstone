@@ -1,0 +1,227 @@
+// > many-to-one; < one-to-many; - one-to-one
+
+// ref: >   represents foreignkey
+
+// built in django auth User model
+Table User  [headercolor: #27ae60] {          
+  id int [pk, increment] 
+  username varchar
+  password varchar
+  
+  is_superuser boolean
+  is_staff boolean
+  is_active boolean
+  date_joined timestamp
+  last_login timestamp
+  
+  first_name varchar
+  last_name varchar
+  email varchar
+}
+
+Table Manager  [headercolor: #27ae60] {
+  id int [pk, increment]
+  user int [ref: - User.id]   // one to one
+  organization int [ref: > Organization.id]  
+  department int [ref: > Department.id] 
+  
+  // no need for names since this will be tied one-to-one with User model
+
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table Worker  [headercolor: #27ae60] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]  
+  department int [ref: > Department.id] 
+  cohort int [ref: > Cohort.id]
+  // "roles" will be related name for the manytomany relationship held by each Role.  worker.roles 
+  
+  badge_id varchar
+  username varchar // note that this is unrelated to the Django User model.  This is usually a separate identifer assigned by the Organization, like a Badge ID
+  first_name varchar
+  last_name varchar
+  full_name varchar
+  hire_date datetime
+  
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table Organization  [headercolor: #c0392b] {
+  id int [pk, increment]
+  
+  name varchar
+  description varchar
+  
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table Department  [headercolor: #d35400] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]  
+  
+  name varchar
+  description varchar
+  
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table Workspace  [headercolor: #8e44ad] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]
+  department int [ref: > Department.id]
+  svg int [ref: - SVGElement.id]
+  
+  name varchar
+  description varchar
+  volume int
+
+  date_created timestamp
+  date_updated timestamp 
+}
+
+Table Zone  [headercolor: #8e44ad] {
+  id int [pk, increment]
+  workspace int [ref: > Workspace.id]
+  department int [ref: > Department.id]
+  svg int [ref: - SVGElement.id]
+  organization int [ref: > Organization.id]
+  
+  name varchar
+  description varchar
+
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table Node  [headercolor: #8e44ad] {
+  id int [pk, increment]
+  department int [ref: > Department.id]
+  workspace int [ref: > Workspace.id]
+  zone int [ref: > Zone.id]
+  role int [ref: > Role.id]
+  svg int [ref: - SVGElement.id]  
+
+  name varchar
+
+  date_created timestamp
+  date_updated timestamp
+}
+
+// cohort is used to group Workers together, based of their schedule
+Table Cohort  [headercolor: #27ae60] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]  
+
+  code varchar  // a shortend, code representation of cohort (ie, DA5)
+  description varchar // a text descrption of the cohort  (ie, Sun-Wed, Days, Thursday overtime day)
+  
+  date_created timestamp
+  date_updated timestamp
+}
+
+// role describes a particular job/path in the operation
+Table Role {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]
+  department int [ref: > Department.id]
+  workers int [ref: < Worker.id]  // many to many.  worker can have many roles, and roles can have many workers.  use "roles" as related name
+  
+  name varchar
+  description varchar
+  rate int  // will be used for calculating widget throughput
+  last_staffed varchar // this will be used for rotation...what is the pk of the person staffed last?  
+  
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table FlowpathNode  [headercolor: #2c3e50] {
+  id int [pk, increment]
+  input int [ref: > Node.id]
+  output int [ref: > Node.id]
+  svg int [ref: - SVGElement.id]
+  organization int [ref: > Organization.id]
+  department int [ref: > Department.id]
+    
+  volume int // how many widgets/hour through this flowpath
+
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table FlowpathZone  [headercolor: #2c3e50] {
+  id int [pk, increment]
+  input int [ref: > Zone.id]
+  output int [ref: > Zone.id]
+  svg int [ref: - SVGElement.id]  
+  organization int [ref: > Organization.id]
+  department int [ref: > Department.id]
+  
+  volume int  // how many widgets/hour flowing through this flowpath
+
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table FlowpathWorkspace  [headercolor: #2c3e50] {
+  id int [pk, increment]
+  input int [ref: > Workspace.id]
+  output int [ref: > Workspace.id]
+  organization int [ref: > Organization.id]
+  // no department foreign key since workspace flowpaths may be between departments
+  // no SVG relationship since only one Workspace rendered at a time  
+  
+  volume int  // how many widgets/hour flowing through this flowpath
+    
+  date_created timestamp
+  date_updated timestamp
+}
+
+// a Shift is going to be a collection of Jobs
+Table Shift  [headercolor: #16a085] {
+  id int [pk, increment]
+  organization int [ref: > Organization.id]
+  department int [ref: > Department.id]
+  
+  start datetime
+  end datetime
+  
+  date_created timestamp
+  date_updated timestamp
+}
+
+// a matching of Worker to Node 
+Table Job  [headercolor: #16a085] {
+  id int [pk, increment]
+  shift int [ref: > Shift.id]
+  worker int [ref: > Worker.id]
+  node int [ref: > Node.id]
+  role int [ref: > Role.id]
+  
+  date_created timestamp
+  date_updated timestamp
+}
+
+Table SVGElement {
+  id int [pk, increment]
+  svg_shape varchar
+  svg_stroke int
+  svg_stroke_width int
+  svg_m int // for path d attribute....moveto
+  svg_l int // for path l attribute....lineto
+  svg_points varchar
+  svg_x int
+  svg_y int
+  svg_height int
+  svg_width int
+  svg_fill_r int
+  svg_fill_g int
+  svg_fill_b int
+  svg_opacity float
+}
+
