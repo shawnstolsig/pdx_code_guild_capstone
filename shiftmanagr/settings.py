@@ -41,6 +41,10 @@ INSTALLED_APPS = [
     'rest_framework',
 
     'api.apps.ApiConfig',
+    'people.apps.PeopleConfig',
+    'process.apps.ProcessConfig',
+    'org.apps.OrgConfig',
+    'planning.apps.PlanningConfig'
 ]
 
 MIDDLEWARE = [
