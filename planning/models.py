@@ -7,7 +7,6 @@ from people.models import Manager, Worker, Role
 # Shift
 # Job
 
-
 class Shift(models.Model):
     """
     A Shift is primarily a collection of worker/node (Job) assignments.  A Shift will include

@@ -15,7 +15,7 @@ class Manager(models.Model):
     """
 
     # attributes
-    # (inherited from built-in User class)
+    full_name = models.CharField(max_length=180, null=True)
 
     # relationships
     user = models.OneToOneField(User, on_delete=models.CASCADE)

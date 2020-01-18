@@ -25,7 +25,7 @@ Table Manager  [headercolor: #27ae60] {
   organization int [ref: > Organization.id]  
   department int [ref: > Department.id] 
   
-  // no need for names since this will be tied one-to-one with User model
+  full_name varchar
 
   date_created timestamp
   date_updated timestamp

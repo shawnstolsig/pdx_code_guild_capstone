@@ -1,22 +1,44 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
+from org.models import Organization, Department, Cohort
+from people.models import Manager
 
+class OrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ('name', 'description', 'date_created', 'date_updated')
 
+class DepartmentSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer(read_only=True)   
 
+    class Meta:
+        model = Department
+        fields = ('name', 'description', 'date_created', 'date_updated', 'organization')
 
+class CohortSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer(read_only=True)
+    class Meta:
+        model = Cohort
+        fields = ('code', 'description', 'date_created', 'date_updated', 'organization')
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = User
+        fields = ('username', 'last_login', 'first_name', 'last_name', 'is_active', 'date_joined')
 
+class ManagerSerializer(serializers.ModelSerializer):
+    organization = OrganizationSerializer(read_only=True)
+    department = DepartmentSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+    class Meta:
+        model = Manager
+        fields = ('full_name', 'date_created', 'date_updated', 'user', 'organization', 'department')
 
 
 
 # Sample serializers:
 # from data.models import Upgrade, Ship, Skill, Clan, Player, ShipInstance
 # from clan_battles.models import Battle, ClanInstance, PlayerInstance
-# class PlayerSerializer(serializers.ModelSerializer):
-#     # clans = serializers.StringRelatedField(many=False)
-#     class Meta:
-#         model = Player
-#         # ommitted fields: player_user, player_ships, player_clan
-#         fields = ('player_wgid', 'player_nickname', 'player_clan_role', 'player_joined_at')
 
 # class UserClanRosterSerializer(serializers.ModelSerializer):
 #     roster = serializers.StringRelatedField(many=True)
