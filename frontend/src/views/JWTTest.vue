@@ -18,11 +18,10 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from "axios";
 
 export default {
   name: "jwtTest",
-  components: {},
   data() {
     return {
       username: null,
@@ -37,29 +36,30 @@ export default {
         password: this.password
       };
       this.$store.dispatch("obtainToken", payload);
-	},
-	refreshToken(){
-		this.$store.dispatch("refreshToken");
-	},
+    },
+    refreshToken() {
+      this.$store.dispatch("refreshToken");
+    },
     inspectToken() {
       this.$store.dispatch("inspectToken");
     },
     deleteToken() {
       this.$store.dispatch("deleteToken");
-	},
-	testAPI() {
-		axios({
-			method: 'get',
-			url: 'http://localhost:8000/api/v1/hello',
-			headers: {
-				authorization: `Bearer ${this.access}`
-			}
-		}).then(response => alert(response.data.message))
-		.catch((error) => {
-			alert("Error with request...not authenticated");
-			console.log(error);
-		})
-	}
+    },
+    testAPI() {
+      axios({
+        method: "get",
+        url: "http://localhost:8000/api/v1/testAuthentication",
+        headers: {
+          authorization: `Bearer ${this.access}`
+        }
+      })
+        .then(response => alert(response.data.message))
+        .catch(error => {
+          alert("Error with request...not authenticated");
+          console.log(error);
+        });
+    }
   },
   computed: {
     access() {

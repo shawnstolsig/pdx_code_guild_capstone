@@ -23,5 +23,5 @@ urlpatterns += [
 
 # for testing JWT
 urlpatterns += [
-    path('hello/', views.HelloView.as_view(), name="hello")
+    path('testAuthentication/', views.HelloView.as_view(), name="test_authentication")
 ]

@@ -9,7 +9,7 @@
 
             <v-spacer></v-spacer>
 
-            <v-btn text color="grey" to="/">
+            <v-btn v-if="authenticated" text color="grey" to="/">
                 <span>Dashboard</span>
                 <v-icon right >home</v-icon>
             </v-btn>
@@ -17,14 +17,14 @@
                 <span>Test JWT</span>
                 <v-icon right >lock</v-icon>
             </v-btn>
-            <!-- <v-btn text color="grey">
+            <v-btn v-if="!authenticated" text color="grey" to="/login">
                 <span>Sign In</span>
                 <v-icon right >perm_identity</v-icon>
             </v-btn>
-            <v-btn text color="grey">
+            <v-btn v-if="authenticated" text color="grey" @click="logOut">
                 <span>Sign Out</span>
                 <v-icon right >exit_to_app</v-icon>
-            </v-btn> -->
+            </v-btn>
 
         </v-app-bar>
     </nav>
@@ -41,8 +41,15 @@ export default {
         }
     },
     methods: {
-
+        logOut(){
+            this.$store.dispatch('deleteToken')
+        }
     },
+    computed: {
+        authenticated(){
+            return this.$store.state.isAuthenticated
+        }
+    }
 
 }
 </script>

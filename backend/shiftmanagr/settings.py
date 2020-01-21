@@ -132,7 +132,7 @@ STATIC_URL = '/static/'
 REST_FRAMEWORK = {
     
     # sets default permission required for GET/POST to API...user must be Authenticated
-    # 'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
     # specifies the JWTAuthentication is used with API
     'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework_simplejwt.authentication.JWTAuthentication']
 }
