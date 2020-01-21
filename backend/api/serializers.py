@@ -24,7 +24,7 @@ class CohortSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
-        fields = ('username', 'last_login', 'first_name', 'last_name', 'is_active', 'date_joined')
+        fields = ('id', 'username', 'last_login', 'first_name', 'last_name', 'is_active', 'date_joined')
 
 class ManagerSerializer(serializers.ModelSerializer):
     organization = OrganizationSerializer(read_only=True)

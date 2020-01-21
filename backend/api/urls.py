@@ -10,6 +10,7 @@ router.register('organizations', views.OrganizationViewSet, basename='organizati
 router.register('departments', views.DepartmentViewSet, basename='departments')
 router.register('cohorts', views.CohortViewSet, basename='cohorts')
 router.register('managers', views.ManagerViewSet, basename='managers')
+router.register('users', views.UserViewSet, basename='users')
 
 urlpatterns = router.urls
 

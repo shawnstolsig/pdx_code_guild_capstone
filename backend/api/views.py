@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from rest_framework import viewsets
 
-from .serializers import OrganizationSerializer, DepartmentSerializer, CohortSerializer, ManagerSerializer
+from .serializers import OrganizationSerializer, DepartmentSerializer, CohortSerializer, ManagerSerializer, UserSerializer
+from django.contrib.auth.models import User
 from org.models import Organization, Department, Cohort
 from people.models import Manager, Worker, Role
 from process.models import SVGElement, Workspace, Zone, Node, FlowpathWorkspace, FlowpathZone, FlowpathNode
@@ -39,7 +40,6 @@ class CohortViewSet(viewsets.ModelViewSet):
 
 class ManagerViewSet(viewsets.ModelViewSet):
     serializer_class = ManagerSerializer
-    # authentication_classes = 
 
     def get_queryset(self):
         queryset = Manager.objects.all()
@@ -56,6 +56,10 @@ class ManagerViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+
 
 # for JWT authentication stuff
 from rest_framework.views import APIView
@@ -63,7 +67,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 class HelloView(APIView):
-    permission_classes = (IsAuthenticated, )
 
     def get(self, request):
         content = {'message': 'Hello from your Django Backend!\n You have accessed an IsAuthenticated view.'}
