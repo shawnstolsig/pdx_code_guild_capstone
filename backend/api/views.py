@@ -66,7 +66,7 @@ class HelloView(APIView):
     permission_classes = (IsAuthenticated, )
 
     def get(self, request):
-        content = {'message': 'Hello World JWT!'}
+        content = {'message': 'Hello from your Django Backend!\n You have accessed an IsAuthenticated view.'}
         return Response(content)
 
 

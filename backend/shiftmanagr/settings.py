@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'corsheaders',
     'rest_framework',
 
     'api.apps.ApiConfig',
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -128,7 +130,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',)
 }
+
+CORS_ORIGIN_ALLOW_ALL = False
+
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:8080',
+)

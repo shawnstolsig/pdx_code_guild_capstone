@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import JWTTest from '../views/JWTTest.vue'
 import About from '../views/About.vue'
 
 Vue.use(VueRouter)
@@ -10,6 +11,11 @@ const routes = [
     path: '/',
     name: 'home',
     component: Home
+  },
+  {
+    path: '/jwttest',
+    name: 'jwtTest',
+    component: JWTTest
   },
   {
     path: '/about',
