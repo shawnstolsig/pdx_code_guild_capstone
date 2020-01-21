@@ -9,6 +9,8 @@ pylint = "*"
 [packages]
 django = "*"
 djangorestframework = "*"
+djangorestframework-jwt = "*"
+djangorestframework-simplejwt = "*"
 
 [requires]
 python_version = "3.8"

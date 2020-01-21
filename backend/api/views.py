@@ -39,6 +39,7 @@ class CohortViewSet(viewsets.ModelViewSet):
 
 class ManagerViewSet(viewsets.ModelViewSet):
     serializer_class = ManagerSerializer
+    # authentication_classes = 
 
     def get_queryset(self):
         queryset = Manager.objects.all()
@@ -56,13 +57,17 @@ class ManagerViewSet(viewsets.ModelViewSet):
         return queryset
 
 
+# for JWT authentication stuff
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
+class HelloView(APIView):
+    permission_classes = (IsAuthenticated, )
 
-
-
-
-
-
+    def get(self, request):
+        content = {'message': 'Hello World JWT!'}
+        return Response(content)
 
 
 
