@@ -10,7 +10,7 @@
             <v-spacer></v-spacer>
 
             <v-btn v-if="authenticated" text color="grey" to="/">
-                <span>Dashboard</span>
+                <span>{{firstName}}'s Dashboard</span>
                 <v-icon right >home</v-icon>
             </v-btn>
             <v-btn text color="grey" to="/jwttest">
@@ -48,6 +48,9 @@ export default {
     computed: {
         authenticated(){
             return this.$store.state.isAuthenticated
+        },
+        firstName(){
+            return this.$store.state.authUser.username
         }
     }
 

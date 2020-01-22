@@ -1,46 +1,20 @@
 <template lang="html">
-	<form class="login form">
-		<div class="field">
-		<label for="id_username">Username</label>
-		<input
-			v-model="username"
-			type="text"
-			placeholder="Username"
-			autofocus="autofocus"
-			maxlength="150"
-			id="id_username">
-		</div>
-		<div class="field">
-			<label for="id_password">Password</label>
-			<input
-				v-model="password"
-				type="password"
-				placeholder="Password"
-				id="id_password">
-		</div>
-		<button
-			@click.prevent="authenticate"
-			class="button primary"
-			type="submit">
-			Log In
-		</button>
-	</form>
-	<!-- from Vuetify layout examples....centered login button -->
-	<!-- <v-container class="fill-height" fluid>
-        <v-row align="center" justify="center">
+	<v-container class="fill-height" fluid>
+		<v-row align="center" justify="center">
 			<v-col cols="12" sm="8" md="4">
-            	<v-card class="elevation-12">
-					<v-toolbar color="primary" dark	flat>
-                		<v-toolbar-title>Login form</v-toolbar-title>
+				<v-card class="elevation-12">
+					<v-toolbar dark	flat>
+                		<v-toolbar-title>Login</v-toolbar-title>
                 		<v-spacer/>
                 	</v-toolbar>
 					<v-card-text>
 						<v-form>
 							<v-text-field
-								label="Login"
+								label="Username"
 								name="login"
 								prepend-icon="person"
 								type="text"
+								v-model="username"
 							/>
 
 							<v-text-field
@@ -48,18 +22,22 @@
 								label="Password"
 								name="password"
 								prepend-icon="lock"
-								type="password"
+								:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+								v-model="password"
+								:type="showPassword ? 'text' : 'password'"
+								@click:append="showPassword = !showPassword"
 							/>
 						</v-form>
-					</v-card-text>
+					</v-card-text>				
               		<v-card-actions>
+                		<v-btn color="primary" @click="register">Register</v-btn>
                 		<v-spacer />
-                		<v-btn color="primary">Login</v-btn>
+                		<v-btn color="success" @click="authenticate">Login</v-btn>
               		</v-card-actions>
-            	</v-card>
-          	</v-col>
-        </v-row>
-    </v-container> -->
+				</v-card>
+			</v-col> 
+		</v-row>
+	</v-container>
 </template>
 
 <script>
@@ -69,7 +47,8 @@ export default {
     data () {
         return {
             username: null,
-            password: null
+			password: null,
+			showPassword: false
         }
     },
     methods: {
@@ -85,8 +64,12 @@ export default {
 
             // call API to obtain token and log in user
             this.$store.dispatch("obtainToken", payload);
+		},
 
-        }
+		// create new user 
+		register(){
+			alert("trying to register!")
+		}
     }
 }
 </script>

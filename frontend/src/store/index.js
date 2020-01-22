@@ -125,7 +125,7 @@ export default new Vuex.Store({
 
 				}).catch((error) => {
 					console.log(error);
-					alert("Error obtaining token and user information")
+					alert("Invalid username/password combination, please try again.")
 				})
 
 

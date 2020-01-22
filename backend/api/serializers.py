@@ -34,47 +34,22 @@ class ManagerSerializer(serializers.ModelSerializer):
         model = Manager
         fields = ('full_name', 'date_created', 'date_updated', 'user', 'organization', 'department')
 
+# class RegistrationSerializer(serializers.ModelSerializer):
 
-
-# Sample serializers:
-# from data.models import Upgrade, Ship, Skill, Clan, Player, ShipInstance
-# from clan_battles.models import Battle, ClanInstance, PlayerInstance
-
-# class UserClanRosterSerializer(serializers.ModelSerializer):
-#     roster = serializers.StringRelatedField(many=True)
+#     # Ensure passwords are at least 8 characters long, no longer than 128
+#     # characters, and can not be read by the client.
+#     password = serializers.CharField(
+#         max_length=128,
+#         min_length=8,
+#         write_only=True
+#     )
 
 #     class Meta:
-#         model = Clan
-#         # ommitted fields: player_user, player_ships, player_clan
-#         fields = ('clan_wgid', 'clan_tag', 'clan_name', 'clan_members_count', 'clan_realm', 'clan_is_disbanded', 'roster')
+#         model = User
+#         # List all of the fields that could possibly be included in a request
+#         # or response, including fields specified explicitly above.
+#         fields = ['email', 'username', 'password', 'first_name', 'last_name']
 
-# class ShipSerializer(serializers.ModelSerializer):
-    
-#     class Meta:
-#         model = Ship
-#         # omitted fields: ship_upgrades
-#         fields = ('ship_wgid',
-#         'ship_name',
-#         'ship_class',
-#         'ship_tier',
-#         'ship_nation',
-#         'ship_upgrades',
-#         'ship_upgrade_slots')
-
-# class UserShipsSerializer(serializers.ModelSerializer):
-#     # player_fleet = serializers.StringRelatedField(many=False)
-#     shipinstance_ship_name = ShipSerializer(read_only=True, source="shipinstance_ship")
-#     class Meta:
-#         model = ShipInstance
-#         fields = ('shipinstance_main_battery_hits',
-#         'shipinstance_main_battery_shots',
-#         'shipinstance_xp',
-#         'shipinstance_battles',
-#         'shipinstance_torpedoes_hits',
-#         'shipinstance_torpedoes_shots',
-#         'shipinstance_wins',
-#         'shipinstance_losses',
-#         'shipinstance_damage_dealt',
-#         'shipinstance_potential_damage',
-#         'shipinstance_spotting_damage',
-#         'shipinstance_ship_name')
+#     def create(self, validated_data):
+#         # Use the `create_user` method we wrote earlier to create a new user.
+#         return User.objects.get_or_create(**validated_data)

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from org.models import Organization, Department, Cohort
 
 # These models are relating to the people element of an organization:
@@ -19,7 +21,7 @@ class Manager(models.Model):
 
     # relationships
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
 
     # timestamps
@@ -28,6 +30,12 @@ class Manager(models.Model):
 
     def __str__(self):
         return self.user.username
+
+# automatically create a Manager when User is created
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Manager.objects.create(user=instance, full_name=f'{instance.first_name} {instance.last_name}')
 
 class Worker(models.Model):
     """
