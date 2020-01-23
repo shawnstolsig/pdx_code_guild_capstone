@@ -10,7 +10,7 @@
             <v-spacer></v-spacer>
 
             <v-btn v-if="authenticated" text color="grey" to="/">
-                <span>{{firstName}}'s Dashboard</span>
+                <span>{{userInfo.username}}'s Dashboard</span>
                 <v-icon right >home</v-icon>
             </v-btn>
             <v-btn text color="grey" to="/jwttest">
@@ -37,7 +37,12 @@
 export default {
     data(){
         return {
-            links: []
+            // links: [
+            //     { label: `${this.userInfo.username}'s Dashboard`, link: '/', icon: 'home', test: this.authenticated, action: null},
+            //     { label: `Test JWT`, link: '/jwttest', icon: 'lock', test: true, action: null},
+            //     { label: `Sign In / Register`, link: '/login', icon: 'perm_identity', test: !this.authenticated, action: null},
+            //     { label: `Sign Out`, link: '/', icon: 'home', test: this.authenticated, action: 'logOut'},
+            // ]
         }
     },
     methods: {
@@ -47,10 +52,10 @@ export default {
     },
     computed: {
         authenticated(){
-            return this.$store.state.isAuthenticated
+            return this.$store.getters.isAuthenticated
         },
-        firstName(){
-            return this.$store.state.authUser.username
+        userInfo(){
+            return this.$store.getters.userInfo
         }
     }
 

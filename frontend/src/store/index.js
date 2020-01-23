@@ -22,9 +22,9 @@ export default new Vuex.Store({
 		// JSON Web Token 
 		jwt_access: localStorage.getItem('accessToken'),
 		jwt_refresh: localStorage.getItem('refreshToken'),
+		jwt_refresh_expiration: localStorage.getItem('refreshExpiration'),
+		jwt_access_expiration: localStorage.getItem('accessExpiration'),
 		endpoints: {
-			// obtainJWT: 'http://localhost:8000/api/v1/token/obtain',
-			// refreshJWT: 'http://localhost:8000/api/v1/token/refresh',
 			obtainJWT: 'http://localhost:8000/auth/jwt/create',
 			refreshJWT: 'http://localhost:8000/auth/jwt/refresh',
 			baseURL: 'http://localhost:8000',
@@ -32,6 +32,24 @@ export default new Vuex.Store({
 		}
 
 	},   // end Vuex state
+
+	getters: {
+		userInfo(state){
+			return state.authUser
+		},
+		isAuthenticated(state){
+			return state.isAuthenticated
+		},
+		accessToken(state){
+			return state.jwt_access
+		},
+		refreshToken(state){
+			return state.jwt_refresh
+		},
+		endpoints(state){
+			return state.endpoints
+		}
+	},	// end Vuex getters
 
 	mutations: {
 
@@ -52,55 +70,59 @@ export default new Vuex.Store({
 
 		// Update local storage and Vuex state with new JWT
 		updateToken(state, newToken) {
-			// Broken into two if statements as the refresh token is not always provided
+			// Broken into two if statements as the refresh token is not always provided (only get an access when you refresh)
 			if(newToken.access){
-				localStorage.setItem('accessToken', newToken.access);
 				state.jwt_access = newToken.access;
+				state.jwt_access_expiration = jwt_decode(newToken.access).exp		// expiration datetime of access token
+				localStorage.setItem('accessToken', state.jwt_access)
+				localStorage.setItem('accessExpiration', state.jwt_access_expiration)
 			}
 			if(newToken.refresh){
-				localStorage.setItem('refreshToken', newToken.refresh);
 				state.jwt_refresh = newToken.refresh;
+				state.jwt_refresh_expiration  = jwt_decode(newToken.refresh).exp;         // expiration datetime of access token
+				localStorage.setItem('refreshToken', state.jwt_refresh)
+				localStorage.setItem('refreshExpiration', state.jwt_refresh_expiration)
 			}
 		},
-
+		
 		// Remove JWT from local Vuex storage and state
 		removeToken(state) {
-			localStorage.removeItem('accessToken');
-			localStorage.removeItem('refreshToken');
 			state.jwt_access = null;
 			state.jwt_refresh = null;
+			state.jwt_access_expiration = null;
+			state.jwt_refresh_expiration = null;
+			localStorage.removeItem('accessToken');
+			localStorage.removeItem('refreshToken');
+			localStorage.removeItem('accessExpiration');
+			localStorage.removeItem('refreshExpiration');
 		}
-
+		
 	},	// end Vuex mutations
-
+	
 	actions: {
-
+		
 		// Use Axios to get new JWT, provided username and password payload
 		obtainToken(context, payload) {
-
+			
 			// Get tokens and update user information (payload is username and password)
 			axios.post(this.state.endpoints.obtainJWT, payload)
-				.then(response => {
-					
-					// update 
-					this.commit('updateToken', response.data);
+			.then(response => {
 				
-					// Set state information for logged in user
-					const token = response.data.access
-					if (token) {
+				// update tokens in state
+				this.commit('updateToken', response.data);
+				
+				// Set state information for logged in user
+				const token = response.data.access
+				if (token) {
 
-						// // use jwt_decode library to extract user_id from JWT 
-						// const decoded = jwt_decode(token);
-						// const user_id = decoded.user_id
-
-						// send user_id next axios call, to pull User info from API
-						return axios({
-							method: 'get',
-							url: `${this.state.endpoints.baseURL}/auth/users/me/`,
-							headers: {
-								authorization: `Bearer ${response.data.access}`
-							}
-						})
+					// send user_id next axios call, to pull User info from API
+					return axios({
+						method: 'get',
+						url: `${this.state.endpoints.baseURL}/auth/users/me/`,
+						headers: {
+							authorization: `Bearer ${response.data.access}`
+						}
+					})
 
 					} else {
 						alert("trying to decode user from access token but no token found!")
@@ -123,6 +145,10 @@ export default new Vuex.Store({
 						isAuthenticated: true,
 					})
 
+					// Start logout timer.  Currently, based on simplejwt config, this is 5 min.
+					let now = new Date()
+					context.dispatch('setLogoutTimer', this.state.jwt_access_expiration * 1000 - now)
+
 					// redirect user to Dashboard
 					router.push({name:'home'})
 
@@ -130,8 +156,6 @@ export default new Vuex.Store({
 					console.log(error);
 					alert("Invalid username/password combination, please try again.")
 				})
-
-
 		},
 
 		// Delete stored token, both in localStorage and state
@@ -159,16 +183,14 @@ export default new Vuex.Store({
 
 		// Verify JWT is valid.  Prompt user if they need to login again.
 		inspectToken() {
-			const token = this.state.jwt_access;
-			if (token) {
-				const decoded = jwt_decode(token);
-				const exp = decoded.exp
-				const orig_iat = decoded.orig_iat
-
-				if (exp - (Date.now() / 1000) < 1800 && (Date.now() / 1000) - orig_iat < 628200) {
+			if (this.state.jwt_access) {
+				const access_exp = this.state.jwt_access_expiration
+				const refresh_exp = this.state.jwt_refresh_expiration
+				alert(`refresh_exp is ${refresh_exp} and access_exp is ${access_exp}`)
+				if (access_exp - (Date.now() / 1000) < 1800 && (Date.now() / 1000) - refresh_exp < 628200) {
 					this.dispatch('refreshToken')
 					alert("token inspected, refreshing token")
-				} else if (exp - (Date.now() / 1000) < 1800) {
+				} else if (access_exp - (Date.now() / 1000) < 1800) {
 					// DO NOTHING, DO NOT REFRESH   
 					alert("token inspected, no issues")
 				} else {
@@ -181,7 +203,58 @@ export default new Vuex.Store({
 			else {
 				alert("No token detected.")
 			}
-		}
+		},
+
+		// Auto-logout action
+		setLogoutTimer(context, expirationTime){
+			setTimeout(() => {
+				context.dispatch('deleteToken')
+			}, expirationTime)
+		},
+
+		// Auto-login
+		tryAutoLogin(){
+			// get access token from local storage
+			let token = localStorage.getItem('accessToken')
+			// if no token, abort auto login...return
+			if(!token){
+				return
+			}
+			
+			// if token is in local storage, get expiration date
+			let expirationDate = localStorage.getItem('accessExpiration')
+			let now = new Date()			
+
+			// if token has expired, abort auto login....return
+			if (now >= expirationDate*1000){
+				return 
+			}
+			
+			// valid, unexpired token...so retrieve authenticated user information from backend sending token
+			axios({
+				method: 'get',
+				url: `${this.state.endpoints.baseURL}/auth/users/me/`,
+				headers: {
+					authorization: `Bearer ${token}`
+				}
+			}).then(response => {
+				this.commit('setAuthUser', {
+
+					// in Vuex store, add user information retrieved from API
+					authUser: {
+						user_id: response.data.id,
+						username: response.data.username,
+						last_login: response.data.last_login,
+						first_name: response.data.first_name,
+						last_name: response.data.last_name,
+						is_active: response.data.is_active,
+						date_joined: response.data.date_joined,
+					},
+					isAuthenticated: true,
+				})
+			})
+		},
+
 	},	// end Vuex actions
 
 	modules: {

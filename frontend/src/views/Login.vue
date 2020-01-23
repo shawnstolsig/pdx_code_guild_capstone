@@ -133,7 +133,7 @@ export default {
 	},
 	computed: {
 		baseUrl(){
-			return this.$store.state.endpoints.baseUrl
+			return this.$store.getters.endpoints.baseUrl
 		}
 	}
 }

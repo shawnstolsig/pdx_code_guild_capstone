@@ -20,5 +20,9 @@ export default {
   data: () => ({
     //
   }),
+
+  created(){
+    this.$store.dispatch('tryAutoLogin')
+  }
 };
 </script>

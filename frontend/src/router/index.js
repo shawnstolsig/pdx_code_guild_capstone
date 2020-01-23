@@ -4,14 +4,23 @@ import Home from '../views/Home.vue'
 import JWTTest from '../views/JWTTest.vue'
 import About from '../views/About.vue'
 import Login from '../views/Login.vue'
+import store from '../store/index.js'
 
 Vue.use(VueRouter)
 
 const routes = [
+  // protected route, must be authenticated to access home
   {
     path: '/',
     name: 'home',
-    component: Home
+    component: Home,
+    beforeEnter (to, from, next){
+      if(store.state.isAuthenticated){
+        next()
+      } else {
+        next('/login')
+      }
+    }
   },
   {
     path: '/login',

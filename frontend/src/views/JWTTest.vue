@@ -63,10 +63,10 @@ export default {
   },
   computed: {
     access() {
-      return this.$store.state.jwt_access;
+      return this.$store.getters.accessToken;
     },
     refresh() {
-      return this.$store.state.jwt_refresh;
+      return this.$store.getters.refreshToken;
     }
   }
 };
