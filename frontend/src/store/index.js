@@ -23,9 +23,12 @@ export default new Vuex.Store({
 		jwt_access: localStorage.getItem('accessToken'),
 		jwt_refresh: localStorage.getItem('refreshToken'),
 		endpoints: {
-			obtainJWT: 'http://localhost:8000/api/v1/token/obtain',
-			refreshJWT: 'http://localhost:8000/api/v1/token/refresh',
-			baseURL: 'http://localhost:8000/api/v1',
+			// obtainJWT: 'http://localhost:8000/api/v1/token/obtain',
+			// refreshJWT: 'http://localhost:8000/api/v1/token/refresh',
+			obtainJWT: 'http://localhost:8000/auth/jwt/create',
+			refreshJWT: 'http://localhost:8000/auth/jwt/refresh',
+			baseURL: 'http://localhost:8000',
+			baseAPIURL: 'http://localhost:8000/api/v1',
 		}
 
 	},   // end Vuex state
@@ -86,14 +89,14 @@ export default new Vuex.Store({
 					const token = response.data.access
 					if (token) {
 
-						// use jwt_decode library to extract user_id from JWT 
-						const decoded = jwt_decode(token);
-						const user_id = decoded.user_id
+						// // use jwt_decode library to extract user_id from JWT 
+						// const decoded = jwt_decode(token);
+						// const user_id = decoded.user_id
 
 						// send user_id next axios call, to pull User info from API
 						return axios({
 							method: 'get',
-							url: `${this.state.endpoints.baseURL}/users/${user_id}`,
+							url: `${this.state.endpoints.baseURL}/auth/users/me/`,
 							headers: {
 								authorization: `Bearer ${response.data.access}`
 							}

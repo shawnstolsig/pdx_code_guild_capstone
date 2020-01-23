@@ -18,7 +18,7 @@
                 <v-icon right >lock</v-icon>
             </v-btn>
             <v-btn v-if="!authenticated" text color="grey" to="/login">
-                <span>Sign In</span>
+                <span>Sign In / Register</span>
                 <v-icon right >perm_identity</v-icon>
             </v-btn>
             <v-btn v-if="authenticated" text color="grey" @click="logOut">
