@@ -16,7 +16,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+
 urlpatterns = [
+    # built-in admin page
     path('admin/', admin.site.urls),
+
+    # path to djoser endpoints
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
+
+    # path to api endpoints
     path('api/v1/', include('api.urls')),
+
 ]

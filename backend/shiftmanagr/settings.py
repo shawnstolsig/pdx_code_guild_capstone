@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # built-in
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,9 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # third party
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
+    'djoser',
 
+    # custom apps
     'api.apps.ApiConfig',
     'people.apps.PeopleConfig',
     'process.apps.ProcessConfig',
@@ -132,9 +137,9 @@ STATIC_URL = '/static/'
 REST_FRAMEWORK = {
     
     # sets default permission required for GET/POST to API...user must be Authenticated
-    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
+    # 'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
     # specifies the JWTAuthentication is used with API
-    'DEFAULT_AUTHENTICATION_CLASSES': ['rest_framework_simplejwt.authentication.JWTAuthentication']
+    'DEFAULT_AUTHENTICATION_CLASSES': ('rest_framework_simplejwt.authentication.JWTAuthentication',),
 }
 
 CORS_ORIGIN_ALLOW_ALL = False
