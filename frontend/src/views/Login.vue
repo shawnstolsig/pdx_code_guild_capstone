@@ -73,7 +73,7 @@
                 		<v-btn color="primary" v-if="!registrationMode" @click="registrationMode = !registrationMode">Register</v-btn>
                 		<v-btn color="primary" v-if="registrationMode" @click="registrationMode = !registrationMode">Back to login...</v-btn>
                 		<v-spacer />
-                		<v-btn color="success" v-if="!registrationMode" @click="authenticate">Login</v-btn>
+                		<v-btn color="success" v-if="!registrationMode" @click="login">Login</v-btn>
                 		<v-btn color="success" v-if="registrationMode" @click="register">Register</v-btn>
               		</v-card-actions>
 
@@ -84,18 +84,17 @@
 </template>
 
 <script>
-import axios from 'axios'
-// import router from '../router'
+
 export default {
 	name: 'login',
     data () {
         return {
-            username: null,
-			password: null,
-			password2: null,
-			firstName: null,
-			lastName: null,
-			email: null,
+            username: '',
+			password: '',
+			password2: '',
+			firstName: '',
+			lastName: '',
+			email: '',
 			showPassword: false,
 			showPassword2: false,
 			registrationMode: false
@@ -104,7 +103,7 @@ export default {
     methods: {
 
         // log user in
-        authenticate () {
+        login () {
 
             // create payload from user input 
             const payload = {
@@ -113,7 +112,7 @@ export default {
             }
 
             // call API to obtain token and log in user
-            this.$store.dispatch("obtainToken", payload);
+            this.$store.dispatch("login", payload);
 		},
 
 		// create new user 
@@ -121,35 +120,25 @@ export default {
 			const payload = {
 				username: this.username,
 				password: this.password2,
-				// first_name: this.firstName,
-				// last_name: this.lastName,
+				firstName: this.firstName,
+				lastName: this.lastName,
+				fullName: `${this.firstName} ${this.lastName}`,
 				email: this.email,
+				darkModeEnabled: false,
 			}
-			axios({
-				method: 'post',
-				url: `${this.baseUrl}/auth/users/`,
-				data: payload,
-			}).then(response => {
-				console.log(response)
-				// if we get a id back in the response, then registration was successful
-				if(response.status == 201){
-					const payload = {
-						username: this.username,
-						password: this.password2
-					}
-					this.$store.dispatch('obtainToken', payload)
-				}
-			}).catch(error => console.log(error))
 
-			// // redirect to profile page?
-			// router.push({name: 'profile'})
+			this.$store.dispatch('register', payload)
 		}
 	},
 	computed: {
 		baseUrl(){
 			return this.$store.getters.endpoints.baseURL
 		}
+	},
+	mounted() {
+		this.$vuetify.theme.dark = false
 	}
+
 }
 </script>
 

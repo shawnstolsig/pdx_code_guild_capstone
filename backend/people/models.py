@@ -16,7 +16,7 @@ class Manager(models.Model):
 
     # attributes
     full_name = models.CharField(max_length=180, null=True)
-    darkModeEnabled = models.BooleanField(default=False)
+    dark_mode_enabled = models.BooleanField(default=False)
 
     # relationships
     user = models.OneToOneField(User, on_delete=models.CASCADE)

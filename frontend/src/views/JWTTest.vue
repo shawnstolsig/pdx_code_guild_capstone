@@ -11,7 +11,6 @@
       <h3>Refresh token:</h3>
       <p>{{refresh}}</p>
       <v-btn @click="inspectToken">Inspect token</v-btn>
-      <v-btn @click="refreshToken">Refresh token</v-btn>
       <v-btn @click="testAPI">Test Protected Django API</v-btn>
     </v-container>
   </div>
@@ -35,16 +34,13 @@ export default {
         username: this.username,
         password: this.password
       };
-      this.$store.dispatch("obtainToken", payload);
-    },
-    refreshToken() {
-      this.$store.dispatch("refreshToken");
+      this.$store.dispatch("login", payload);
     },
     inspectToken() {
-      this.$store.dispatch("inspectToken");
+      this.$store.dispatch("verifyLogin");
     },
     deleteToken() {
-      this.$store.dispatch("deleteToken");
+      this.$store.dispatch("logout");
     },
     testAPI() {
       axios({

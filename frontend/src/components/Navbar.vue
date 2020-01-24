@@ -11,7 +11,7 @@
             <v-spacer></v-spacer>
 
             <v-btn v-if="authenticated" text to="/">
-                <span>{{userInfo.username}}'s Dashboard</span>
+                <span>{{username}}'s Dashboard</span>
                 <v-icon right >home</v-icon>
             </v-btn>
             <v-btn v-if="authenticated" text to="/settings">
@@ -54,15 +54,16 @@ export default {
     },
     methods: {
         logOut(){
-            this.$store.dispatch('deleteToken')
+            this.$store.dispatch('logout')
         },
     },
     computed: {
         authenticated(){
             return this.$store.getters.isAuthenticated
         },
-        userInfo(){
-            return this.$store.getters.userInfo
+        username(){
+            console.log(`computed property of navbar user is ${this.$store.getters.username}`)
+            return this.$store.getters.username
         },
     }
 

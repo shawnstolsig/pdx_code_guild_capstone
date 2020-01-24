@@ -1,4 +1,5 @@
 import Vue from 'vue'
+
 // For connecting to Django backend using JWT
 import axios from 'axios'
 import VueAxios from 'vue-axios'
@@ -10,212 +11,337 @@ import router from '../router'
 Vue.use(VueAxios, axios)
 Vue.use(Vuex)
 
-
 export default new Vuex.Store({
 
-	state: {
-
-		// ==========  Authentication =============================================
-		// For managing User logins
-		authUser: {},
-		isAuthenticated: false,
-		
-		// JSON Web Token 
-		jwt_access: localStorage.getItem('accessToken'),
-		jwt_refresh: localStorage.getItem('refreshToken'),
-		jwt_refresh_expiration: localStorage.getItem('refreshExpiration'),
-		jwt_access_expiration: localStorage.getItem('accessExpiration'),
-		endpoints: {
-			obtainJWT: 'http://localhost:8000/auth/jwt/create',
+    state: {
+        user: {
+            userId: '',
+            username: '',
+            firstName: '',
+            lastName: '',
+            fullName: '',
+            email: '',
+            darkModeEnabled: '',
+        },
+        isAuthenticated: false,
+        jwt: {
+            access: localStorage.getItem('accessToken'),
+            refresh: localStorage.getItem('refreshToken'),
+            refreshExpiration: localStorage.getItem('refreshExpiration'),
+            accessExpiration: localStorage.getItem('accessExpiration'), 
+        },
+        endpoints: {
+            obtainJWT: 'http://localhost:8000/auth/jwt/create',
 			refreshJWT: 'http://localhost:8000/auth/jwt/refresh',
 			baseURL: 'http://localhost:8000',
 			baseAPI: 'http://localhost:8000/api/v1',
-		},
-		// ========================================================================
-		
-	},   // end Vuex state
+        },
 
-	getters: {
-		userInfo(state){
-			return state.authUser
-		},
-		isAuthenticated(state){
-			return state.isAuthenticated
-		},
-		accessToken(state){
-			return state.jwt_access
-		},
-		refreshToken(state){
-			return state.jwt_refresh
-		},
-		endpoints(state){
-			return state.endpoints
-		},
-	},	// end Vuex getters
+    },      // end Vuex state
 
-	mutations: {
+    getters: {
+        user(state){ return state.user },
+        username(state){ return state.user.username },
+        isAuthenticated(state){ return state.isAuthenticated },
+        accessToken(state){ return state.jwt.access },
+        refreshToken(state){ return state.jwt.refresh },
+        endpoints(state){ return state.endpoints },
+    },    // end Vuex getters
 
-		// Login: set the authenticated user in state
-		setAuthUser(state,payload){
-			Vue.set(state, 'authUser', payload.authUser)
-			Vue.set(state, 'isAuthenticated', payload.isAuthenticated)
-		},
+    mutations: {
 
-		// Logout: null authenticated user in state
-		unsetAuthUser(state){
-			Vue.set(state, 'authUser', {});
-			Vue.set(state, 'isAuthenticated', false)
-		},
-
-		// Update local storage and Vuex state with new JWT
-		updateToken(state, newToken) {
-			// Broken into two if statements as the refresh token is not always provided (only get an access when you refresh)
-			if(newToken.access){
-				state.jwt_access = newToken.access;
-				state.jwt_access_expiration = jwt_decode(newToken.access).exp		// expiration datetime of access token
-				localStorage.setItem('accessToken', state.jwt_access)
-				localStorage.setItem('accessExpiration', state.jwt_access_expiration)
+        // Update tokens
+        updateTokens(state, newTokens){
+            // Broken into two if statements as the refresh token is not always provided (only get an access when you refresh)
+			if(newTokens.access){
+				state.jwt.access = newTokens.access;
+				state.jwt.accessExpiration = jwt_decode(newTokens.access).exp;		// expiration datetime of access token
+				localStorage.setItem('accessToken', state.jwt.access);
+				localStorage.setItem('accessExpiration', state.jwt.accessExpiration);
 			}
-			if(newToken.refresh){
-				state.jwt_refresh = newToken.refresh;
-				state.jwt_refresh_expiration  = jwt_decode(newToken.refresh).exp;         // expiration datetime of access token
-				localStorage.setItem('refreshToken', state.jwt_refresh)
-				localStorage.setItem('refreshExpiration', state.jwt_refresh_expiration)
+			if(newTokens.refresh){
+				state.jwt.refresh = newTokens.refresh;
+				state.jwt.refreshExpiration  = jwt_decode(newTokens.refresh).exp;         // expiration datetime of access token
+				localStorage.setItem('refreshToken', state.jwt.refresh);
+				localStorage.setItem('refreshExpiration', state.jwt.refreshExpiration);
 			}
-		},
-		
-		// Remove JWT from local Vuex storage and state
-		removeToken(state) {
-			state.jwt_access = null;
-			state.jwt_refresh = null;
-			state.jwt_access_expiration = null;
-			state.jwt_refresh_expiration = null;
+        },
+
+        // Update user information (takes in whatever is sent from API)
+        updateUser(state, managerItem){
+            state.user = managerItem
+        },
+
+        // For reactively updating User model info only
+        updateUserInfoOnly(state, userPayload){
+            state.user['userId'] = userPayload.id
+            state.user['username'] = userPayload.username
+            state.user['firstName'] = userPayload.first_name
+            state.user['lastName'] = userPayload.last_name
+            state.user['email'] = userPayload.email
+        },
+        
+        // For reactively updating Manager model info only
+        updateManagerInfoOnly(state, managerPayload){
+            state.user['fullName'] = managerPayload.full_name
+            state.user['darkModeEnabled'] = managerPayload.dark_mode_enabled
+        },
+
+        // Clear state/log user out
+        clearStateAndLocalStorage(state){
+
+            // clear state
+            state.user = {
+                userId: '',
+                username: '',
+                firstName: '',
+                lastName: '',
+                fullName: '',
+                email: '',
+                darkModeEnabled: '', 
+            }
+            state.jwt = {
+                access: '',
+                refresh: '',
+                refreshExpiration: '',
+                accessExpiration: '', 
+            }
+
+            // clear local storage
 			localStorage.removeItem('accessToken');
 			localStorage.removeItem('refreshToken');
 			localStorage.removeItem('accessExpiration');
-			localStorage.removeItem('refreshExpiration');
-		},
-		
-	},	// end Vuex mutations
-	
-	actions: {
-		
-		// Use Axios to get new JWT, provided username and password payload
-		obtainToken(context, payload) {
-			
-			// Get tokens and update user information (payload is username and password)
-			axios.post(this.state.endpoints.obtainJWT, payload)
-			.then(response => {
-				
-				// update tokens in state
-				this.commit('updateToken', response.data);
-				
-				// Set state information for logged in user
-				const token = response.data.access
-				if (token) {
+            localStorage.removeItem('refreshExpiration');
 
-					// send user_id next axios call, to pull User info from API
-					return axios({
-						method: 'get',
-						url: `${this.state.endpoints.baseURL}/auth/users/me/`,
-						headers: {
-							authorization: `Bearer ${response.data.access}`
-						}
-					})
+            // set isAuthenticated to false
+            state.isAuthenticated = false
+        }
 
-					} else {
-						alert("trying to decode user from access token but no token found!")
-					}
-				})
-				// Set user information
-				.then(response => {
-					this.commit('setAuthUser', {
+    },  // end Vuex mutations
 
-						// in Vuex store, add user information retrieved from API
-						authUser: {
-							userId: response.data.id,
-							username: response.data.username,
-							lastLogin: response.data.last_login,
-							firstName: response.data.first_name,
-							lastName: response.data.last_name,
-							isActive: response.data.is_active,
-							dateJoined: response.data.date_joined,
-							email: response.data.email,
-							darkModeEnabled: response.data.darkModeEnabled,
-						},
-						isAuthenticated: true,
-					})
+    actions: {
+        
+        // Register user
+        register(context, fullUserPayload){
+            
+            // Post to djoser registration endpoint
+            const registrationPayload = {
+                username: fullUserPayload.username,
+                password: fullUserPayload.password,
+                email: fullUserPayload.email,
+            }
+            axios({
+				method: 'post',
+				url: `${this.state.endpoints.baseURL}/auth/users/`,
+				data: registrationPayload,
+            })
+            // Set up for login, now that we have account created (and a user id)
+            .then(response => {
+                
+                // Print status message to console
+                console.log(`User ${response.data.username} successfully created.`)
+                
+                // Store user ID for updating User backend
+                fullUserPayload['userId'] = response.data.id
+                this.state.user['userId'] = response.data.id
+                
+                // Log user in...must use another axios here so that we can wait to updateUserBackend once tokens obtained
+                const loginPayload = {
+                    username: fullUserPayload.username,
+                    password: fullUserPayload.password
+                }
 
-					// Start logout timer.  Currently, based on simplejwt config, this is 5 min.
-					let now = new Date()
-					context.dispatch('setLogoutTimer', this.state.jwt_access_expiration * 1000 - now)
+                // Login
+                return axios({
+                    method: 'post',
+                    url: this.state.endpoints.obtainJWT,
+                    data: loginPayload,
+                })
+            })
+            // Setup for posting manager/user info
+            .then(response => {
 
-					// redirect user to Dashboard
-					router.push({name:'home'})
+                // Print status message to console
+                console.log(`User logged in after registration.`)
 
-				}).catch((error) => {
-					console.log(error);
-					alert("Invalid username/password combination, please try again.")
-				})
-		},
+                // Update authentication status
+                this.state.isAuthenticated = true
 
-		// Delete stored token, both in localStorage and state
-		deleteToken() {
-			this.commit("removeToken")
-			this.commit("unsetAuthUser")
-			router.push({name: "login"})
-		},
+                // Store tokens
+                this.commit('updateTokens', response.data)
 
-		// Use Axios to refresh existing JWT (no username/password needed with refresh, just refresh token)
-		refreshToken() {
-			const payload = {
-				refresh: this.state.jwt_refresh
-			}
+                // Post Manager/User info
+                this.dispatch('updateUserBackend', fullUserPayload)
 
-			axios.post(this.state.endpoints.refreshJWT, payload)
-				.then((response) => {
-					this.commit('updateToken', response.data)
-				})
-				.catch((error) => {
-					console.log(error)
-					alert("Error freshing access token...make sure refresh token passed to backend!")
-				})
-		},
+                // Send to home page after registration
+                router.push('home')
+            })
+            .catch(error => {
+                console.log(error)
+                if (error == 'Error: request failed with status code 400'){
+                    alert("Invalid credentials.  Possible causes:\n Username taken already\nCommon password\nInvalid email")
+                }
+            })
+        },
 
-		// Verify JWT is valid.  Prompt user if they need to login again.
-		inspectToken() {
-			if (this.state.jwt_access) {
-				const access_exp = this.state.jwt_access_expiration
-				const refresh_exp = this.state.jwt_refresh_expiration
-				alert(`refresh_exp is ${refresh_exp} and access_exp is ${access_exp}`)
-				if (access_exp - (Date.now() / 1000) < 1800 && (Date.now() / 1000) - refresh_exp < 628200) {
-					this.dispatch('refreshToken')
-					alert("token inspected, refreshing token")
-				} else if (access_exp - (Date.now() / 1000) < 1800) {
-					// DO NOTHING, DO NOT REFRESH   
-					alert("token inspected, no issues")
-				} else {
-					// PROMPT USER TO RE-LOGIN
-					// THIS ELSE CLAUSE COVERS THEN CONDITION WHERE A TOKEN IS EXPIRED
-					alert("Authentication token expired), please login again!")
-					router.push({name: 'login'})
+        // Logs user in when given username/password payload
+        login(context, payload){
+            
+            // Given username/password, get tokens 
+            axios({
+                method: 'post',
+                url: this.state.endpoints.obtainJWT,
+                data: payload,
+            })
+            // With successful login, commit token mutations, set logout timer, and get Manager/User info 
+            .then(response => {
+
+                // Set isAuthenticated
+                this.state.isAuthenticated = true
+
+                // Mutate tokens
+                this.commit('updateTokens', response.data)
+
+                // Set logout timer
+                let now = new Date()
+                let expirationTime = this.state.jwt.accessExpiration * 1000
+                this.dispatch('setLogoutTimer', expirationTime - now)
+
+                // Get Manager/User info
+                let userId = jwt_decode(this.state.jwt.access).user_id
+                return axios({
+                    method: 'get',
+                    url: `${this.state.endpoints.baseAPI}/managers/${userId}/`,
+                    headers: {
+                        authorization: `Bearer ${this.state.jwt.access}`
+                    }
+                })
+            })
+            // Once all Manager/User information obtained, commit mutations to store
+            .then(response => {
+
+                // Mutate user information
+                this.commit('updateUserInfoOnly', response.data.user)
+                this.commit('updateManagerInfoOnly', response.data)
+
+                // Send to home screen
+                router.push('home')
+            })
+            // Catch errors
+            .catch(error => {
+                if(error == 'Error: Request failed with status code 401'){
+                    alert('Invalid credentials, please try again.')
+                } else {
+                    alert('Server error during login.')
+                    console.log(error)
+                }
+
+            })
+        },
+        
+        // Logs user out
+        logout(){
+            this.commit('clearStateAndLocalStorage')
+            router.push('login')
+        },
+        
+        // Checks if user is still logged in (are tokens valid?)
+        verifyLogin(){
+            
+            // If state has token
+            if(this.state.jwt.access){
+
+                // Set user to isAuthenticated
+                this.state.isAuthenticated = true
+
+                // Get expirations
+                const accessExp = this.state.jwt.access
+                const refreshExp = this.state.jwt.refresh
+                
+                // If within 30 min of access expiring and we have a valid refresh token, refresh token
+				if (accessExp - (Date.now() / 1000) < 1800 && (Date.now() / 1000) - refreshExp < 628200) {
+                    console.log("Access token expiring in less than 30 min, refreshing.")
+                    
+                    axios({
+                        method: 'post',
+                        url: this.state.endpoints.refreshJWT,
+                        data: this.state.jwt.refresh
+                    }).then(response => {
+                        this.commit('updateTokens', response.data)
+                    }).catch(error => {
+                        console.log(error)
+                        alert("Error refreshing access token...please re-login.")
+                        router.push('login')
+                    })
+
+
+                } 
+                // If not within 30 min of access expiring, do nothing...token is good for now.
+                else if (accessExp - (Date.now() / 1000) < 1800) {
+                    console.log("Access token checked, it's valid for at least 30 min")
+                } 
+                // If unable to refresh access token, prompt user to re-login.
+                else {
+					alert("Authentication token expired, please re-login.")
+					router.push('login')
 				}
-			}
-			else {
-				alert("No token detected.")
-			}
-		},
+            }
+        },
+        
+        // Update user info
+        updateUserBackend(context, payload){
 
-		// Auto-logout action
-		setLogoutTimer(context, expirationTime){
-			setTimeout(() => {
-				context.dispatch('deleteToken')
+            // Patch user model
+            axios({
+                method: 'patch',
+                url: `${this.state.endpoints.baseAPI}/users/${payload.userId}/`,
+                data: {
+                    username: payload.username,
+                    first_name: payload.firstName,
+                    last_name: payload.lastName,
+                    email: payload.email,
+                },
+                headers: {
+                    authorization: `Bearer ${this.state.jwt.access}`
+                }
+            })
+            .then(response => {
+                console.log(response)
+
+                this.commit('updateUserInfoOnly', response.data)
+            })
+            .catch(error => console.log(error))
+            
+            // Patch manager model
+            axios({
+                method: 'patch',
+                url: `${this.state.endpoints.baseAPI}/managers/${payload.userId}/`,
+                data: {
+                    full_name: payload.fullName,
+                    dark_mode_enabled: payload.darkModeEnabled,
+                },
+                headers: {
+                    authorization: `Bearer ${this.state.jwt.access}`
+                }
+            })
+            .then(response => {
+                console.log(response)
+                this.commit('updateManagerInfoOnly', response.data)
+            })
+            .catch(error => console.log(error))
+        },
+        
+        // Sets a timer for logging the user out
+        setLogoutTimer(context, expirationTime){
+            setTimeout(() => {
+				context.dispatch('logout')
 			}, expirationTime)
-		},
+        },
+        
+        // Checks local storage for token to auto login
+        tryAutoLogin(){
 
-		// Auto-login
-		tryAutoLogin(){
-			// get access token from local storage
+            // get access token from local storage
 			let token = localStorage.getItem('accessToken')
 			// if no token, abort auto login...return
 			if(!token){
@@ -230,41 +356,44 @@ export default new Vuex.Store({
 			if (now >= expirationDate*1000){
 				return 
 			}
-			
-			// valid, unexpired token...so retrieve authenticated user information from backend sending token
-			axios({
-				method: 'get',
-				url: `${this.state.endpoints.baseURL}/auth/users/me/`,
-				headers: {
+
+            alert("conditions met for auto login")
+			// With valid token, get user id from backend
+            axios({
+                method: 'get',
+                url: `${this.state.endpoints.baseURL}/auth/users/me/`,
+                headers: {
 					authorization: `Bearer ${token}`
 				}
-			}).then(response => {
-				this.commit('setAuthUser', {
+            }).then(response => {
+                // Get Manager/User info
+                let userId = response.data.id
+                console.log(`Autologin: user id ${userId} obtained.`)
+                return axios({
+                    method: 'get',
+                    url: `${this.state.endpoints.baseAPI}/managers/${userId}`,
+                    headers: {
+                        authorization: `Bearer ${token}`
+                    }
+                })
+            })
+            // Once all Manager/User information obtained, commit mutations to store
+            .then(response => {
 
-					// in Vuex store, add user information retrieved from API
-					authUser: {
-						userId: response.data.id,
-						username: response.data.username,
-						lastLogin: response.data.last_login,
-						firstName: response.data.first_name,
-						lastName: response.data.last_name,
-						isActive: response.data.is_active,
-						dateJoined: response.data.date_joined,
-						email: response.data.email,
-						darkModeEnabled: response.data.darkModeEnabled,
-					},
-					isAuthenticated: true,
-				})
-			})
-		},
+                // Mutate user information
+                this.commit('updateUserInfoOnly', response.data.user)
+                this.commit('updateManagerInfoOnly', response.data)
+                this.state.isAuthenticated = true
+                router.push('home')
+            })
+            // Catch errors
+            .catch(error => {
+                console.log(error)
+            })
+        },
 
-		// Update authUser after they update their account info
-		updateAuthUser(context, payload){
-			this.commit('setAuthUser', payload);
-		}
-	},	// end Vuex actions
+    },    // end Vuex actions
+    modules: {
 
-	modules: {
-
-	}	// end Vuex modules
+    },    // end Vuex modules
 })

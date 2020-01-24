@@ -109,7 +109,6 @@
 
 
 <script>
-import axios from "axios";
 
 export default {
 	name: 'settings',
@@ -148,57 +147,16 @@ export default {
 		saveAccountSettings(){
 			if (this.$refs.accountForm.validate()){
 				
-				// update User model
-				alert("Patching User Model")
-				axios({
-					method: 'patch',
-					url: `${this.$store.getters.endpoints.baseAPI}/users/${this.$store.getters.userInfo.userId}/`,
-					data: {
-						username: this.account.username,
-						first_name: this.account.firstName,
-						last_name: this.account.lastName,
-						email: this.account.email,
-					},
-					headers: {
-						authorization: `Bearer ${this.$store.getters.accessToken}`
-					}
-				}).then(response => {
-					console.log(response)
-				})
-
-				// update Manager model
-				alert("Patching Manager Model")
-				axios({
-					method: 'patch',
-					url: `${this.$store.getters.endpoints.baseAPI}/managers/${this.$store.getters.userInfo.userId}/`,
-					data: {
-						full_name: `${this.account.firstName} ${this.account.lastName}`,
-						darkModeEnabled: this.$vuetify.theme.dark,
-					},
-					headers: {
-						authorization: `Bearer ${this.$store.getters.accessToken}`
-					}
-				}).then(response => {
-					console.log(response)
-				})
-
-				// update auth user
-				let userInfo = this.$store.getters.userInfo
 				const payload = {
-					authUser: {
-						userId: userInfo.userId,
-						username: this.account.username,
-						lastLogin: userInfo.last_login,
-						firstName: this.account.first_name,
-						lastName: this.account.last_name,
-						isActive: userInfo.is_active,
-						dateJoined: userInfo.date_joined,
-						email: this.account.email,
-						darkModeEnabled: this.account.darkModeEnabled,
-					},
-					isAuthenticated: true,
+					userId: this.$store.getters.user.userId,
+					username: this.account.username,
+					firstName: this.account.firstName,
+					lastName: this.account.lastName,
+					fullName: `${this.account.firstName} ${this.account.lastName}`,
+					email: this.account.email,
+					darkModeEnabled: this.$vuetify.theme.dark,
 				}
-				this.$store.dispatch('updateAuthUser', payload)
+				this.$store.dispatch('updateUserBackend', payload)
 			} else {
 				alert('Invalid form input.')
 			}
@@ -208,14 +166,16 @@ export default {
 	computed: {			
 
 	},		// end computed
-	
-	created() {
-		let userInfo = this.$store.getters.userInfo
-		this.account.username = userInfo.username
-		this.account.email = userInfo.email
+	mounted() {
+    	this.$vuetify.theme.dark = this.$store.getters.user.darkModeEnabled
+		let user = this.$store.getters.user
+		console.log("populating settings with user info:")
+		console.log(user)
+		this.account.username = user.username
+		this.account.email = user.email
 		// note that for form model to work correctly, must be empty string...not undefined/null
-		this.account.firstName = (userInfo.firstName === undefined) ? "" : userInfo.firstName
-		this.account.lastName = (userInfo.firstName === undefined) ? "" : userInfo.lastName
-	},		// end created
+		this.account.firstName = (user.firstName === undefined) ? "" : user.firstName
+		this.account.lastName = (user.firstName === undefined) ? "" : user.lastName
+	},		// end mounted
 }
 </script>

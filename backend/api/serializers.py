@@ -21,19 +21,18 @@ class CohortSerializer(serializers.ModelSerializer):
         model = Cohort
         fields = ('code', 'description', 'date_created', 'date_updated', 'organization')
 
-# following example here: https://dev.to/lewiskori/user-registration-and-authorization-on-a-django-api-with-djoser-and-json-web-tokens-4kc7
-class ManagerSerializer(serializers.ModelSerializer):
-    # organization = OrganizationSerializer(read_only=True)
-    # department = DepartmentSerializer(read_only=True)
-    # user = UserSerializer(read_only=True)
-    user = serializers.StringRelatedField(read_only=True)
-    class Meta:
-        model = Manager
-        fields='__all__'
-        # user currently removed
-        # fields = ('full_name', 'date_created', 'date_updated', 'organization', 'department')
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta: 
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name')
+# following example here: https://dev.to/lewiskori/user-registration-and-authorization-on-a-django-api-with-djoser-and-json-web-tokens-4kc7
+class ManagerSerializer(serializers.ModelSerializer):
+    # organization = OrganizationSerializer(read_only=True)
+    # department = DepartmentSerializer(read_only=True)
+    user = UserSerializer(read_only=True)
+    # user = serializers.StringRelatedField(read_only=True)
+    class Meta:
+        model = Manager
+        # fields='__all__'
+        # user currently removed
+        fields = ('id', 'full_name', 'date_created', 'date_updated', 'dark_mode_enabled', 'organization', 'department', 'user')
