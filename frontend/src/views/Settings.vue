@@ -117,11 +117,11 @@ export default {
 			{text: 'Department Settings', action: '', icon: 'group'},
 		],
 		account: {
-			userId: 'userid',
-			username: 'username',
-			firstName: 'first name',
-			lastName: 'a last name',
-			email: 'email',
+			userId: 'test',
+			username: 'test',
+			firstName: 'test',
+			lastName: 'test',
+			email: 'test',
 		}, 
 		formValidity: false, 
 		validationRules: {
@@ -154,9 +154,7 @@ export default {
 	},      /// end methods	
 
 	computed: {
-		// getUserInfo(){
-		// 	return this.$store.getters.userInfo
-		// }
+
 	},		// end computed
 	
 	created() {
