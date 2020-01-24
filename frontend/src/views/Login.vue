@@ -11,8 +11,9 @@
                 	</v-toolbar>
 
 					<v-card-text>
-						<v-form dense>
+						<v-form dense v-model="formValidity" ref="registrationForm">
 							<v-text-field
+								v-if="!registrationMode"
 								label="Username"
 								name="username"
 								prepend-icon="person"
@@ -21,11 +22,23 @@
 							/>
 							<v-text-field
 								v-if="registrationMode"
+								label="Username"
+								name="username"
+								prepend-icon="person"
+								type="text"
+								v-model="username"
+								:rules="validationRules.name"
+								counter="30"
+							/>
+							<v-text-field
+								v-if="registrationMode"
 								label="First Name"
 								name="first_name"
 								prepend-icon="person"
 								type="text"
 								v-model="firstName"
+								:rules="validationRules.name"
+								counter="30"
 							/>
 							<v-text-field
 								v-if="registrationMode"
@@ -34,6 +47,8 @@
 								prepend-icon="person"
 								type="text"
 								v-model="lastName"
+								:rules="validationRules.name"
+								counter="30"
 							/>
 							<v-text-field
 								v-if="registrationMode"
@@ -42,6 +57,7 @@
 								prepend-icon="email"
 								type="text"
 								v-model="email"
+								:rules="validationRules.email"
 							/>
 							<v-text-field
 								id="password"
@@ -51,6 +67,7 @@
 								:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 								v-model="password"
 								:type="showPassword ? 'text' : 'password'"
+								:rules="validationRules.password1"
 								@click:append="showPassword = !showPassword"
 							/>
 							<v-text-field
@@ -62,9 +79,10 @@
 								:append-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"
 								v-model="password2"
 								:type="showPassword2 ? 'text' : 'password'"
+								:rules="validationRules.password2"
 								@click:append="showPassword2 = !showPassword2"
 							/>
-							<v-checkbox label="Agree to terms and conditions" v-if="registrationMode"></v-checkbox>
+							<v-checkbox label="Agree to terms and conditions" v-if="registrationMode" v-model="termsCheckbox" required></v-checkbox>
 						</v-form>
 					</v-card-text>			
 
@@ -74,7 +92,7 @@
                 		<v-btn color="primary" v-if="registrationMode" @click="registrationMode = !registrationMode">Back to login...</v-btn>
                 		<v-spacer />
                 		<v-btn color="success" v-if="!registrationMode" @click="login">Login</v-btn>
-                		<v-btn color="success" v-if="registrationMode" @click="register">Register</v-btn>
+                		<v-btn color="success" v-if="registrationMode" @click="register" :disabled="!(formValidity === termsCheckbox)">Register</v-btn>
               		</v-card-actions>
 
 				</v-card>
@@ -97,8 +115,35 @@ export default {
 			email: '',
 			showPassword: false,
 			showPassword2: false,
-			registrationMode: false
-        }
+			registrationMode: false,
+			formValidity: false,
+			termsCheckbox: false,
+			validationRules: {
+					name: [
+						v => !!v || 'Name is required.',
+						v => (v && v.length) <= 30 || 'Name must be less than 30 characters.',
+						v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
+					],
+					email: [
+						v => !!v || 'E-mail is required.',
+						// v => /.+@.+/.test(v) || 'E-mail must be valid.',
+						v => (v && v.indexOf("@") !== 0) || 'Email should have username.',
+						v => (v && !!v.includes("@")) || 'Email should have @ sybol.',
+						v => (v && v.indexOf(".") - v.indexOf('@') > 1)|| 'Email should have have domain.',
+						v => (v && !!v.indexOf(".")) || 'Email should have have domain.',
+						v => (v && v.indexOf('.') <= v.length - 3) || 'Email should contain a valid domain extension.'
+					],
+					password1: [
+						v => !!v || 'Password is required.',
+						v => (v && v.length) >= 6 || 'Password must be at least 6 characters.',
+					],
+					password2: [
+						v => !!v || 'Password is required.',
+						v => (v && v.length) >= 6 || 'Password must be at least 6 characters.',
+						() => (this.password == this.password2) || 'Passwords must be the same.',
+					],
+			}
+		}
     },
     methods: {
 
@@ -133,7 +178,7 @@ export default {
 	computed: {
 		baseUrl(){
 			return this.$store.getters.endpoints.baseURL
-		}
+		},
 	},
 	mounted() {
 		this.$vuetify.theme.dark = false

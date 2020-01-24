@@ -357,7 +357,6 @@ export default new Vuex.Store({
 				return 
 			}
 
-            alert("conditions met for auto login")
 			// With valid token, get user id from backend
             axios({
                 method: 'get',

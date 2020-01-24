@@ -3,9 +3,8 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Settings from '../views/Settings.vue'
 import JWTTest from '../views/JWTTest.vue'
-import About from '../views/About.vue'
 import Login from '../views/Login.vue'
-// import store from '../store/index.js'
+import store from '../store/index.js'
 
 Vue.use(VueRouter)
 
@@ -15,25 +14,25 @@ const routes = [
     path: '/',
     name: 'home',
     component: Home,
-    // beforeEnter (to, from, next){
-    //   if(store.state.isAuthenticated){
-    //     next()
-    //   } else {
-    //     next('/login')
-    //   }
-    // }
+    beforeEnter (to, from, next){
+      if(store.state.isAuthenticated){
+        next()
+      } else {
+        next('/login')
+      }
+    }
   },
   {
     path: '/settings',
     name: 'settings',
     component: Settings,
-    // beforeEnter (to, from, next){
-    //   if(store.state.isAuthenticated){
-    //     next()
-    //   } else {
-    //     next('/login')
-    //   }
-    // }
+    beforeEnter (to, from, next){
+      if(store.state.isAuthenticated){
+        next()
+      } else {
+        next('/login')
+      }
+    }
   },
   {
     path: '/login',
@@ -45,11 +44,6 @@ const routes = [
     name: 'jwtTest',
     component: JWTTest
   },
-  {
-    path: '/about',
-    name: 'about',
-    component: About
-  }
 ]
 
 const router = new VueRouter({

@@ -4,107 +4,93 @@
 			<v-toolbar-title>Settings</v-toolbar-title>
 		</v-toolbar>
 		<v-tabs>
-		<v-tab>
-			<v-icon left>mdi-account</v-icon>
-			Account
-		</v-tab>
-		<v-tab>
-			<v-icon left>business_center</v-icon>
-			Manager
-		</v-tab>
-		<v-tab>
-			<v-icon left>business</v-icon>
-			Department
-		</v-tab>
+			<v-tab v-for="link in links" :key="link.text">
+				<v-icon left>{{link.icon}}</v-icon>
+				{{link.text}}
+			</v-tab>
 
-      <v-tab-item> <!-- Start of Account -->
-		  <v-form v-model="formValidity" ref='accountForm' dense>
-			<v-container>
-				<v-row>
-					<v-col cols="12" md="6">
-					<v-text-field
-						v-model="account.username"
-						:rules="validationRules.name"
-						:counter="30"
-						type="text"
-						label="Username"
-						required
-					></v-text-field>
-					</v-col>
-				</v-row>
-				<v-row>
-					<v-col cols="12" md="6">
-					<v-text-field
-						v-model="account.firstName"
-						:rules="validationRules.name"
-						:counter="30"
-						type="text"
-						label="First name"
-						required
-					></v-text-field>
-					</v-col>
-				</v-row>
-				<v-row>
-					<v-col cols="12" md="6">
-					<v-text-field
-						v-model="account.lastName"
-						:rules="validationRules.name"
-						:counter="30"
-						type="text"
-						label="Last name"
-						required
-					></v-text-field>
-					</v-col>
-				</v-row>
-				<v-row>
-					<v-col cols="12" md="6">
-					<v-text-field
-						v-model="account.email"
-						:rules="validationRules.email"
-						type="email"
-						label="E-mail"
-						required
-					></v-text-field>
-					</v-col>
-				</v-row>
-				<v-row>
-					<v-card flat>
-						<v-card-text>
-							<v-switch v-model="$vuetify.theme.dark" primary	label="Dark Mode"/>
-						</v-card-text>
-					</v-card>
-				</v-row>
-				<v-row>
-					<v-btn 
-					class="mx-5" 
-					@click.prevent="saveAccountSettings" 
-					type="submit" 
-					:disabled="!formValidity"
-					>
-						Save
-					</v-btn>
-				</v-row>
+			<v-tab-item> <!-- Start of Account -->
+				<v-form v-model="formValidity" ref='accountForm' dense>
+					<v-container>
+						<v-row>
+							<v-col cols="12" md="6">
+							<v-text-field
+								v-model="account.username"
+								:rules="validationRules.name"
+								:counter="30"
+								type="text"
+								label="Username"
+								required
+							></v-text-field>
+							</v-col>
+						</v-row>
+						<v-row>
+							<v-col cols="12" md="6">
+							<v-text-field
+								v-model="account.firstName"
+								:rules="validationRules.name"
+								:counter="30"
+								type="text"
+								label="First name"
+								required
+							></v-text-field>
+							</v-col>
+						</v-row>
+						<v-row>
+							<v-col cols="12" md="6">
+							<v-text-field
+								v-model="account.lastName"
+								:rules="validationRules.name"
+								:counter="30"
+								type="text"
+								label="Last name"
+								required
+							></v-text-field>
+							</v-col>
+						</v-row>
+						<v-row>
+							<v-col cols="12" md="6">
+							<v-text-field
+								v-model="account.email"
+								:rules="validationRules.email"
+								type="email"
+								label="E-mail"
+								required
+							></v-text-field>
+							</v-col>
+						</v-row>
+						<v-row>
+							<v-card flat>
+								<v-card-text>
+									<v-switch v-model="$vuetify.theme.dark" primary	label="Dark Mode"/>
+								</v-card-text>
+							</v-card>
+						</v-row>
+						<v-row>
+							<v-btn 
+							class="mx-5" 
+							@click.prevent="saveAccountSettings" 
+							type="submit" 
+							:disabled="!formValidity"
+							>
+								Save
+							</v-btn>
+						</v-row>
 
-			</v-container>
-		</v-form>
-      </v-tab-item>  <!-- End of Account -->
+					</v-container>
+				</v-form>
+			</v-tab-item>  <!-- End of Account -->
 
-      <v-tab-item>
-        <v-card flat>
-          <v-card-text>
+			
+			<v-tab-item>	<!-- Start of Department -->
+				<v-card flat>
+					<v-card-text>
 
-          </v-card-text>
-        </v-card>
-      </v-tab-item>
-      <v-tab-item>
-        <v-card flat>
-          <v-card-text>
-
-          </v-card-text>
-        </v-card>
-      </v-tab-item>
-    </v-tabs>
-  </v-card>
+					</v-card-text>
+				</v-card>
+			</v-tab-item>	<!-- End of Department -->
+		</v-tabs>
+	</v-card>
 </template>
 
 
@@ -115,8 +101,8 @@ export default {
 
 	data: () => ({
 		links: [
-			{text: 'User Settings', action: '', icon: 'account_box'},
-			{text: 'Department Settings', action: '', icon: 'group'},
+			{text: 'Account', icon: 'mdi-account'},
+			{text: 'Department', icon: 'business'},
 		],
 		account: {
 			username: "",
