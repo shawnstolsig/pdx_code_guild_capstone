@@ -9,5 +9,8 @@
 export default {
   name: 'home',
   components: {}, 
+  mounted(){
+    this.$vuetify.theme.dark = this.$store.getters.userInfo.darkModeEnabled
+  }
 }
 </script>

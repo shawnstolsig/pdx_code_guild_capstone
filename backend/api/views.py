@@ -3,12 +3,8 @@ from rest_framework import viewsets
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsOwnerManagerOrReadOnly
-# from rest_framework.permissions import AllowAny
-# from api.permissions import IsLoggedInUserOrAdmin, IsAdminUser
 
-
-# from .serializers import OrganizationSerializer, DepartmentSerializer, CohortSerializer, ManagerSerializer, UserSerializer
-from .serializers import OrganizationSerializer, DepartmentSerializer, CohortSerializer, ManagerSerializer
+from .serializers import OrganizationSerializer, DepartmentSerializer, CohortSerializer, ManagerSerializer, UserSerializer
 from django.contrib.auth.models import User
 from org.models import Organization, Department, Cohort
 from people.models import Manager, Worker, Role
@@ -47,6 +43,7 @@ class CohortViewSet(viewsets.ModelViewSet):
 
 class ManagerViewSet(viewsets.ModelViewSet):
     serializer_class = ManagerSerializer
+    permission_classes = [IsOwnerManagerOrReadOnly,IsAuthenticated]
 
     def get_queryset(self):
         queryset = Manager.objects.all()
@@ -91,17 +88,7 @@ class TestAuthenticationView(APIView):
         return Response(content)
 
 
-
-# class UserViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = UserSerializer
-#     queryset = User.objects.all()
-
-    # def get_permissions(self):
-    #     permission_classes = []
-    #     if self.action == 'create':
-    #         permission_classes = [AllowAny]
-    #     elif self.action == 'retrieve' or self.action == 'update' or self.action == 'partial_update':
-    #         permission_classes = [IsLoggedInUserOrAdmin]
-    #     elif self.action == 'list' or self.action == 'destroy':
-    #         permission_classes = [IsAdminUser]
-    #     return [permission() for permission in permission_classes]
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]

@@ -68,22 +68,23 @@
 					</v-col>
 				</v-row>
 				<v-row>
+					<v-card flat>
+						<v-card-text>
+							<v-switch v-model="$vuetify.theme.dark" primary	label="Dark Mode"/>
+						</v-card-text>
+					</v-card>
+				</v-row>
+				<v-row>
 					<v-btn 
 					class="mx-5" 
-					@click="saveAccountSettings" 
+					@click.prevent="saveAccountSettings" 
 					type="submit" 
 					:disabled="!formValidity"
 					>
 						Save
 					</v-btn>
 				</v-row>
-				<v-row>
-					<v-card flat>
-						<v-card-text>
-							<v-switch v-model="$vuetify.theme.dark" primary	label="Dark"/>
-						</v-card-text>
-					</v-card>
-				</v-row>
+
 			</v-container>
 		</v-form>
       </v-tab-item>  <!-- End of Account -->
@@ -108,6 +109,8 @@
 
 
 <script>
+import axios from "axios";
+
 export default {
 	name: 'settings',
 
@@ -117,27 +120,26 @@ export default {
 			{text: 'Department Settings', action: '', icon: 'group'},
 		],
 		account: {
-			userId: 'test',
-			username: 'test',
-			firstName: 'test',
-			lastName: 'test',
-			email: 'test',
+			username: "",
+			firstName: "",
+			lastName: "",
+			email: "",
 		}, 
 		formValidity: false, 
 		validationRules: {
 			name: [
 				v => !!v || 'Name is required.',
-				v => v.length <= 30 || 'Name must be less than 30 characters.',
-				v => v.length >= 3 || 'Name must be at least 3 characters.',
+				v => (v && v.length) <= 30 || 'Name must be less than 30 characters.',
+				v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
 			],
 			email: [
 				v => !!v || 'E-mail is required.',
 				// v => /.+@.+/.test(v) || 'E-mail must be valid.',
-				v => v.indexOf("@") !== 0 || 'Email should have username.',
-				v => !!v.includes("@") || 'Email should have @ sybol.',
-				v => v.indexOf(".") - v.indexOf('@') > 1|| 'Email should have have domain.',
-				v => !!v.indexOf(".") || 'Email should have have domain.',
-				v => v.indexOf('.') <= v.length - 3 || 'Email should contain a valid domain extension.'
+				v => (v && v.indexOf("@") !== 0) || 'Email should have username.',
+				v => (v && !!v.includes("@")) || 'Email should have @ sybol.',
+				v => (v && v.indexOf(".") - v.indexOf('@') > 1)|| 'Email should have have domain.',
+				v => (v && !!v.indexOf(".")) || 'Email should have have domain.',
+				v => (v && v.indexOf('.') <= v.length - 3) || 'Email should contain a valid domain extension.'
 			],
 		},
 	}),     // end data
@@ -145,20 +147,75 @@ export default {
 	methods: {
 		saveAccountSettings(){
 			if (this.$refs.accountForm.validate()){
-				alert('form is valid')
-			} else {
-				alert('saving account settings')
-			}
+				
+				// update User model
+				alert("Patching User Model")
+				axios({
+					method: 'patch',
+					url: `${this.$store.getters.endpoints.baseAPI}/users/${this.$store.getters.userInfo.userId}/`,
+					data: {
+						username: this.account.username,
+						first_name: this.account.firstName,
+						last_name: this.account.lastName,
+						email: this.account.email,
+					},
+					headers: {
+						authorization: `Bearer ${this.$store.getters.accessToken}`
+					}
+				}).then(response => {
+					console.log(response)
+				})
 
+				// update Manager model
+				alert("Patching Manager Model")
+				axios({
+					method: 'patch',
+					url: `${this.$store.getters.endpoints.baseAPI}/managers/${this.$store.getters.userInfo.userId}/`,
+					data: {
+						full_name: `${this.account.firstName} ${this.account.lastName}`,
+						darkModeEnabled: this.$vuetify.theme.dark,
+					},
+					headers: {
+						authorization: `Bearer ${this.$store.getters.accessToken}`
+					}
+				}).then(response => {
+					console.log(response)
+				})
+
+				// update auth user
+				let userInfo = this.$store.getters.userInfo
+				const payload = {
+					authUser: {
+						userId: userInfo.userId,
+						username: this.account.username,
+						lastLogin: userInfo.last_login,
+						firstName: this.account.first_name,
+						lastName: this.account.last_name,
+						isActive: userInfo.is_active,
+						dateJoined: userInfo.date_joined,
+						email: this.account.email,
+						darkModeEnabled: this.account.darkModeEnabled,
+					},
+					isAuthenticated: true,
+				}
+				this.$store.dispatch('updateAuthUser', payload)
+			} else {
+				alert('Invalid form input.')
+			}
 		},
 	},      /// end methods	
 
-	computed: {
+	computed: {			
 
 	},		// end computed
 	
 	created() {
-		this.account = this.$store.getters.userInfo
+		let userInfo = this.$store.getters.userInfo
+		this.account.username = userInfo.username
+		this.account.email = userInfo.email
+		// note that for form model to work correctly, must be empty string...not undefined/null
+		this.account.firstName = (userInfo.firstName === undefined) ? "" : userInfo.firstName
+		this.account.lastName = (userInfo.firstName === undefined) ? "" : userInfo.lastName
 	},		// end created
 }
 </script>

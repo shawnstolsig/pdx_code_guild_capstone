@@ -29,7 +29,7 @@ export default new Vuex.Store({
 			obtainJWT: 'http://localhost:8000/auth/jwt/create',
 			refreshJWT: 'http://localhost:8000/auth/jwt/refresh',
 			baseURL: 'http://localhost:8000',
-			baseAPIURL: 'http://localhost:8000/api/v1',
+			baseAPI: 'http://localhost:8000/api/v1',
 		},
 		// ========================================================================
 		
@@ -258,6 +258,10 @@ export default new Vuex.Store({
 			})
 		},
 
+		// Update authUser after they update their account info
+		updateAuthUser(context, payload){
+			this.commit('setAuthUser', payload);
+		}
 	},	// end Vuex actions
 
 	modules: {
