@@ -11,7 +11,7 @@
                 	</v-toolbar>
 
 					<v-card-text>
-						<v-form>
+						<v-form dense>
 							<v-text-field
 								label="Username"
 								name="username"
@@ -64,6 +64,7 @@
 								:type="showPassword2 ? 'text' : 'password'"
 								@click:append="showPassword2 = !showPassword2"
 							/>
+							<v-checkbox label="Agree to terms and conditions" v-if="registrationMode"></v-checkbox>
 						</v-form>
 					</v-card-text>			
 
@@ -84,6 +85,7 @@
 
 <script>
 import axios from 'axios'
+// import router from '../router'
 export default {
 	name: 'login',
     data () {
@@ -116,24 +118,36 @@ export default {
 
 		// create new user 
 		register(){
-			alert("trying to register")
 			const payload = {
 				username: this.username,
 				password: this.password2,
-				first_name: this.firstName,
-				last_name: this.lastName,
+				// first_name: this.firstName,
+				// last_name: this.lastName,
 				email: this.email,
 			}
 			axios({
 				method: 'post',
-				url: `${this.baseUrl}/users/`,
-				params: payload,
-			}).then(response => console.log(response))
+				url: `${this.baseUrl}/auth/users/`,
+				data: payload,
+			}).then(response => {
+				console.log(response)
+				// if we get a id back in the response, then registration was successful
+				if(response.status == 201){
+					const payload = {
+						username: this.username,
+						password: this.password2
+					}
+					this.$store.dispatch('obtainToken', payload)
+				}
+			}).catch(error => console.log(error))
+
+			// // redirect to profile page?
+			// router.push({name: 'profile'})
 		}
 	},
 	computed: {
 		baseUrl(){
-			return this.$store.getters.endpoints.baseUrl
+			return this.$store.getters.endpoints.baseURL
 		}
 	}
 }

@@ -26,6 +26,7 @@ Table Manager  [headercolor: #27ae60] {
   department int [ref: > Department.id] 
   
   full_name varchar
+  darkModeEnabled boolean
 
   date_created timestamp
   date_updated timestamp

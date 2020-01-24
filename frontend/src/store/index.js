@@ -15,10 +15,11 @@ export default new Vuex.Store({
 
 	state: {
 
+		// ==========  Authentication =============================================
 		// For managing User logins
 		authUser: {},
 		isAuthenticated: false,
-
+		
 		// JSON Web Token 
 		jwt_access: localStorage.getItem('accessToken'),
 		jwt_refresh: localStorage.getItem('refreshToken'),
@@ -29,8 +30,9 @@ export default new Vuex.Store({
 			refreshJWT: 'http://localhost:8000/auth/jwt/refresh',
 			baseURL: 'http://localhost:8000',
 			baseAPIURL: 'http://localhost:8000/api/v1',
-		}
-
+		},
+		// ========================================================================
+		
 	},   // end Vuex state
 
 	getters: {
@@ -48,18 +50,15 @@ export default new Vuex.Store({
 		},
 		endpoints(state){
 			return state.endpoints
-		}
+		},
 	},	// end Vuex getters
 
 	mutations: {
 
 		// Login: set the authenticated user in state
-		setAuthUser(state,{
-			authUser,
-			isAuthenticated
-		}){
-			Vue.set(state, 'authUser', authUser)
-			Vue.set(state, 'isAuthenticated', isAuthenticated)
+		setAuthUser(state,payload){
+			Vue.set(state, 'authUser', payload.authUser)
+			Vue.set(state, 'isAuthenticated', payload.isAuthenticated)
 		},
 
 		// Logout: null authenticated user in state
@@ -95,7 +94,7 @@ export default new Vuex.Store({
 			localStorage.removeItem('refreshToken');
 			localStorage.removeItem('accessExpiration');
 			localStorage.removeItem('refreshExpiration');
-		}
+		},
 		
 	},	// end Vuex mutations
 	
@@ -134,13 +133,15 @@ export default new Vuex.Store({
 
 						// in Vuex store, add user information retrieved from API
 						authUser: {
-							user_id: response.data.id,
+							userId: response.data.id,
 							username: response.data.username,
-							last_login: response.data.last_login,
-							first_name: response.data.first_name,
-							last_name: response.data.last_name,
-							is_active: response.data.is_active,
-							date_joined: response.data.date_joined,
+							lastLogin: response.data.last_login,
+							firstName: response.data.first_name,
+							lastName: response.data.last_name,
+							isActive: response.data.is_active,
+							dateJoined: response.data.date_joined,
+							email: response.data.email,
+							darkModeEnabled: response.data.darkModeEnabled,
 						},
 						isAuthenticated: true,
 					})
@@ -242,13 +243,15 @@ export default new Vuex.Store({
 
 					// in Vuex store, add user information retrieved from API
 					authUser: {
-						user_id: response.data.id,
+						userId: response.data.id,
 						username: response.data.username,
-						last_login: response.data.last_login,
-						first_name: response.data.first_name,
-						last_name: response.data.last_name,
-						is_active: response.data.is_active,
-						date_joined: response.data.date_joined,
+						lastLogin: response.data.last_login,
+						firstName: response.data.first_name,
+						lastName: response.data.last_name,
+						isActive: response.data.is_active,
+						dateJoined: response.data.date_joined,
+						email: response.data.email,
+						darkModeEnabled: response.data.darkModeEnabled,
 					},
 					isAuthenticated: true,
 				})
