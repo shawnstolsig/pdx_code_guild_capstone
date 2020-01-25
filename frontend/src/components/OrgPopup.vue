@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="flag" persistent max-width="500px">
+    <v-dialog v-model="popupFlag" persistent max-width="500px">
         <v-card v-if="!createMode" class="pa-3">
             <v-card-title>Select Organization</v-card-title>
             <v-card-text>Please type in your organization code before proceeding.</v-card-text>
@@ -8,6 +8,7 @@
                     <v-text-field
                         v-model="orgCode"
                         :rules="validationRules.code"
+                        v-mask="codeMask"
                         type="text"
                         label="Organization Code"
                         required
@@ -46,19 +47,21 @@
 
 <script>
 import axios from 'axios'
+import {mask} from 'vue-the-mask'
 
 export default {
-    props: {
-        flag: Boolean,
-    },
     data(){
         return {
+            popupFlag: '',
             selectFormValid: false,
             createFormValid: false,
             createMode: false,
             orgCode: '',
             orgName: '',
+            orgId: '',
+            organizations: '',
             orgDescription: '',
+            codeMask: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
             validationRules:{
                 code: [ v => !!v || 'Please input Organization code.' ],
                 name: [
@@ -73,15 +76,27 @@ export default {
             }
         }
     },
+    directives: {mask},
     methods: {
         selectOrg(){
-            console.log("selecting org")
-            if(this.selectFormValid){
+
+            // if org id is not set (if user is not coming from org creation)
+            if(!this.orgId){
+                // using input code, find pk of organization
+                for(let i=0; i < this.organizations.length; i++){
+                    let thisOrg = this.organizations[i].code
+                    if(thisOrg == this.orgCode){
+                        this.orgId = this.organizations[i].id
+                    }
+                }
+            }
+
+            if(this.selectFormValid || this.createFormValid){
                 axios({
                     method: 'patch',
-                    url: `${this.$store.getters.endpoints.baseAPI}/managers/${this.$store.getters.user.userId}`,
+                    url: `${this.$store.getters.endpoints.baseAPI}/managers/${this.$store.getters.user.userId}/`,
                     data: {
-                        organization: this.orgCode
+                        organization: this.orgId
                     },
                     headers: {
                         authorization: `Bearer ${this.$store.getters.accessToken}`
@@ -89,7 +104,8 @@ export default {
                 })
                 .then(response => {
                     console.log(response)
-                    this.flag = false
+                    this.$store.dispatch('setUserOrganization', this.orgId)
+                    this.popupFlag = false
                 })
                 .catch(error => {
                     console.log("Could not patch User's organization.  Error:")
@@ -98,12 +114,11 @@ export default {
             }
         },
         createOrg(){
-            console.log("creating org")
             if(this.createFormValid){
                 alert("creating org with axios")
                 axios({
                     method: 'post',
-                    url: `${this.$store.getters.endpoints.baseAPI}/organizations/${this.$store.getters.user.userId}`,
+                    url: `${this.$store.getters.endpoints.baseAPI}/organizations/`,
                     data: {
                         name: this.orgName,
                         description: this.orgDescription,
@@ -112,31 +127,33 @@ export default {
                         authorization: `Bearer ${this.$store.getters.accessToken}`
                     }
                 })
+                // Set org as user's org
                 .then(response => {
                     console.log(response)
-                    
-                    return axios({
-                        method: 'patch',
-                        url: `${this.$store.getters.endpoints.baseAPI}/managers/${this.$store.getters.user.userId}`,
-                        data: {
-                            organization: response.data.id
-                        },
-                        headers: {
-                            authorization: `Bearer ${this.$store.getters.accessToken}`
-                        }
-                    })
-                    
+                    this.orgId = response.data.id
+                    this.selectOrg()
                 })
-                .then(response => {
-                    console.log(response)
-                    this.flag = false
-                }) 
                 .catch(error => {
                     console.log("Could not patch User's organization.  Error:")
                     console.log(error)
                 })
             }
         }
+    },
+    created(){
+        // set flag
+        this.popupFlag = !this.$store.getters.user.organization
+
+        // get list of Organization IDs and UUIDs
+        axios({
+            method: 'get',
+            url: `${this.$store.getters.endpoints.baseAPI}/organizationsuuid/`,
+            headers: {
+                authorization: `Bearer ${this.$store.getters.accessToken}`
+            }
+        })
+        .then(response => this.organizations = response.data)
+        .catch(error => console.log(error))
     }
 }
 </script>

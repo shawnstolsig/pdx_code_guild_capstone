@@ -1,6 +1,6 @@
 <template>
   <v-card>
-	<OrgPopup :flag="launchPopup"></OrgPopup>
+	<OrgPopup></OrgPopup>
 		<v-toolbar flat dark color="primary">
 			<v-toolbar-title>Settings</v-toolbar-title>
 		</v-toolbar>
@@ -153,9 +153,6 @@ export default {
 	},      /// end methods	
 
 	computed: {			
-		launchPopup(){
-			return !this.$store.getters.user.organization
-		}
 	},		// end computed
 
 	mounted() {

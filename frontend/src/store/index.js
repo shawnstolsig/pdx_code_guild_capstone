@@ -122,6 +122,11 @@ export default new Vuex.Store({
 
             // set isAuthenticated to false
             state.isAuthenticated = false
+        },
+
+        // Set user org after initial login
+        setUserOrganization(state, orgId){
+            state.user['organization'] = orgId
         }
 
     },  // end Vuex mutations
@@ -396,6 +401,11 @@ export default new Vuex.Store({
             .catch(error => {
                 console.log(error)
             })
+        },
+
+        // To set the user's organization after initial login
+        setUserOrganization(context, orgId){
+            this.commit('setUserOrganization', orgId)
         },
 
     },    // end Vuex actions
