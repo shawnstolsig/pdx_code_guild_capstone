@@ -62,7 +62,6 @@ export default {
             return this.$store.getters.isAuthenticated
         },
         username(){
-            console.log(`computed property of navbar user is ${this.$store.getters.username}`)
             return this.$store.getters.username
         },
     }

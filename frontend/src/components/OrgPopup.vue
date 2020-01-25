@@ -2,9 +2,9 @@
     <v-dialog v-model="popupFlag" persistent max-width="500px">
         <v-card v-if="!createMode" class="pa-3">
             <v-card-title>Select Organization</v-card-title>
-            <v-card-text>Please type in your organization code before proceeding.</v-card-text>
-            <v-card-actions>
-                <v-form v-model="selectFormValid" ref="orgSelectForm">
+            <v-card-subtitle class="mt-1">Please input your organization code before proceeding.</v-card-subtitle>
+            <v-form v-model="selectFormValid" ref="orgSelectForm">
+                <v-card-text>
                     <v-text-field
                         v-model="orgCode"
                         :rules="validationRules.code"
@@ -13,34 +13,39 @@
                         label="Organization Code"
                         required
                     ></v-text-field>
-                    <v-btn @click.prevent="selectOrg" :disabled="!selectFormValid" class="my-3 mr-3">Select</v-btn>  
-                    <v-btn @click.prevent="createMode = true">Create new Organization...</v-btn>
-                </v-form>
-            </v-card-actions>
+                </v-card-text>
+                <v-card-actions>
+                        <v-btn @click.prevent="selectOrg" :disabled="!selectFormValid" class="my-3 mr-3">Select</v-btn>  
+                        <v-btn @click.prevent="createMode = true">Create new Organization...</v-btn>
+                </v-card-actions>
+            </v-form>
         </v-card>
         <v-card v-if="createMode" class="pa-3">
             <v-card-title>Create New Organization</v-card-title>
-            <v-card-text>Please type in a name and description for your organization.</v-card-text>
-            <v-card-actions>
-                <v-form v-model="createFormValid" ref="orgCreateForm">
-                    <v-text-field
-                        v-model="orgName"
-                        :rules="validationRules.name"
-                        type="text"
-                        label="Name"
-                        required
-                    ></v-text-field>
-                    <v-textarea
-                        solo
-                        v-model="orgDescription"
-                        :rules="validationRules.description"
-                        label="Description"
-                        required
-                    ></v-textarea>
-                    <v-btn @click.prevent="createOrg" :disabled="!createFormValid" class="my-3 mr-3">Create</v-btn>  
-                    <v-btn @click.prevent="createMode = false">Back...</v-btn>
-                </v-form>
-            </v-card-actions>
+            <v-card-subtitle class="mt-1">Please type in a name and description for your organization.</v-card-subtitle>
+            <v-form v-model="createFormValid" ref="orgCreateForm">
+                <v-card-text>
+                        <v-text-field
+                            v-model="orgName"
+                            :rules="validationRules.name"
+                            type="text"
+                            v-mask=""
+                            label="Name"
+                            required
+                        ></v-text-field>
+                        <v-textarea
+                            solo
+                            v-model="orgDescription"
+                            :rules="validationRules.description"
+                            label="Description"
+                            required
+                        ></v-textarea>
+                </v-card-text>
+                <v-card-actions>
+                        <v-btn @click.prevent="createOrg" :disabled="!createFormValid" class="my-3 mr-3">Create</v-btn>  
+                        <v-btn @click.prevent="createMode = false">Back...</v-btn>
+                </v-card-actions>
+            </v-form>
         </v-card>
     </v-dialog>
 </template>
@@ -89,6 +94,10 @@ export default {
                         this.orgId = this.organizations[i].id
                     }
                 }
+                if(!this.orgId){
+                    alert("Organization not found, please re-enter code.")
+                    return
+                } 
             }
 
             if(this.selectFormValid || this.createFormValid){
@@ -115,7 +124,6 @@ export default {
         },
         createOrg(){
             if(this.createFormValid){
-                alert("creating org with axios")
                 axios({
                     method: 'post',
                     url: `${this.$store.getters.endpoints.baseAPI}/organizations/`,
@@ -131,6 +139,7 @@ export default {
                 .then(response => {
                     console.log(response)
                     this.orgId = response.data.id
+                    alert(`${this.orgName} created!`)
                     this.selectOrg()
                 })
                 .catch(error => {

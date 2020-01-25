@@ -1,6 +1,7 @@
 <template>
-  <v-card>
-	<OrgPopup></OrgPopup>
+	<v-container>
+		<OrgPopup></OrgPopup>
+
 		<v-toolbar flat dark color="primary">
 			<v-toolbar-title>Settings</v-toolbar-title>
 		</v-toolbar>
@@ -10,6 +11,78 @@
 				{{link.text}}
 			</v-tab>
 
+			<v-tab-item>	<!-- Start of Organization Settings -->
+				<v-container>
+					<v-row v-if="!validOrg">
+						<v-col cols="3">
+							<v-card flat>
+								<v-card-text>
+									No organization selected.
+								</v-card-text>
+							</v-card>
+						</v-col>
+					</v-row>
+					<v-row v-if="validOrg">
+						<v-col cols="6">
+							<v-card>
+								<v-card-title>
+									Departments
+								</v-card-title>
+								<v-card-text>
+									<v-list>
+									    <v-list-item v-for="department in org.org_departments" :key="department.id">
+											<v-list-item-content>
+												<v-list-item-title>{{department.name}}</v-list-item-title>
+											</v-list-item-content>
+										</v-list-item>
+									    <v-list-item v-if="org.org_departments.length == 0">
+											<v-list-item-content>
+												<v-list-item-title class="grey--text">(none)</v-list-item-title>
+											</v-list-item-content>
+										</v-list-item>
+									</v-list>
+								</v-card-text>
+								<v-card-actions>
+									<v-btn>
+										Add...
+									</v-btn>
+								</v-card-actions>
+							</v-card>
+						</v-col>
+						<v-col cols="6">
+							<v-card>
+								<v-card-title>
+									Cohorts
+								</v-card-title>
+								<v-card-text>
+									<v-list>
+
+									    <v-list-item v-for="cohort in org.org_cohorts" :key="cohort.id">
+											<v-list-item-content>
+												<v-list-item-title>{{cohort.name}}</v-list-item-title>
+											</v-list-item-content>
+										</v-list-item>
+									    <v-list-item v-if="org.org_cohorts.length == 0">
+											<v-list-item-content>
+												<v-list-item-title class="grey--text">(none)</v-list-item-title>
+											</v-list-item-content>
+										</v-list-item>
+
+
+									</v-list>
+								</v-card-text>
+								<v-card-actions>
+									<v-btn>
+										Add...
+									</v-btn>
+								</v-card-actions>
+							</v-card>
+						</v-col>
+					</v-row>
+				</v-container>
+
+			</v-tab-item>	<!-- End of Organization Settings -->
+			
 			<v-tab-item> <!-- Start of Account -->
 				<v-form v-model="formValidity" ref='accountForm' dense>
 					<v-container>
@@ -83,16 +156,8 @@
 				</v-form>
 			</v-tab-item>  <!-- End of Account -->
 
-			
-			<v-tab-item>	<!-- Start of Department -->
-				<v-card flat>
-					<v-card-text>
-
-					</v-card-text>
-				</v-card>
-			</v-tab-item>	<!-- End of Department -->
 		</v-tabs>
-	</v-card>
+	</v-container>
 </template>
 
 
@@ -103,8 +168,8 @@ export default {
 	components: { OrgPopup },
 	data: () => ({
 		links: [
+			{text: 'Organization', icon: 'business'},
 			{text: 'Account', icon: 'mdi-account'},
-			{text: 'Department', icon: 'business'},
 		],
 		organizationDialogFlag: false,
 		account: {
@@ -153,9 +218,15 @@ export default {
 	},      /// end methods	
 
 	computed: {			
+		validOrg(){
+			return !!this.$store.getters.user.organization
+		},
+		org(){
+			return this.$store.getters.organization
+		},
 	},		// end computed
 
-	mounted() {
+	created() {
 		this.$vuetify.theme.dark = this.$store.getters.user.darkModeEnabled
 
 		let user = this.$store.getters.user

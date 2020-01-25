@@ -26,6 +26,7 @@ export default new Vuex.Store({
             department: '',
         },
         isAuthenticated: false,
+        organization: {},
         jwt: {
             access: localStorage.getItem('accessToken'),
             refresh: localStorage.getItem('refreshToken'),
@@ -48,6 +49,7 @@ export default new Vuex.Store({
         accessToken(state){ return state.jwt.access },
         refreshToken(state){ return state.jwt.refresh },
         endpoints(state){ return state.endpoints },
+        organization(state) { return state.organization },
     },    // end Vuex getters
 
     mutations: {
@@ -127,6 +129,11 @@ export default new Vuex.Store({
         // Set user org after initial login
         setUserOrganization(state, orgId){
             state.user['organization'] = orgId
+        },
+
+        // Set organization in state
+        setOrganization(state, payload){
+            state.organization = payload
         }
 
     },  // end Vuex mutations
@@ -235,6 +242,7 @@ export default new Vuex.Store({
                 // Mutate user information
                 this.commit('updateUserInfoOnly', response.data.user)
                 this.commit('updateManagerInfoOnly', response.data)
+                this.dispatch('loadOrganization')
 
                 // Send to home screen
                 router.push('home')
@@ -395,6 +403,7 @@ export default new Vuex.Store({
                 this.commit('updateUserInfoOnly', response.data.user)
                 this.commit('updateManagerInfoOnly', response.data)
                 this.state.isAuthenticated = true
+                this.dispatch('loadOrganization')
                 router.push('home')
             })
             // Catch errors
@@ -406,7 +415,22 @@ export default new Vuex.Store({
         // To set the user's organization after initial login
         setUserOrganization(context, orgId){
             this.commit('setUserOrganization', orgId)
+            this.dispatch('loadOrganization')
         },
+
+        // Load all Organization's information
+        loadOrganization(){
+            // Get all information on the organization from backend
+            axios({
+                method: 'get',
+                url: `${this.getters.endpoints.baseAPI}/organizationsall/${this.getters.user.organization}`,
+                headers: {
+                    authorization: `Bearer ${this.getters.accessToken}`
+                }
+            })
+            .then(response => this.commit('setOrganization', response.data))
+            .catch(error => console.log(error))
+        }
 
     },    // end Vuex actions
     modules: {
