@@ -1,5 +1,6 @@
 <template>
   <v-card>
+	<OrgPopup :flag="launchPopup"></OrgPopup>
 		<v-toolbar flat dark color="primary">
 			<v-toolbar-title>Settings</v-toolbar-title>
 		</v-toolbar>
@@ -72,6 +73,7 @@
 							@click.prevent="saveAccountSettings" 
 							type="submit" 
 							:disabled="!formValidity"
+							color="success"
 							>
 								Save
 							</v-btn>
@@ -95,15 +97,16 @@
 
 
 <script>
-
+import OrgPopup from '../components/OrgPopup'
 export default {
 	name: 'settings',
-
+	components: { OrgPopup },
 	data: () => ({
 		links: [
 			{text: 'Account', icon: 'mdi-account'},
 			{text: 'Department', icon: 'business'},
 		],
+		organizationDialogFlag: false,
 		account: {
 			username: "",
 			firstName: "",
@@ -150,13 +153,15 @@ export default {
 	},      /// end methods	
 
 	computed: {			
-
+		launchPopup(){
+			return !this.$store.getters.user.organization
+		}
 	},		// end computed
+
 	mounted() {
-    	this.$vuetify.theme.dark = this.$store.getters.user.darkModeEnabled
+		this.$vuetify.theme.dark = this.$store.getters.user.darkModeEnabled
+
 		let user = this.$store.getters.user
-		console.log("populating settings with user info:")
-		console.log(user)
 		this.account.username = user.username
 		this.account.email = user.email
 		// note that for form model to work correctly, must be empty string...not undefined/null

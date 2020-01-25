@@ -22,6 +22,8 @@ export default new Vuex.Store({
             fullName: '',
             email: '',
             darkModeEnabled: '',
+            organization: '',
+            department: '',
         },
         isAuthenticated: false,
         jwt: {
@@ -85,6 +87,9 @@ export default new Vuex.Store({
         updateManagerInfoOnly(state, managerPayload){
             state.user['fullName'] = managerPayload.full_name
             state.user['darkModeEnabled'] = managerPayload.dark_mode_enabled
+            state.user['organization'] = managerPayload.organization
+            state.user['department'] = managerPayload.department
+
         },
 
         // Clear state/log user out
@@ -99,6 +104,8 @@ export default new Vuex.Store({
                 fullName: '',
                 email: '',
                 darkModeEnabled: '', 
+                organization: '',
+                department: '',
             }
             state.jwt = {
                 access: '',
@@ -174,7 +181,7 @@ export default new Vuex.Store({
                 this.dispatch('updateUserBackend', fullUserPayload)
 
                 // Send to home page after registration
-                router.push('home')
+                router.push('settings')
             })
             .catch(error => {
                 console.log(error)
