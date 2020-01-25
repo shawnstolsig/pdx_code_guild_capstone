@@ -4,7 +4,7 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsOwnerManagerOrReadOnly
 
-from .serializers import OrganizationSerializer, DepartmentSerializer, CohortSerializer, ManagerSerializer, UserSerializer
+from .serializers import OrganizationSerializer, OrganizationUUIDSerializer, DepartmentSerializer, CohortSerializer, ManagerSerializer, UserSerializer
 from django.contrib.auth.models import User
 from org.models import Organization, Department, Cohort
 from people.models import Manager, Worker, Role
@@ -14,6 +14,11 @@ from planning.models import Shift, Job
 class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
+    permission_classes = [IsAuthenticated]
+
+class OrganizationUUIDViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationUUIDSerializer
     permission_classes = [IsAuthenticated]
 
 class DepartmentViewSet(viewsets.ModelViewSet):

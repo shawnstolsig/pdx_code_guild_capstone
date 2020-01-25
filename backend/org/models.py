@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 # These models deal with defining the organization:
 # Organization
@@ -14,6 +15,7 @@ class Organization(models.Model):
 
     # attributes
     name = models.CharField(max_length=150)
+    code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     description = models.TextField(null=True)
 
     # relationships
