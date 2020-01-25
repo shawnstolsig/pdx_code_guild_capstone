@@ -20,8 +20,8 @@ class Shift(models.Model):
     end = models.DateTimeField()
   
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_shifts")
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_shifts")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)
@@ -38,12 +38,12 @@ class Job(models.Model):
     # (none)
     
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    node = models.ForeignKey(Node, on_delete=models.CASCADE)
-    shift = models.ForeignKey(Shift, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-    worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_jobs")
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_jobs")
+    node = models.ForeignKey(Node, on_delete=models.CASCADE, related_name="node_jobs")
+    shift = models.ForeignKey(Shift, on_delete=models.CASCADE, related_name="shift_jobs")
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name="role_jobs")
+    worker = models.ForeignKey(Worker, on_delete=models.CASCADE, related_name="worker_jobs")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)

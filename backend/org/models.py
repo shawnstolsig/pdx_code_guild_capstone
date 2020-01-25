@@ -43,7 +43,7 @@ class Department(models.Model):
 
     # relationships
     # (all models using Department as foreign key will SET_NULL on deletion of Department)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_departments")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)
@@ -69,7 +69,7 @@ class Cohort(models.Model):
     description = models.TextField(null=True)
 
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_cohorts")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)

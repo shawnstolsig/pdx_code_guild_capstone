@@ -47,8 +47,8 @@ class Workspace(models.Model):
     volume = models.IntegerField(null=True)
   
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_workspaces")
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_workspaces")
     svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True)
 
     # timestamps
@@ -72,9 +72,9 @@ class Zone(models.Model):
     volume = models.IntegerField(null=True)
   
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_zones")
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_zones")
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="workspace_zones")
     svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True)
 
     # timestamps
@@ -96,11 +96,11 @@ class Node(models.Model):
     volume = models.IntegerField(null=True)
   
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
-    zone = models.ForeignKey(Zone, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_nodes")
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_nodes")
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="workspace_nodes")
+    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name="zone_nodes")
+    role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, related_name="role_nodes")
     svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True)
 
     # timestamps
@@ -119,10 +119,10 @@ class FlowpathWorkspace(models.Model):
     volume = models.IntegerField(null=True)
     
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_workspace_flows")
 
-    input_workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="flowpath_in")
-    output_workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="flowpath_out")
+    input_workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="workspace_ins")
+    output_workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="workspace_outs")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)
@@ -140,12 +140,12 @@ class FlowpathZone(models.Model):
     volume = models.IntegerField(null=True)
     
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_zone_flows")
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name="dept_zone_flows")
     svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True)
 
-    input_zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name="flowpath_in")
-    output_zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name="flowpath_out")
+    input_zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name="zone_ins")
+    output_zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name="zone_outs")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)
@@ -163,12 +163,12 @@ class FlowpathNode(models.Model):
     volume = models.IntegerField(null=True)
     
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_node_flows")
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name="dept_node_flows")
     svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True)
 
-    input_node = models.ForeignKey(Node, on_delete=models.CASCADE, related_name="flowpath_in")
-    output_node = models.ForeignKey(Node, on_delete=models.CASCADE, related_name="flowpath_out")
+    input_node = models.ForeignKey(Node, on_delete=models.CASCADE, related_name="node_ins")
+    output_node = models.ForeignKey(Node, on_delete=models.CASCADE, related_name="node_outs")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)

@@ -8,6 +8,7 @@ router = routers.DefaultRouter()
 
 router.register('organizations', views.OrganizationViewSet, basename='organizations')
 router.register('organizationsuuid', views.OrganizationUUIDViewSet, basename='organizationsuuid')
+router.register('organizationsall', views.OrganizationAllViewset, basename="organizationall")
 router.register('departments', views.DepartmentViewSet, basename='departments')
 router.register('cohorts', views.CohortViewSet, basename='cohorts')
 router.register('managers', views.ManagerViewSet, basename='managers')

@@ -20,8 +20,8 @@ class Manager(models.Model):
 
     # relationships
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, related_name="org_managers")
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_managers")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)
@@ -48,9 +48,9 @@ class Worker(models.Model):
     hire_date = models.DateField(null=True)
   
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    cohort = models.ForeignKey(Cohort, on_delete=models.SET_NULL, null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_workers")
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_workers")
+    cohort = models.ForeignKey(Cohort, on_delete=models.SET_NULL, null=True, related_name="cohort_workers")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)
@@ -78,9 +78,9 @@ class Role(models.Model):
 
   
     # relationships
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True)
-    workers = models.ManyToManyField(Worker, related_name="roles")
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_roles")
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_roles")
+    workers = models.ManyToManyField(Worker, related_name="worker_roles")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)

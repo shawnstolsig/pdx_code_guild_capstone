@@ -4,7 +4,8 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsOwnerManagerOrReadOnly
 
-from .serializers import OrganizationSerializer, OrganizationUUIDSerializer, DepartmentSerializer, CohortSerializer, ManagerSerializer, UserSerializer
+from .serializers import OrganizationSerializer, OrganizationUUIDSerializer, OrganizationAllSerializer
+from .serializers import DepartmentSerializer, CohortSerializer, ManagerSerializer, UserSerializer
 from django.contrib.auth.models import User
 from org.models import Organization, Department, Cohort
 from people.models import Manager, Worker, Role
@@ -20,6 +21,12 @@ class OrganizationUUIDViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Organization.objects.all()
     serializer_class = OrganizationUUIDSerializer
     permission_classes = [IsAuthenticated]
+
+class OrganizationAllViewset(viewsets.ReadOnlyModelViewSet):
+    queryset = Organization.objects.all()
+    serializer_class = OrganizationAllSerializer
+    permission_classes = [IsAuthenticated]
+    
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     serializer_class = DepartmentSerializer
@@ -66,20 +73,20 @@ class ManagerViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-class ManagerListCreateView(ListCreateAPIView):
-    queryset = Manager.objects.all()
-    serializer_class = ManagerSerializer
-    permission_classes = [IsAuthenticated]
+# class ManagerListCreateView(ListCreateAPIView):
+#     queryset = Manager.objects.all()
+#     serializer_class = ManagerSerializer
+#     permission_classes = [IsAuthenticated]
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        print(f"perform create user is {user}")
-        serializer.save(user=user)
+#     def perform_create(self, serializer):
+#         user = self.request.user
+#         print(f"perform create user is {user}")
+#         serializer.save(user=user)
 
-class ManagerDetailView(RetrieveUpdateDestroyAPIView):
-    queryset = Manager.objects.all()
-    serializer_class = ManagerSerializer
-    permission_classes = [IsOwnerManagerOrReadOnly,IsAuthenticated]
+# class ManagerDetailView(RetrieveUpdateDestroyAPIView):
+#     queryset = Manager.objects.all()
+#     serializer_class = ManagerSerializer
+#     permission_classes = [IsOwnerManagerOrReadOnly,IsAuthenticated]
 
 
 # for JWT authentication stuff
