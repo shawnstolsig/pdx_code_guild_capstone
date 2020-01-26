@@ -27,7 +27,7 @@
 								prepend-icon="person"
 								type="text"
 								v-model="username"
-								:rules="validationRules.name"
+								:rules="rules.name"
 								counter="30"
 							/>
 							<v-text-field
@@ -37,7 +37,7 @@
 								prepend-icon="person"
 								type="text"
 								v-model="firstName"
-								:rules="validationRules.name"
+								:rules="rules.name"
 								counter="30"
 							/>
 							<v-text-field
@@ -47,7 +47,7 @@
 								prepend-icon="person"
 								type="text"
 								v-model="lastName"
-								:rules="validationRules.name"
+								:rules="rules.name"
 								counter="30"
 							/>
 							<v-text-field
@@ -57,7 +57,7 @@
 								prepend-icon="email"
 								type="text"
 								v-model="email"
-								:rules="validationRules.email"
+								:rules="rules.email"
 							/>
 							<v-text-field
 								id="password"
@@ -67,7 +67,7 @@
 								:append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
 								v-model="password"
 								:type="showPassword ? 'text' : 'password'"
-								:rules="validationRules.password1"
+								:rules="rules.password"
 								@click:append="showPassword = !showPassword"
 							/>
 							<v-text-field
@@ -79,7 +79,7 @@
 								:append-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"
 								v-model="password2"
 								:type="showPassword2 ? 'text' : 'password'"
-								:rules="validationRules.password2"
+								:rules="password2Validation"
 								@click:append="showPassword2 = !showPassword2"
 							/>
 							<v-checkbox label="Agree to terms and conditions" v-if="registrationMode" v-model="termsCheckbox" required></v-checkbox>
@@ -118,31 +118,12 @@ export default {
 			registrationMode: false,
 			formValidity: false,
 			termsCheckbox: false,
-			validationRules: {
-					name: [
-						v => !!v || 'Name is required.',
-						v => (v && v.length) <= 30 || 'Name must be less than 30 characters.',
-						v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
-					],
-					email: [
-						v => !!v || 'E-mail is required.',
-						// v => /.+@.+/.test(v) || 'E-mail must be valid.',
-						v => (v && v.indexOf("@") !== 0) || 'Email should have username.',
-						v => (v && !!v.includes("@")) || 'Email should have @ sybol.',
-						v => (v && v.indexOf(".") - v.indexOf('@') > 1)|| 'Email should have have domain.',
-						v => (v && !!v.indexOf(".")) || 'Email should have have domain.',
-						v => (v && v.indexOf('.') <= v.length - 3) || 'Email should contain a valid domain extension.'
-					],
-					password1: [
-						v => !!v || 'Password is required.',
-						v => (v && v.length) >= 6 || 'Password must be at least 6 characters.',
-					],
-					password2: [
-						v => !!v || 'Password is required.',
-						v => (v && v.length) >= 6 || 'Password must be at least 6 characters.',
-						() => (this.password == this.password2) || 'Passwords must be the same.',
-					],
-			}
+			// This is specified here instead of the store so that there is access to this.password
+			password2Validation:  [
+				v => !!v || 'Password is required.',
+				v => (v && v.length) >= 6 || 'Password must be at least 6 characters.',
+				() => (this.password == this.password2) || 'Passwords must be the same.',
+            ],
 		}
     },
     methods: {
@@ -179,6 +160,9 @@ export default {
 		baseUrl(){
 			return this.$store.getters.endpoints.baseURL
 		},
+		rules(){
+            return this.$store.getters.formRules
+        },
 	},
 	mounted() {
 		this.$vuetify.theme.dark = false

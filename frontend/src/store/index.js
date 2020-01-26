@@ -39,6 +39,31 @@ export default new Vuex.Store({
 			baseURL: 'http://localhost:8000',
 			baseAPI: 'http://localhost:8000/api/v1',
         },
+        formRules: {
+			name: [
+				v => !!v || 'Name is required.',
+				v => (v && v.length) <= 30 || 'Name must be less than 30 characters.',
+				v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
+			],
+			email: [
+				v => !!v || 'E-mail is required.',
+				// v => /.+@.+/.test(v) || 'E-mail must be valid.',
+				v => (v && v.indexOf("@") !== 0) || 'Email should have username.',
+				v => (v && !!v.includes("@")) || 'Email should have @ sybol.',
+				v => (v && v.indexOf(".") - v.indexOf('@') > 1)|| 'Email should have have domain.',
+				v => (v && !!v.indexOf(".")) || 'Email should have have domain.',
+				v => (v && v.indexOf('.') <= v.length - 3) || 'Email should contain a valid domain extension.'
+            ],
+            password: [
+                v => !!v || 'Password is required.',
+                v => (v && v.length) >= 6 || 'Password must be at least 6 characters.',
+            ],
+            description: [
+                v => !!v || 'Description is required.',
+                v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
+            ],
+            code: [ v => !!v || 'Please input Organization code.' ],
+        }
 
     },      // end Vuex state
 
@@ -50,6 +75,7 @@ export default new Vuex.Store({
         refreshToken(state){ return state.jwt.refresh },
         endpoints(state){ return state.endpoints },
         organization(state) { return state.organization },
+        formRules(state){ return state.formRules }
     },    // end Vuex getters
 
     mutations: {
