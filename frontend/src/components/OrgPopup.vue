@@ -16,7 +16,7 @@
                 </v-card-text>
                 <v-card-actions>
                         <v-btn @click.prevent="selectOrg" :disabled="!selectFormValid" class="my-3 mr-3">Select</v-btn>  
-                        <v-btn @click.prevent="createMode = true">Create new Organization...</v-btn>
+                        <v-btn @click.prevent="createMode = true">Create new Organization</v-btn>
                 </v-card-actions>
             </v-form>
         </v-card>
@@ -43,7 +43,7 @@
                 </v-card-text>
                 <v-card-actions>
                         <v-btn @click.prevent="createOrg" :disabled="!createFormValid" class="my-3 mr-3">Create</v-btn>  
-                        <v-btn @click.prevent="createMode = false">Back...</v-btn>
+                        <v-btn @click.prevent="createMode = false">Back</v-btn>
                 </v-card-actions>
             </v-form>
         </v-card>
@@ -101,6 +101,7 @@ export default {
             }
 
             if(this.selectFormValid || this.createFormValid){
+                // Patch the user's organization with selected org
                 axios({
                     method: 'patch',
                     url: `${this.$store.getters.endpoints.baseAPI}/managers/${this.$store.getters.user.userId}/`,
@@ -124,6 +125,7 @@ export default {
         },
         createOrg(){
             if(this.createFormValid){
+                // Create a new organization
                 axios({
                     method: 'post',
                     url: `${this.$store.getters.endpoints.baseAPI}/organizations/`,
@@ -135,7 +137,6 @@ export default {
                         authorization: `Bearer ${this.$store.getters.accessToken}`
                     }
                 })
-                // Set org as user's org
                 .then(response => {
                     console.log(response)
                     this.orgId = response.data.id

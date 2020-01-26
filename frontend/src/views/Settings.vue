@@ -1,6 +1,7 @@
 <template>
 	<v-container>
 		<OrgPopup></OrgPopup>
+		<AddCohortPopup :popupFlag="addCohortPopupFlag"></AddCohortPopup>
 
 		<v-toolbar flat dark color="primary">
 			<v-toolbar-title>Settings</v-toolbar-title>
@@ -43,9 +44,10 @@
 									</v-list>
 								</v-card-text>
 								<v-card-actions>
-									<v-btn>
-										Add...
-									</v-btn>
+									
+									<v-btn @click.stop="addDeptPopupFlag = true">Add</v-btn>
+									<AddDeptPopup v-model="addDeptPopupFlag" />
+
 								</v-card-actions>
 							</v-card>
 						</v-col>
@@ -72,8 +74,8 @@
 									</v-list>
 								</v-card-text>
 								<v-card-actions>
-									<v-btn>
-										Add...
+									<v-btn @click="addCohortPopupFlag = true">
+										Add
 									</v-btn>
 								</v-card-actions>
 							</v-card>
@@ -163,15 +165,23 @@
 
 <script>
 import OrgPopup from '../components/OrgPopup'
+import AddDeptPopup from '../components/OrgPopup'
+import AddCohortPopup from '../components/OrgPopup'
+
 export default {
 	name: 'settings',
-	components: { OrgPopup },
+	components: { 
+		OrgPopup, 
+		AddDeptPopup, 
+		AddCohortPopup 
+	},
 	data: () => ({
 		links: [
 			{text: 'Organization', icon: 'business'},
 			{text: 'Account', icon: 'mdi-account'},
 		],
-		organizationDialogFlag: false,
+		addDeptPopupFlag: false,
+		addCohortPopupFlag: false,
 		account: {
 			username: "",
 			firstName: "",
@@ -198,6 +208,8 @@ export default {
 	}),     // end data
 
 	methods: {
+
+		// Save account settings based on input to the Account Settings tab
 		saveAccountSettings(){
 			if (this.$refs.accountForm.validate()){
 				
@@ -215,6 +227,11 @@ export default {
 				alert('Invalid form input.')
 			}
 		},
+
+		// Create a department on button press from Organization Settings tab
+		addDepartment(){
+			
+		}
 	},      /// end methods	
 
 	computed: {			
