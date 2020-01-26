@@ -65,7 +65,7 @@ class Cohort(models.Model):
     """
 
     # attributes
-    code = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
     description = models.TextField(null=True)
 
     # relationships

@@ -1,7 +1,6 @@
 <template>
 	<v-container>
 		<OrgPopup></OrgPopup>
-		<AddCohortPopup :popupFlag="addCohortPopupFlag"></AddCohortPopup>
 
 		<v-toolbar flat dark color="primary">
 			<v-toolbar-title>Settings</v-toolbar-title>
@@ -23,6 +22,7 @@
 							</v-card>
 						</v-col>
 					</v-row>
+					<!-- Department Card -->
 					<v-row v-if="validOrg">
 						<v-col cols="6">
 							<v-card>
@@ -44,13 +44,41 @@
 									</v-list>
 								</v-card-text>
 								<v-card-actions>
-									
-									<v-btn @click.stop="addDeptPopupFlag = true">Add</v-btn>
-									<AddDeptPopup v-model="addDeptPopupFlag" />
-
+									<!-- Dialog for adding Department -->
+									<v-dialog v-model="deptDialog" max-width="500">
+										<template v-slot:activator="{ on }">
+											<v-btn v-on="on">Add</v-btn>
+										</template>
+										<v-card class="pa-3">
+											<v-card-title>Create New Department</v-card-title>
+											<v-card-subtitle class="mt-1">Please type in a name and description for your department.</v-card-subtitle>
+											<v-form v-model="deptCreateFormValidity" ref="deptCreateForm">
+												<v-card-text>
+														<v-text-field
+															v-model="newDept.name"
+															:rules="validationRules.name"
+															type="text"
+															label="Name"
+															required
+														></v-text-field>
+														<v-textarea
+															solo
+															v-model="newDept.description"
+															:rules="validationRules.description"
+															label="Description"
+															required
+														></v-textarea>
+												</v-card-text>
+												<v-card-actions>
+														<v-btn @click.prevent="addDepartment" :disabled="!deptCreateFormValidity" class="my-3 mr-3">Add</v-btn>  
+												</v-card-actions>
+											</v-form>
+										</v-card>
+									</v-dialog>
 								</v-card-actions>
 							</v-card>
 						</v-col>
+						<!-- Cohort Card -->
 						<v-col cols="6">
 							<v-card>
 								<v-card-title>
@@ -74,9 +102,38 @@
 									</v-list>
 								</v-card-text>
 								<v-card-actions>
-									<v-btn @click="addCohortPopupFlag = true">
-										Add
-									</v-btn>
+									<!-- Dialog for adding Cohort -->
+									<v-dialog v-model="cohortDialog" max-width="500">
+										<template v-slot:activator="{ on }">
+											<v-btn v-on="on">Add</v-btn>
+										</template>
+										<v-card class="pa-3">
+											<v-card-title>Create New Cohort</v-card-title>
+											<v-card-subtitle class="mt-1">Please type in a name and description for your cohort.</v-card-subtitle>
+											<v-form v-model="cohortCreateFormValidity" ref="cohortCreateForm">
+												<v-card-text>
+														<v-text-field
+															v-model="newCohort.name"
+															:rules="validationRules.name"
+															type="text"
+															label="Name"
+															required
+														></v-text-field>
+														<v-textarea
+															solo
+															v-model="newCohort.description"
+															:rules="validationRules.description"
+															label="Description"
+															required
+														></v-textarea>
+												</v-card-text>
+												<v-card-actions>
+														<v-btn @click.prevent="addCohort" :disabled="!cohortCreateFormValidity" class="my-3 mr-3">Add</v-btn>  
+												</v-card-actions>
+											</v-form>
+										</v-card>
+									</v-dialog>
+
 								</v-card-actions>
 							</v-card>
 						</v-col>
@@ -86,7 +143,7 @@
 			</v-tab-item>	<!-- End of Organization Settings -->
 			
 			<v-tab-item> <!-- Start of Account -->
-				<v-form v-model="formValidity" ref='accountForm' dense>
+				<v-form v-model="accountFormValidity" ref='accountForm' dense>
 					<v-container>
 						<v-row>
 							<v-col cols="12" md="6">
@@ -147,7 +204,7 @@
 							class="mx-5" 
 							@click.prevent="saveAccountSettings" 
 							type="submit" 
-							:disabled="!formValidity"
+							:disabled="!accountFormValidity"
 							color="success"
 							>
 								Save
@@ -165,30 +222,40 @@
 
 <script>
 import OrgPopup from '../components/OrgPopup'
-import AddDeptPopup from '../components/OrgPopup'
-import AddCohortPopup from '../components/OrgPopup'
+import axios from 'axios'
 
 export default {
 	name: 'settings',
 	components: { 
 		OrgPopup, 
-		AddDeptPopup, 
-		AddCohortPopup 
 	},
 	data: () => ({
 		links: [
 			{text: 'Organization', icon: 'business'},
 			{text: 'Account', icon: 'mdi-account'},
 		],
-		addDeptPopupFlag: false,
-		addCohortPopupFlag: false,
+		// Account form vars
+		accountFormValidity: false, 
 		account: {
 			username: "",
 			firstName: "",
 			lastName: "",
 			email: "",
 		}, 
-		formValidity: false, 
+		// Dept create form/dialog vars
+		deptDialog: false,
+		deptCreateFormValidity: false,
+		newDept: {
+			name: '',
+			description: '',
+		},
+		// Cohort create form/dialog vars
+		cohortDialog: false,
+		cohortCreateFormValidity: false,
+		newCohort: {
+			name: '',
+			description: '',
+		},
 		validationRules: {
 			name: [
 				v => !!v || 'Name is required.',
@@ -230,8 +297,51 @@ export default {
 
 		// Create a department on button press from Organization Settings tab
 		addDepartment(){
-			
-		}
+			console.log("creating dept")
+			axios({
+				method: 'post',
+				url: `${this.$store.getters.endpoints.baseAPI}/departments/`,
+				data: {
+					name: this.newDept.name,
+					description: this.newDept.description,
+					organization: this.$store.getters.organization.id
+				},
+				headers: {
+					authorization: `Bearer ${this.$store.getters.accessToken}`
+				},
+			})
+			.then(response => {
+				console.log(response)
+				// reload organization
+				this.$store.dispatch('loadOrganization')
+				this.deptDialog = false
+			})
+			.catch(error => {console.log(error)})
+		},
+
+		// Create a department on button press from Organization Settings tab
+		addCohort(){
+			console.log("creating cohort")
+			axios({
+				method: 'post',
+				url: `${this.$store.getters.endpoints.baseAPI}/cohorts/`,
+				data: {
+					name: this.newCohort.name,
+					description: this.newCohort.description,
+					organization: this.$store.getters.organization.id
+				},
+				headers: {
+					authorization: `Bearer ${this.$store.getters.accessToken}`
+				},
+			})
+			.then(response => {
+				console.log(response)
+				// reload organization
+				this.$store.dispatch('loadOrganization')
+				this.cohortDialog = false
+			})
+			.catch(error => {console.log(error)})
+		},
 	},      /// end methods	
 
 	computed: {			
