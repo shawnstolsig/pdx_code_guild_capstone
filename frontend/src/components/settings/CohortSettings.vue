@@ -25,30 +25,45 @@
             <!-- Dialog for adding Cohort -->
             <v-dialog v-model="cohortCreateDialog" max-width="500">
                 <template v-slot:activator="{ on }">
-                    <v-btn v-on="on">Add</v-btn>
+                    <v-btn color="primary" v-on="on">Add</v-btn>
                 </template>
                 <v-card class="pa-3">
                     <v-card-title>Create New Cohort</v-card-title>
                     <v-card-subtitle class="mt-1">Please type in a name and description for your cohort.</v-card-subtitle>
                     <v-form v-model="cohortCreateFormValidity" ref="cohortCreateForm">
                         <v-card-text>
-                                <v-text-field
-                                    v-model="newCohort.name"
-                                    :rules="rules.name"
-                                    type="text"
-                                    label="Name"
-                                    required
-                                ></v-text-field>
-                                <v-textarea
-                                    solo
-                                    v-model="newCohort.description"
-                                    :rules="rules.description"
-                                    label="Description"
-                                    required
-                                ></v-textarea>
+                            <v-text-field
+                                v-model="newCohort.name"
+                                :rules="rules.name"
+                                type="text"
+                                label="Name"
+                                required
+                            ></v-text-field>
+                            <v-textarea
+                                solo
+                                v-model="newCohort.description"
+                                :rules="rules.description"
+                                label="Description"
+                                required
+                            ></v-textarea>
                         </v-card-text>
                         <v-card-actions>
-                                <v-btn @click.prevent="addCohort" :disabled="!cohortCreateFormValidity" class="my-3 mr-3">Add</v-btn>  
+                            <v-spacer></v-spacer>
+                            <v-btn 
+                                @click.prevent="cohortCreateDialog = false" 
+                                color="error"
+                                text 
+                                class="my-3 mr-3"
+                                >Cancel
+                            </v-btn>  
+                            <v-btn 
+                                @click.prevent="addCohort" 
+                                :disabled="!cohortCreateFormValidity"
+                                color="success"
+                                text 
+                                class="my-3 mr-3"
+                                >Add
+                            </v-btn>  
                         </v-card-actions>
                     </v-form>
                 </v-card>

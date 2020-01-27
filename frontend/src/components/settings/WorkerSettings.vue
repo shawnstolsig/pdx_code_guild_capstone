@@ -9,7 +9,7 @@
     >
         <!-- Overwrite the top slot with CRUD -->
         <template v-slot:top>
-            <v-toolbar flat color="white">
+            <v-toolbar flat>
                 <v-toolbar-title>
                     Employees
                 </v-toolbar-title>
@@ -38,27 +38,57 @@
 
                             <v-card-text>
                                 <v-container>
-                                    <v-row>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-text-field v-model="editedItem.firstName" label="First name"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-text-field v-model="editedItem.lastName" label="Last name"></v-text-field>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-select :items="departments" label="Department" v-model="editedItem.department"></v-select>
-                                        </v-col>
-                                        <v-col cols="12" sm="6" md="4">
-                                            <v-select :items="cohorts" label="Department" v-model="editedItem.cohort"></v-select>
-                                        </v-col>
-                                    </v-row>
+                                    <v-form v-model="createWorkerValidity">
+                                        <v-row>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field 
+                                                    v-model="editedItem.firstName" 
+                                                    label="First name"
+                                                    :rules="rules.name"
+                                                    required
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-text-field 
+                                                    v-model="editedItem.lastName" 
+                                                    label="Last name"
+                                                    :rules="rules.name"
+                                                    required
+                                                ></v-text-field>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-select 
+                                                    :items="departments" 
+                                                    label="Department" 
+                                                    v-model="editedItem.department"
+                                                    required
+                                                ></v-select>
+                                            </v-col>
+                                            <v-col cols="12" sm="6" md="4">
+                                                <v-select 
+                                                    :items="cohorts" 
+                                                    label="Department" 
+                                                    v-model="editedItem.cohort"
+                                                ></v-select>
+                                            </v-col>
+                                        </v-row>
+                                    </v-form>
                                 </v-container>
                             </v-card-text>
 
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                                <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+                                <v-btn 
+                                    color="error" 
+                                    text 
+                                    @click="close"
+                                >Cancel</v-btn>
+                                <v-btn 
+                                    color="success" 
+                                    text 
+                                    :disabled="!formValid" 
+                                    @click="save"
+                                >Save</v-btn>
                             </v-card-actions>
                         </v-card>
                     </v-dialog>
@@ -92,6 +122,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
     data: () => ({
         dialog: false,
@@ -119,6 +150,7 @@ export default {
         ],
         search: '',
         workerList: [],
+        createWorkerValidity: false,
         editedIndex: -1,
         editedItem: {
             firstName: '',
@@ -153,7 +185,10 @@ export default {
             let returnArray = []
             this.$store.getters.organization.org_cohorts.map(x => returnArray.push(x.name))
             return returnArray
-        }
+        },
+        formValid(){
+            return this.createWorkerValidity && !!this.editedItem.department && !!this.editedItem.cohort
+        },
     },      // end of computed
 
     watch: {
@@ -168,7 +203,22 @@ export default {
 
     methods: {
         initialize () {
-            this.workerList = this.$store.getters.organization.org_workers
+            // create array for displaying in list.  
+            // Only needs firstName, lastName, Dept (as string), Cohort(as string)
+            let org = this.$store.getters.organization
+            this.workerList = []
+            let deptPairs = {}
+            let cohortPairs = {}
+            org.org_departments.map(x => deptPairs[x.id] = x.name)
+            org.org_cohorts.map(x => cohortPairs[x.id] = x.name)
+            for(let worker of org.org_workers){
+                this.workerList.push({
+                    firstName: worker.first_name,
+                    lastName: worker.last_name,
+                    department: deptPairs[worker.department],
+                    cohort: cohortPairs[worker.cohort],
+                })
+            }
         },      // end of initialize
 
         editItem (item) {
@@ -187,14 +237,54 @@ export default {
             setTimeout(() => {
                 this.editedItem = Object.assign({}, this.defaultItem)
                 this.editedIndex = -1
+                this.initialize()
             }, 300)
         },
 
         save () {
+            // get department and cohort ID's from the strings passed in by the dialog's selects
+            let deptId;
+            let cohortId;
+            for(let dept of this.$store.getters.organization.org_departments){
+                if(dept.name == this.editedItem.department){
+                    deptId = dept.id
+                }
+            }
+            for(let cohort of this.$store.getters.organization.org_cohorts){
+                if(cohort.name == this.editedItem.cohort){
+                    cohortId = cohort.id
+                }
+            }
+            // If worker is edited, make axios patch
             if (this.editedIndex > -1) {
+                // axios patch call
                 Object.assign(this.workerList[this.editedIndex], this.editedItem)
-            } else {
-                this.workerList.push(this.editedItem)
+            }
+            // If worker is created, make axios post 
+            else {
+                // axios post call
+                // this.workerList.push(this.editedItem)
+                axios({
+                    method: 'post',
+                    url: `${this.$store.getters.endpoints.baseAPI}/workers/`,
+                    data: {
+                        first_name: this.editedItem.firstName,
+                        last_name: this.editedItem.firstName,
+                        full_name: `${this.editedItem.firstName} ${this.editedItem.lastName}`,
+                        organization: this.$store.getters.organization.id,
+                        department: deptId,
+                        cohort: cohortId,
+                    },
+                    headers: {
+                        authorization: `Bearer ${this.$store.getters.accessToken}`
+                    },
+                })
+                .then(response => {
+                    console.log(response)
+                    this.$store.dispatch('loadOrganization')
+                    
+                })
+                .catch(error => {console.log(error)})
             }
             this.close()
         },

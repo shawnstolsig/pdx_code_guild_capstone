@@ -45,7 +45,7 @@ class ManagerSerializer(serializers.ModelSerializer):
 class WorkerSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Worker 
-        fields = '__all___'
+        fields = '__all__'
 
 class RoleSerializer(serializers.ModelSerializer):
     class Meta: 
