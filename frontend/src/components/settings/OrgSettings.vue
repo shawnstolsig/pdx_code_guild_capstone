@@ -19,7 +19,7 @@
                 <CohortSettings />
             </v-col>
         </v-row>
-        <v-row>
+        <v-row v-if="validOrg">
             <v-col cols="12">
                 <WorkerSettings />
             </v-col>
@@ -33,6 +33,7 @@ import CohortSettings from '@/components/settings/CohortSettings'
 import WorkerSettings from '@/components/settings/WorkerSettings'
 
 export default {
+
     components: {
         DeptSettings,
         CohortSettings,
@@ -43,7 +44,9 @@ export default {
 	}),     // end data
 
 	methods: {
-
+        test(){
+            alert("is this thing on")
+        }
 	},      /// end methods	
 
 	computed: {			
@@ -55,7 +58,8 @@ export default {
 		},
 	},		// end computed
 
-	created() {
+	mounted() {
+
 	},		// end mounted
 }
 </script>

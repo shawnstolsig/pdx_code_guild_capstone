@@ -4,12 +4,14 @@
             Departments
         </v-card-title>
         <v-card-text>
-            <v-list>
-                <v-list-item v-for="department in org.org_departments" :key="department.id">
-                    <v-list-item-content>
-                        <v-list-item-title>{{department.name}}</v-list-item-title>
-                    </v-list-item-content>
-                </v-list-item>
+            <v-list >
+                <v-list-item-group v-model="selectedDept">
+                    <v-list-item v-for="department in org.org_departments" :key="department.id">
+                        <v-list-item-content>
+                            <v-list-item-title>{{department.name}}</v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                </v-list-item-group>
                 <v-list-item v-if="org.org_departments.length == 0">
                     <v-list-item-content>
                         <v-list-item-title class="grey--text">(none)</v-list-item-title>
@@ -19,7 +21,7 @@
         </v-card-text>
         <v-card-actions>
             <!-- Dialog for adding Department -->
-            <v-dialog v-model="deptDialog" max-width="500">
+            <v-dialog v-model="deptCreateDialog" max-width="500">
                 <template v-slot:activator="{ on }">
                     <v-btn v-on="on">Add</v-btn>
                 </template>
@@ -49,6 +51,20 @@
                     </v-form>
                 </v-card>
             </v-dialog>
+            <!-- Dialog for deleting Department -->
+            <v-dialog v-model="deptDeleteDialog" max-width="500" v-if="selectedDept >= 0">
+                <template v-slot:activator="{ on }">
+                    <v-btn v-on="on">Delete</v-btn>
+                </template>
+                <v-card class="pa-3">
+                    <v-card-title>Delete Department?</v-card-title>
+                    <v-card-subtitle class="mt-1">Are you sure you want to delete this department?</v-card-subtitle>
+                    <v-card-actions>
+                            <v-btn @click="deleteDepartment" class="my-3 mr-3">Yes</v-btn>  
+                            <v-btn @click="deptDeleteDialog = false" class="my-3 mr-3">No</v-btn>  
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
         </v-card-actions>
     </v-card>
 </template>
@@ -60,8 +76,10 @@ import axios from 'axios'
 export default {
 	data: () => ({
 		// Dept create form/dialog vars
-		deptDialog: false,
-		deptCreateFormValidity: false,
+        deptCreateDialog: false,
+        deptDeleteDialog: false,
+        deptCreateFormValidity: false,
+        selectedDept: undefined,
 		newDept: {
 			name: '',
 			description: '',
@@ -72,27 +90,66 @@ export default {
 
 		// Create a department on button press from Organization Settings tab
 		addDepartment(){
-			console.log("creating dept")
-			axios({
-				method: 'post',
-				url: `${this.$store.getters.endpoints.baseAPI}/departments/`,
-				data: {
-					name: this.newDept.name,
-					description: this.newDept.description,
-					organization: this.$store.getters.organization.id
-				},
-				headers: {
-					authorization: `Bearer ${this.$store.getters.accessToken}`
-				},
-			})
-			.then(response => {
-				console.log(response)
-				// reload organization
-				this.$store.dispatch('loadOrganization')
-				this.deptDialog = false
-			})
-			.catch(error => {console.log(error)})
-		},
+
+            // Trim whitespace
+            this.newDept.name = this.newDept.name.trim()
+
+            // Check to make sure there isn't already a department with that name
+            for (let i = 0; i < this.org.org_departments.length; i++){
+                if(this.newDept.name == this.org.org_departments[i].name){
+                    alert("Organization already has a department with that name.\n Please pick a new department name.")
+                    return
+                }
+            }
+
+            console.log("Creating department.")
+            axios({
+                method: 'post',
+                url: `${this.$store.getters.endpoints.baseAPI}/departments/`,
+                data: {
+                    name: this.newDept.name,
+                    description: this.newDept.description,
+                    organization: this.$store.getters.organization.id
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log(response)
+                // reload organization
+                this.$store.dispatch('loadOrganization')
+                this.deptCreateDialog = false
+                this.newDept = {
+                    name: '',
+                    description: '',
+                }
+            })
+            .catch(error => {console.log(error)})
+        },
+        
+        // Delete a department
+        deleteDepartment(){
+            
+            // Look up dept id.  Names must be unique when created, so looking up by name is reliable.
+            let deptId = this.org.org_departments[this.selectedDept].id
+  
+            console.log("deleting dept")
+            axios({
+                method: 'delete',
+                url: `${this.$store.getters.endpoints.baseAPI}/departments/${deptId}`,
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log(response)
+                this.$store.dispatch('loadOrganization')
+                this.selectedDept = undefined
+                this.deptDeleteDialog = false
+            })
+            .catch(error => {console.log(error)})
+        },
 	},      /// end methods	
 
 	computed: {			
@@ -107,4 +164,5 @@ export default {
 	created() {
 	},		// end mounted
 }
+
 </script>
