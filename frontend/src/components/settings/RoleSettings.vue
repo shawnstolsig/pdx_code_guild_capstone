@@ -100,10 +100,17 @@
                                     </v-card>
                                 </v-dialog>
                         </v-toolbar>
+
                     </template>
 
                     <!-- Custom item.action slot -->
                     <template v-slot:item.action="{ item }">
+                        <v-icon
+                            small
+                            class="mr-2"
+                            @click="viewWorkers(item)"
+                            >people
+                        </v-icon>
                         <v-icon
                             small
                             class="mr-2"
@@ -117,55 +124,57 @@
                         </v-icon>
                     </template>
 
-                    <!-- Custom no-data slot -->
-                    <!-- <template v-slot:no-data>
-                        <v-btn color="primary" @click="initialize">Reset</v-btn>
-                        <v-spacer></v-spacer>
-                        <v-subheader>No data...please add employees.</v-subheader>
-                        <v-spacer></v-spacer>
-                    </template> -->
-                
+                    <!-- Dialog for setting worker roles -->
+                    <v-dialog v-model="employeeRolesDialog" max-width="500px">
+                        <v-card>
+                            <v-card-title>
+                                Employee Roles
+                            </v-card-title>
+                            <v-card-subtitle>
+                                Add/remove employee's roles.
+                            </v-card-subtitle>
+                            <v-card-text>
+                                <v-list>
+                                    <v-list-item-group
+                                        v-model="qualifiedWorkerArray"
+                                        multiple
+                                    >
+                                        <v-list-item v-for="worker in org.org_workers" :key="worker.id">
+                                            <template v-slot:default="{ active, toggle }">
+                                                <v-list-item-action>
+                                                    <v-checkbox
+                                                        v-model=" "
+                                                        color="primary"
+                                                        @click="toggle"
+                                                    ></v-checkbox>
+                                                </v-list-item-action>
+
+                                                <v-list-item-content>
+                                                    <v-list-item-title>Notifications</v-list-item-title>
+                                                    <v-list-item-subtitle>Allow notifications</v-list-item-subtitle>
+                                                </v-list-item-content>
+                                            </template>
+                                        </v-list-item>
+                                    </v-list-item-group>
+                                </v-list>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn 
+                                    color="error" 
+                                    text 
+                                    @click="employeeRolesDialog = false"
+                                >Cancel</v-btn>
+                                <v-btn 
+                                    color="success" 
+                                    text 
+                                    @click="saveEmployeeRoles"
+                                >Save</v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
                 </v-data-table>
             </v-col>
-
-            <!-- <v-col cols="4">
-                <v-card>
-                    <v-list
-                        flat
-                        dense
-                        >
-                        <v-header>Workers Trained in Role</v-header>
-
-                        <v-list-item-group
-                            v-model="settings"
-                            multiple
-                        >
-                            <v-list-item v-for="worker in org.org_workers" :key="worker.id">
-                                <template v-slot:default="{ active, toggle }">
-                                    <v-list-item-action>
-                                        <v-checkbox
-                                            v-model="active"
-                                            color="primary"
-                                            @click="toggle"
-                                        ></v-checkbox>
-                                    </v-list-item-action>
-
-                                    <v-list-item-content>
-                                        <v-list-item-title>{{worker.full_name}}</v-list-item-title>
-                                    </v-list-item-content>
-                                </template>
-                            </v-list-item>
-
-                            <v-list-item v-if="org.org_workers.length == 0">
-                                <v-list-item-content>
-                                    <v-list-item-title class="grey--text">(none)</v-list-item-title>
-                                </v-list-item-content>
-                            </v-list-item>
-
-                        </v-list-item-group>
-                    </v-list>
-                </v-card>
-            </v-col> -->
         </v-row>
     </v-container>
 </template>
@@ -174,7 +183,9 @@
 import axios from 'axios'
 export default {
     data: () => ({
+        // for role CRUD operations
         newRoleDialog: false,
+        createRoleValidity: false,
         headers: [
             {
                 text: 'Name',
@@ -205,7 +216,6 @@ export default {
         search: '',
         compiledRoleList: [],
         deptListObj: {},
-        createRoleValidity: false,
         editedIndex: -1,
         editedItem: {
             id: '',
@@ -225,6 +235,10 @@ export default {
             description: '',
             workerArray: []
         },
+        // for adding/removing employee roles
+        employeeRolesDialog: false,
+        qualifiedWorkerArray: [],
+
     }),
 
     computed: {
@@ -245,6 +259,9 @@ export default {
         formValid(){
             return this.createRoleValidity && !!this.editedItem.department
         },
+        inQualifiedArray(worker){
+            return !!this.qualifiedWorkerArray.indexOf(worker.id)
+        }
     },      // end of computed
 
     watch: {
@@ -278,7 +295,7 @@ export default {
                     rate: x.rate ? x.rate : '-',
                     count: x.worker_ids.count ? x.worker_ids.count : 0,
                     description: x.description,
-                    workerArray: x.worker_ids
+                    workerArray: x.worker_ids 
                 })
             })
         },      // end of initialize
@@ -287,6 +304,16 @@ export default {
             this.editedIndex = this.compiledRoleList.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.newRoleDialog = true
+        },
+        viewWorkers (item) {
+            console.log(item)
+            //set qualifiedWorkerArray for this role 
+            for(let role of this.$store.getters.organization.org_roles){
+                if (role.id == item.id){
+                    this.qualifiedWorkerArray = role.worker_ids
+                }
+            }
+            this.employeeRolesDialog = true
         },
 
         deleteItem (item) {
@@ -386,6 +413,11 @@ export default {
             }
             this.close()
         },
+
+        // Save employee roles
+        saveEmployeeRoles(){
+            alert("implement saveEmployeeRoles")
+        }
     },      // end of methods
 }
 </script>
