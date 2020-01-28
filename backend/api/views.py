@@ -4,14 +4,15 @@ from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIV
 from rest_framework.permissions import IsAuthenticated
 from api.permissions import IsOwnerManagerOrReadOnly
 
-from .serializers import OrganizationSerializer, OrganizationUUIDSerializer, OrganizationAllSerializer
-from .serializers import DepartmentSerializer, CohortSerializer, ManagerSerializer, UserSerializer, WorkerSerializer
+from .serializers import OrganizationSerializer, OrganizationUUIDSerializer, OrganizationAllSerializer, DepartmentSerializer, CohortSerializer
+from .serializers import ManagerSerializer, UserSerializer, WorkerSerializer, RoleSerializer
 from django.contrib.auth.models import User
 from org.models import Organization, Department, Cohort
 from people.models import Manager, Worker, Role
 from process.models import SVGElement, Workspace, Zone, Node, FlowpathWorkspace, FlowpathZone, FlowpathNode
 from planning.models import Shift, Job
 
+# organization viewsets
 class OrganizationViewSet(viewsets.ModelViewSet):
     queryset = Organization.objects.all()
     serializer_class = OrganizationSerializer
@@ -27,22 +28,16 @@ class OrganizationAllViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = OrganizationAllSerializer
     permission_classes = [IsAuthenticated]
 
-class WorkerViewSet(viewsets.ModelViewSet):
-    queryset = Worker.objects.all()
-    serializer_class = WorkerSerializer
-    permission_classes = [IsAuthenticated]
-
 class DepartmentViewSet(viewsets.ModelViewSet):
     serializer_class = DepartmentSerializer
 
     def get_queryset(self):
         queryset = Department.objects.all()
-        
+    
         # Optionally filter by Organization
         organization = self.request.query_params.get('organization', None)
         if organization is not None:
             queryset = queryset.filter(organization=organization)
-
         return queryset
 
 class CohortViewSet(viewsets.ModelViewSet):
@@ -50,12 +45,33 @@ class CohortViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Cohort.objects.all()
-
         # Optionally filter by Organization:
         organization = self.request.query_params.get('organization', None)
         if organization is not None:
             queryset = queryset.filter(organization=organization)
+        return queryset
+# end organization views
 
+# people viewsets
+class WorkerViewSet(viewsets.ModelViewSet):
+    queryset = Worker.objects.all()
+    serializer_class = WorkerSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Worker.objects.all()
+        # Optionally filter by Organization:
+        organization = self.request.query_params.get('organization', None)
+        if organization is not None:
+            queryset = queryset.filter(organization=organization)
+        # Optionally filter by Department:
+        department = self.request.query_params.get('department', None)
+        if organization is not None:
+            queryset = queryset.filter(department=department)
+        # Optionally filter by role:
+        role = self.request.query_params.get('role', None)
+        if role is not None:
+            queryset = queryset.filter(worker_roles=role)
         return queryset
 
 class ManagerViewSet(viewsets.ModelViewSet):
@@ -64,18 +80,43 @@ class ManagerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Manager.objects.all()
-
         # Optionally filter by Organization:
         organization = self.request.query_params.get('organization', None)
         if organization is not None:
             queryset = queryset.filter(organization=organization)
-
         # Optionally filter by Department:
         department = self.request.query_params.get('department', None)
         if organization is not None:
             queryset = queryset.filter(department=department)
-
         return queryset
+
+class UserViewSet(viewsets.ModelViewSet):
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+
+class RoleViewSet(viewsets.ModelViewSet):
+    serializer_class = RoleSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Role.objects.all()
+        # Optionally filter by Organization:
+        organization = self.request.query_params.get('organization', None)
+        if organization is not None:
+            queryset = queryset.filter(organization=organization)
+        # Optionally filter by Department:
+        department = self.request.query_params.get('department', None)
+        if organization is not None:
+            queryset = queryset.filter(department=department)
+        return queryset
+
+
+# end people views
+
+
+
+
 
 # class ManagerListCreateView(ListCreateAPIView):
 #     queryset = Manager.objects.all()
@@ -105,7 +146,3 @@ class TestAuthenticationView(APIView):
         return Response(content)
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    permission_classes = [IsAuthenticated]

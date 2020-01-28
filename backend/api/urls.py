@@ -6,15 +6,20 @@ from . import views
 
 router = routers.DefaultRouter()
 
+# organization routes
 router.register('organizations', views.OrganizationViewSet, basename='organizations')
 router.register('organizationsuuid', views.OrganizationUUIDViewSet, basename='organizationsuuid')
 router.register('organizationsall', views.OrganizationAllViewSet, basename="organizationall")
 router.register('departments', views.DepartmentViewSet, basename='departments')
 router.register('cohorts', views.CohortViewSet, basename='cohorts')
+
+# people routes
 router.register('managers', views.ManagerViewSet, basename='managers')
 router.register('workers', views.WorkerViewSet, basename='workers')
 router.register('users', views.UserViewSet, basename='users')
+router.register('roles', views.RoleViewSet, basename='roles')
 
+# urlconf
 urlpatterns = router.urls
 
 # for testing JWT

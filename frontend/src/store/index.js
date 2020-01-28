@@ -293,6 +293,7 @@ export default new Vuex.Store({
         
         // Checks if user is still logged in (are tokens valid?)
         verifyLogin(){
+            console.log(Date.now())
             
             // If state has token
             if(this.state.jwt.access){
@@ -301,12 +302,30 @@ export default new Vuex.Store({
                 this.state.isAuthenticated = true
 
                 // Get expirations
-                const accessExp = this.state.jwt.access
-                const refreshExp = this.state.jwt.refresh
+                const accessExp = this.state.jwt.accessExpiration
+                const refreshExp = this.state.jwt.refreshExpiration
                 
-                // If within 30 min of access expiring and we have a valid refresh token, refresh token
-				if (accessExp - (Date.now() / 1000) < 1800 && (Date.now() / 1000) - refreshExp < 628200) {
-                    console.log("Access token expiring in less than 30 min, refreshing.")
+                if(accessExp - (Date.now() / 1000) > 0 ){
+                    console.log("I think my access token is good")
+                }
+                if(accessExp - (Date.now() / 1000) < 0 ){
+                    console.log("I think my access token is bad")
+                }
+                if(refreshExp - (Date.now() / 1000) > 0){
+                    console.log("I think my refresh token is good")
+                }
+                if(refreshExp - (Date.now() / 1000) < 0){
+                    console.log("I think my refresh token is bad")
+                }
+
+                // Access token is good, do nothing.  Still has at least 5 seconds left.
+                if (accessExp - (Date.now() / 1000) >= 5) {
+                    console.log("Access token checked, it's valid...no refresh needed.")
+                } 
+
+                // If access token has expired (or will within 5 seconds) and we have a valid refresh token, then refresh token
+				else if ((accessExp - (Date.now() / 1000)) < 5 && (refreshExp - (Date.now() / 1000)) >= 5) {
+                    console.log("Access token expired but refresh token is valid. Refreshing access token.")
                     
                     axios({
                         method: 'post',
@@ -319,18 +338,17 @@ export default new Vuex.Store({
                         alert("Error refreshing access token...please re-login.")
                         router.push('login')
                     })
-
-
                 } 
-                // If not within 30 min of access expiring, do nothing...token is good for now.
-                else if (accessExp - (Date.now() / 1000) < 1800) {
-                    console.log("Access token checked, it's valid for at least 30 min")
-                } 
+                
                 // If unable to refresh access token, prompt user to re-login.
                 else {
 					alert("Authentication token expired, please re-login.")
 					router.push('login')
 				}
+            }
+            else {
+                alert("No authentication token found, please login.")
+				router.push('login')
             }
         },
         

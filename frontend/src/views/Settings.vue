@@ -13,6 +13,9 @@
     		<v-tab-item>	
 				<OrgSettings></OrgSettings>
 			</v-tab-item>	
+    		<v-tab-item>	
+				<WorkerSettings></WorkerSettings>
+			</v-tab-item>	
 			<v-tab-item>	
 				<AccountSettings></AccountSettings>
 			</v-tab-item>
@@ -26,6 +29,7 @@
 import OrgPopup from '@/components/settings/OrgPopup'
 import OrgSettings from '@/components/settings/OrgSettings'
 import AccountSettings from '@/components/settings/AccountSettings'
+import WorkerSettings from '@/components/settings/WorkerSettings'
 
 
 export default {
@@ -34,10 +38,12 @@ export default {
 		OrgPopup, 
 		OrgSettings,
 		AccountSettings,
+		WorkerSettings,
 	},
 	data: () => ({
 		links: [
 			{text: 'Organization', icon: 'business'},
+			{text: 'Employees', icon: 'people_alt'},
 			{text: 'Account', icon: 'mdi-account'},
 		],
 	}),     // end data

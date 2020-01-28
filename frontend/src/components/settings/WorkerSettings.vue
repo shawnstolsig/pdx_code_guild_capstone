@@ -67,7 +67,7 @@
                                             <v-col cols="12" sm="6" md="4">
                                                 <v-select 
                                                     :items="cohorts" 
-                                                    label="Department" 
+                                                    label="Cohort" 
                                                     v-model="editedItem.cohort"
                                                 ></v-select>
                                             </v-col>
@@ -102,21 +102,22 @@
                 small
                 class="mr-2"
                 @click="editItem(item)"
-            >
-                edit
+                >edit
             </v-icon>
             <v-icon
                 small
                 @click="deleteItem(item)"
-            >
-                delete
+                >delete
             </v-icon>
         </template>
 
         <!-- Custom no-data slot -->
-        <template v-slot:no-data>
+        <!-- <template v-slot:no-data>
             <v-btn color="primary" @click="initialize">Reset</v-btn>
-        </template>
+            <v-spacer></v-spacer>
+            <v-subheader>No data...please add employees.</v-subheader>
+            <v-spacer></v-spacer>
+        </template> -->
     
     </v-data-table>
 </template>
@@ -146,6 +147,11 @@ export default {
                 text: 'Cohort',
                 sortable: true,
                 value: 'cohort',
+            },
+            { 
+                text: 'Actions', 
+                value: 'action', 
+                sortable: false 
             },
         ],
         search: '',
@@ -213,6 +219,7 @@ export default {
             org.org_cohorts.map(x => cohortPairs[x.id] = x.name)
             for(let worker of org.org_workers){
                 this.workerList.push({
+                    id: worker.id,
                     firstName: worker.first_name,
                     lastName: worker.last_name,
                     department: deptPairs[worker.department],
@@ -228,8 +235,24 @@ export default {
         },
 
         deleteItem (item) {
-            const index = this.workerList.indexOf(item)
-            confirm('Are you sure you want to delete this item?') && this.workerList.splice(index, 1)
+            if(confirm('Are you sure you want to delete this item?')){
+                axios({
+                    method: 'delete',
+                    url: `${this.$store.getters.endpoints.baseAPI}/workers/${item.id}`,
+                    headers: {
+                        authorization: `Bearer ${this.$store.getters.accessToken}`
+                    },
+                })
+                .then(response => {
+                    console.log(response)
+                    this.$store.dispatch('loadOrganization')
+                    setTimeout(() => {
+                        this.initialize()
+                    }, 300)
+                    
+                })
+                .catch(error => {console.log(error)})
+            } 
         },
 
         close () {
@@ -242,6 +265,9 @@ export default {
         },
 
         save () {
+            // Check to make sure token is valid
+            this.$store.dispatch('verifyLogin')
+            
             // get department and cohort ID's from the strings passed in by the dialog's selects
             let deptId;
             let cohortId;
@@ -258,18 +284,40 @@ export default {
             // If worker is edited, make axios patch
             if (this.editedIndex > -1) {
                 // axios patch call
-                Object.assign(this.workerList[this.editedIndex], this.editedItem)
+                // Object.assign(this.workerList[this.editedIndex], this.editedItem)
+                let workerPk = this.workerList[this.editedIndex].id
+                axios({
+                    method: 'patch',
+                    url: `${this.$store.getters.endpoints.baseAPI}/workers/${workerPk}/`,
+                    data: {
+                        first_name: this.editedItem.firstName,
+                        last_name: this.editedItem.lastName,
+                        full_name: `${this.editedItem.firstName} ${this.editedItem.lastName}`,
+                        organization: this.$store.getters.organization.id,
+                        department: deptId,
+                        cohort: cohortId,
+                    },
+                    headers: {
+                        authorization: `Bearer ${this.$store.getters.accessToken}`
+                    },
+                })
+                .then(response => {
+                    console.log(response)
+                    this.$store.dispatch('loadOrganization')
+                    
+                })
+                .catch(error => {console.log(error)})
+
             }
             // If worker is created, make axios post 
             else {
                 // axios post call
-                // this.workerList.push(this.editedItem)
                 axios({
                     method: 'post',
                     url: `${this.$store.getters.endpoints.baseAPI}/workers/`,
                     data: {
                         first_name: this.editedItem.firstName,
-                        last_name: this.editedItem.firstName,
+                        last_name: this.editedItem.lastName,
                         full_name: `${this.editedItem.firstName} ${this.editedItem.lastName}`,
                         organization: this.$store.getters.organization.id,
                         department: deptId,

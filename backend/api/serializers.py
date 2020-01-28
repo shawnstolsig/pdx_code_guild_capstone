@@ -48,10 +48,22 @@ class WorkerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class RoleSerializer(serializers.ModelSerializer):
+    # workers = WorkerSerializer(many=True, read_only=False)
+    worker_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Worker.objects.all(), source="workers")
     class Meta: 
         model = Role 
-        # Doesn't include workers ManyToMany
-        fields = ('name', 'description', 'rate', 'last_staffed', 'organization', 'department', 'date_created', 'date_updated')
+        fields = ('id', 'name', 'description', 'rate', 'last_staffed', 'organization', 'department', 'date_created', 'date_updated', 'worker_ids')
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
+# class RoleWithWorkersSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Role
+#         fields
 
 # Base serializers for process.models
 class SVGElementSerializer(serializers.ModelSerializer):

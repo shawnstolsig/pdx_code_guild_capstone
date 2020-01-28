@@ -21,7 +21,7 @@
         </v-row>
         <v-row v-if="validOrg">
             <v-col cols="12">
-                <WorkerSettings />
+                <RoleSettings />
             </v-col>
         </v-row>
     </v-container><!-- End of Organization Settings -->
@@ -30,14 +30,14 @@
 <script>
 import DeptSettings from '@/components/settings/DeptSettings'
 import CohortSettings from '@/components/settings/CohortSettings'
-import WorkerSettings from '@/components/settings/WorkerSettings'
+import RoleSettings from '@/components/settings/RoleSettings'
 
 export default {
 
     components: {
         DeptSettings,
         CohortSettings,
-        WorkerSettings
+        RoleSettings
     },
 	data: () => ({
 
