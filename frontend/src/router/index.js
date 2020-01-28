@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
+import Dashboard from '../views/Dashboard.vue'
 import Settings from '../views/Settings.vue'
 import JWTTest from '../views/JWTTest.vue'
 import Login from '../views/Login.vue'
@@ -12,8 +12,8 @@ const routes = [
   // protected route, must be authenticated to access home
   {
     path: '/',
-    name: 'home',
-    component: Home,
+    name: 'dashboard',
+    component: Dashboard,
     beforeEnter (to, from, next){
       if(store.state.isAuthenticated){
         next()

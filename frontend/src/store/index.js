@@ -222,7 +222,9 @@ export default new Vuex.Store({
                 this.dispatch('updateUserBackend', fullUserPayload)
 
                 // Send to home page after registration
-                router.push('settings')
+                setTimeout(() => {
+                    router.push({name: 'settings'})
+                }, 300)
             })
             .catch(error => {
                 console.log(error)
@@ -255,6 +257,11 @@ export default new Vuex.Store({
                 let expirationTime = this.state.jwt.accessExpiration * 1000
                 this.dispatch('setLogoutTimer', expirationTime - now)
 
+                // Send to dashboard screen...use delay to time the response from org update
+                setTimeout(() => {
+                    router.push({name: 'dashboard'})
+                }, 300)
+
                 // Get Manager/User info
                 let userId = jwt_decode(this.state.jwt.access).user_id
                 return axios({
@@ -272,9 +279,6 @@ export default new Vuex.Store({
                 this.commit('updateUserInfoOnly', response.data.user)
                 this.commit('updateManagerInfoOnly', response.data)
                 this.dispatch('loadOrganization')
-
-                // Send to home screen
-                router.push('home')
             })
             // Catch errors
             .catch(error => {
@@ -291,7 +295,9 @@ export default new Vuex.Store({
         // Logs user out
         logout(){
             this.commit('clearStateAndLocalStorage')
-            router.push('login')
+            setTimeout(() => {
+                router.push({name: 'login'})
+            }, 300)
         },
         
         // Checks if user is still logged in (are tokens valid?)
@@ -339,19 +345,19 @@ export default new Vuex.Store({
                     }).catch(error => {
                         console.log(error)
                         alert("Error refreshing access token...please re-login.")
-                        router.push('login')
+                        router.push({name: 'login'})
                     })
                 } 
                 
                 // If unable to refresh access token, prompt user to re-login.
                 else {
 					alert("Authentication token expired, please re-login.")
-					router.push('login')
+					router.push({name: 'login'})
 				}
             }
             else {
                 alert("No authentication token found, please login.")
-				router.push('login')
+				router.push({name: 'login'})
             }
         },
         
@@ -451,7 +457,10 @@ export default new Vuex.Store({
                 this.commit('updateManagerInfoOnly', response.data)
                 this.state.isAuthenticated = true
                 this.dispatch('loadOrganization')
-                router.push('home')
+                setTimeout(() => {
+                    router.push({name: 'dashboard'})
+                }, 300)
+                
             })
             // Catch errors
             .catch(error => {
