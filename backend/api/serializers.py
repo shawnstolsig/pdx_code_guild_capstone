@@ -56,8 +56,7 @@ class RoleSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'description', 'rate', 'last_staffed', 'organization', 'department', 'date_created', 'date_updated', 'worker_ids')
 
     def update(self, instance, validated_data):
-        print('validated_data is: ')
-        print(validated_data)
+
         for attr, value in validated_data.items():
             if str(attr) != 'workers':
                 setattr(instance, attr, value)
