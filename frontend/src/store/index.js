@@ -150,6 +150,9 @@ export default new Vuex.Store({
 
             // set isAuthenticated to false
             state.isAuthenticated = false
+
+            // clear Org info
+            state.organization = {}
         },
 
         // Set user org after initial login

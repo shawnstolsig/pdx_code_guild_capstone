@@ -122,66 +122,66 @@
                             @click="deleteItem(item)"
                             >delete
                         </v-icon>
-                    <!-- Dialog for setting worker roles -->
-                    <v-dialog v-model="employeeRolesDialog" max-width="500px">
-                        <v-card>
+                    
+                        <!-- Dialog for setting worker roles -->
+                        <v-dialog v-model="employeeRolesDialog" max-width="500px">
+                            <v-card>
 
-                            <v-card-title>
-                                Employee Roles
-                            </v-card-title>
+                                <v-card-title>
+                                    Employee Roles
+                                </v-card-title>
 
-                            <v-card-subtitle>
-                                Add/remove employee's roles. {{selectedWorkers}}
-                            </v-card-subtitle>
+                                <v-card-subtitle>
+                                    Add/remove employee's roles. {{selectedWorkers}}
+                                </v-card-subtitle>
 
-                            <v-card-text>
-                                   <v-list
-                                    subheader
-                                    two-line
-                                    flat
-                                >
-                            
-                                    <v-list-item-group
-                                    v-model="selectedWorkers"
-                                    multiple
+                                <v-card-text>
+                                    <v-list
+                                        subheader
+                                        two-line
+                                        flat
                                     >
-                                    <v-list-item v-for="worker in allWorkers" :key="worker.id">
-                                        <template v-slot:default="{ active, toggle }">
-                                        <v-list-item-action>
-                                            <v-checkbox
-                                            v-model="active"
-                                            color="primary"
-                                            @click="toggle"
-                                            ></v-checkbox>
-                                        </v-list-item-action>
-                            
-                                        <v-list-item-content>
-                                            <v-list-item-title>{{worker.full_name}}</v-list-item-title>
-                                        </v-list-item-content>
-                                        </template>
-                                    </v-list-item>
-                            
-                                    </v-list-item-group>
-                                </v-list>
-                            </v-card-text>
+                                
+                                        <v-list-item-group
+                                        v-model="selectedWorkers"
+                                        multiple
+                                        >
+                                        <v-list-item v-for="worker in allWorkers" :key="worker.id">
+                                            <template v-slot:default="{ active, toggle }">
+                                            <v-list-item-action>
+                                                <v-checkbox
+                                                v-model="active"
+                                                color="primary"
+                                                @click="toggle"
+                                                ></v-checkbox>
+                                            </v-list-item-action>
+                                
+                                            <v-list-item-content>
+                                                <v-list-item-title>{{worker.full_name}}</v-list-item-title>
+                                            </v-list-item-content>
+                                            </template>
+                                        </v-list-item>
+                                
+                                        </v-list-item-group>
+                                    </v-list>
+                                </v-card-text>
 
-                            <v-card-actions>
-                                <v-spacer></v-spacer>
-                                <v-btn 
-                                    color="error" 
-                                    text 
-                                    @click="employeeRolesDialog = false"
-                                >Cancel</v-btn>
-                                <v-btn 
-                                    color="success" 
-                                    text 
-                                    @click="saveEmployeeRoles"
-                                >Save</v-btn>
-                            </v-card-actions>
-                        </v-card>
-                    </v-dialog>
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn 
+                                        color="error" 
+                                        text 
+                                        @click="employeeRolesDialog = false"
+                                    >Cancel</v-btn>
+                                    <v-btn 
+                                        color="success" 
+                                        text 
+                                        @click="saveEmployeeRoles"
+                                    >Save</v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-dialog>
                     </template>
-
                 </v-data-table>
             </v-col>
         </v-row>

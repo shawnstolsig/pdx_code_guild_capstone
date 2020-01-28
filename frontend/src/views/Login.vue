@@ -92,7 +92,7 @@
                 		<v-btn color="primary" v-if="registrationMode" @click="registrationMode = !registrationMode">Back to login...</v-btn>
                 		<v-spacer />
                 		<v-btn color="success" v-if="!registrationMode" @click="login">Login</v-btn>
-                		<v-btn color="success" v-if="registrationMode" @click="register" :disabled="!(formValidity === termsCheckbox)">Register</v-btn>
+                		<v-btn color="success" v-if="registrationMode" @click="register" :disabled="!(formValidity && termsCheckbox)">Register</v-btn>
               		</v-card-actions>
 
 				</v-card>

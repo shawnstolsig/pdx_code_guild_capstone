@@ -9,27 +9,34 @@
             </v-toolbar-title>
 
             <v-spacer></v-spacer>
-
-            <v-btn v-if="authenticated" text to="/">
-                <span>{{username}}'s Dashboard</span>
-                <v-icon right >home</v-icon>
+        
+                <span v-if="authenticated && org.name" color="primary" class="mr-2">
+                    <v-chip color="primary" class="mr-2" label large>
+                        {{ org.name }}
+                    </v-chip>
+                </span>
+            <v-toolbar-items >
+                <v-btn v-if="authenticated" text to="/" class="mr-2">
+                    <span>Dashboard</span>
+                    <v-icon right >home</v-icon>
+                </v-btn>
+                <v-btn v-if="authenticated" text to="/settings" class="mr-2">
+                    <span>Settings</span>
+                    <v-icon right >settings</v-icon>
+                </v-btn>
+                <v-btn text to="/jwttest" class="mr-2">
+                    <span>Test JWT</span>
+                    <v-icon right >lock</v-icon>
+                </v-btn>
+                <v-btn v-if="!authenticated" text to="/login" class="mr-2">
+                    <span>Sign In / Register</span>
+                    <v-icon right >perm_identity</v-icon>
+                </v-btn>
+                <v-btn v-if="authenticated" text @click="logOut" class="mr-2">
+                    <span>Sign Out</span>
+                    <v-icon right >exit_to_app</v-icon>
             </v-btn>
-            <v-btn v-if="authenticated" text to="/settings">
-                <span>Settings</span>
-                <v-icon right >settings</v-icon>
-            </v-btn>
-            <v-btn text to="/jwttest">
-                <span>Test JWT</span>
-                <v-icon right >lock</v-icon>
-            </v-btn>
-            <v-btn v-if="!authenticated" text to="/login">
-                <span>Sign In / Register</span>
-                <v-icon right >perm_identity</v-icon>
-            </v-btn>
-            <v-btn v-if="authenticated" text @click="logOut">
-                <span>Sign Out</span>
-                <v-icon right >exit_to_app</v-icon>
-            </v-btn>
+            </v-toolbar-items>
         </v-app-bar>
     </nav>
 </template>
@@ -64,6 +71,9 @@ export default {
         username(){
             return this.$store.getters.username
         },
+        org(){
+            return this.$store.getters.organization
+        }
     }
 
 }

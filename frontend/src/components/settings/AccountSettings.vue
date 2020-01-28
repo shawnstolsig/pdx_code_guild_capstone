@@ -49,6 +49,18 @@
                 </v-col>
             </v-row>
             <v-row>
+                <v-col cols="12" md="6">
+                    <v-text-field 
+                    disabled
+                    v-model="org.code"
+                    outlined
+                    :label="org.name + ' Organization Code'"
+                    >
+                    </v-text-field>
+                </v-col>
+            </v-row>
+
+            <v-row>
                 <v-card flat>
                     <v-card-text>
                         <v-switch v-model="$vuetify.theme.dark" primary	label="Dark Mode"/>
@@ -62,8 +74,7 @@
                 type="submit" 
                 :disabled="!accountFormValidity"
                 color="success"
-                >
-                    Save
+                >Save
                 </v-btn>
             </v-row>
 
