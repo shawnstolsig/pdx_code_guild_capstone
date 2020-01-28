@@ -213,6 +213,7 @@ export default {
             department: '',
             rate: '',
             count: '',
+            description: '',
             workerArray: []
         },
         defaultItem: {
@@ -221,6 +222,7 @@ export default {
             department: '',
             rate: '',
             count: '',
+            description: '',
             workerArray: []
         },
     }),
@@ -273,18 +275,18 @@ export default {
                     id: x.id,
                     name: x.name,
                     department: this.deptListObj[x.department],
-                    rate: x.rate,
+                    rate: x.rate ? x.rate : '-',
                     count: x.worker_ids.count ? x.worker_ids.count : 0,
+                    description: x.description,
                     workerArray: x.worker_ids
                 })
             })
         },      // end of initialize
 
         editItem (item) {
-            alert("need to implement edit role" + item)
-            // this.editedIndex = this.roleList.indexOf(item)
-            // this.editedItem = Object.assign({}, item)
-            // this.newRoleDialog = true
+            this.editedIndex = this.compiledRoleList.indexOf(item)
+            this.editedItem = Object.assign({}, item)
+            this.newRoleDialog = true
         },
 
         deleteItem (item) {
@@ -332,15 +334,13 @@ export default {
             // If role is edited, make axios patch
             if (this.editedIndex > -1) {
                 // axios patch call
-                // Object.assign(this.roleList[this.editedIndex], this.editedItem)
-                let rolePk = this.roleList[this.editedIndex].id
                 axios({
                     method: 'patch',
-                    url: `${this.$store.getters.endpoints.baseAPI}/roles/${rolePk}/`,
+                    url: `${this.$store.getters.endpoints.baseAPI}/roles/${this.compiledRoleList[this.editedIndex].id}/`,
                     data: {
                         name: this.editedItem.name,
                         description: this.editedItem.description,
-                        rate: this.editedItem.rate,
+                        rate: this.editedItem.rate ? this.editedItem.rate : null,
                         organization: this.$store.getters.organization.id,
                         department: deptId,
                         worker_ids: this.editedItem.workerArray
@@ -359,6 +359,8 @@ export default {
             }
             // If role is created, make axios post 
             else {
+                console.log("this.editedItem.rate")
+                console.log(typeof this.editedItem.rate)
                 // axios post call
                 axios({
                     method: 'post',
@@ -366,7 +368,7 @@ export default {
                     data: {
                         name: this.editedItem.name,
                         description: this.editedItem.description,
-                        rate: this.editedItem.rate,
+                        rate: this.editedItem.rate ? this.editedItem.rate : null,
                         organization: this.$store.getters.organization.id,
                         department: deptId,
                         worker_ids: []

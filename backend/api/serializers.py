@@ -49,14 +49,20 @@ class WorkerSerializer(serializers.ModelSerializer):
 
 class RoleSerializer(serializers.ModelSerializer):
     # workers = WorkerSerializer(many=True, read_only=False)
-    worker_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Worker.objects.all(), source="workers")
+    worker_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Worker.objects.all(), source="workers", allow_null=True)
+    rate = serializers.IntegerField(allow_null=True, default='')
     class Meta: 
         model = Role 
         fields = ('id', 'name', 'description', 'rate', 'last_staffed', 'organization', 'department', 'date_created', 'date_updated', 'worker_ids')
 
     def update(self, instance, validated_data):
+        print('validated_data is: ')
+        print(validated_data)
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+            if str(attr) != 'workers':
+                setattr(instance, attr, value)
+            else:
+                instance.workers.set(value)
         instance.save()
         return instance
 
