@@ -9,50 +9,73 @@
         <template v-slot:activator>
             <v-btn v-model="fab" color="blue darken-2" dark fab>
                 <v-icon v-if="fab">mdi-close</v-icon>
-                <v-icon v-else>mdi-account-circle</v-icon>
+                <v-icon v-else>dashboard</v-icon>
             </v-btn>
         </template>
-        <v-btn fab dark small color="green">
-            <v-icon>mdi-pencil</v-icon>
-        </v-btn>
-        <v-btn fab dark small color="indigo">
-            <v-icon>mdi-plus</v-icon>
-        </v-btn>
-        <v-btn fab dark small color="red" >
-            <v-icon>mdi-delete</v-icon>
-        </v-btn>
+
+		<v-tooltip right>
+			<template v-slot:activator="{ on }">
+				<v-btn fab dark small color="green" v-on="on" @click="createNode">
+					<v-icon>mdi-pencil</v-icon>
+				</v-btn>
+			</template>
+			<span>Create Workstation</span>
+		</v-tooltip>
+
+		<v-tooltip right>
+			<template v-slot:activator="{ on }">
+				<v-btn fab dark small color="indigo" v-on="on" @click="saveWorkspace">
+					<v-icon>save</v-icon>
+				</v-btn>
+			</template>
+			<span>Save Workspace</span>
+		</v-tooltip>
+
+		<v-tooltip right>
+			<template v-slot:activator="{ on }">
+				<v-btn fab dark small color="red" v-on="on" @click="changeWorkspace">
+					<v-icon>view_carousel</v-icon>
+				</v-btn>
+			</template>
+			<span>Change Workspace</span>
+		</v-tooltip>
     </v-speed-dial>
 </template>
 <script>
   export default {
     data: () => ({
-      fab: false,
-    }),
+		workingNodeList: [],
+		fab: false,
+	  	createNodeDialog: false,
 
-    computed: {
-      activeFab () {
-        switch (this.tabs) {
-          case 'one': return { class: 'purple', icon: 'account_circle' }
-          case 'two': return { class: 'red', icon: 'edit' }
-          case 'three': return { class: 'green', icon: 'keyboard_arrow_up' }
-          default: return {}
-        }
-      },
-    },
+    }),		// end data
 
-    watch: {
-      top (val) {
-        this.bottom = !val
-      },
-      right (val) {
-        this.left = !val
-      },
-      bottom (val) {
-        this.top = !val
-      },
-      left (val) {
-        this.right = !val
-      },
-    },
+    methods: {
+		createNode(){
+
+			this.createNodeDialog = true
+		},
+		saveWorkspace(){
+			alert("implement ability to save workspace")
+		},
+		changeWorkspace(){
+			alert("implement ability to change workspace")
+		},
+	},		// end methods
+	
+	mounted(){
+		this.workingNodeList = this.$store.getters.organization.org_workspaces[0]
+	},		// end mounted
+
+	computed: {
+		org(){
+			return this.$store.getters.organization
+		},
+		rules(){
+				return this.$store.getters.formRules
+		},
+	},     // end computed
+
+
   }
 </script>

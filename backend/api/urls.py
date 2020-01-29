@@ -19,6 +19,12 @@ router.register('workers', views.WorkerViewSet, basename='workers')
 router.register('users', views.UserViewSet, basename='users')
 router.register('roles', views.RoleViewSet, basename='roles')
 
+# process routes
+router.register('workspaces', views.WorkspaceViewSet, basename='workspaces')
+router.register('workspacesall', views.WorkspaceAllViewSet, basename='workspacesall')
+router.register('zones', views.ZoneViewSet, basename='zones')
+router.register('nodes', views.NodeViewSet, basename='nodes')
+
 # urlconf
 urlpatterns = router.urls
 

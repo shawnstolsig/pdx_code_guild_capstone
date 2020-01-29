@@ -6,6 +6,7 @@ from api.permissions import IsOwnerManagerOrReadOnly
 
 from .serializers import OrganizationSerializer, OrganizationUUIDSerializer, OrganizationAllSerializer, DepartmentSerializer, CohortSerializer
 from .serializers import ManagerSerializer, UserSerializer, WorkerSerializer, RoleSerializer
+from .serializers import WorkspaceSerializer, WorkspaceAllSerializer, ZoneSerializer, NodeSerializer
 from django.contrib.auth.models import User
 from org.models import Organization, Department, Cohort
 from people.models import Manager, Worker, Role
@@ -114,7 +115,83 @@ class RoleViewSet(viewsets.ModelViewSet):
 
 # end people views
 
+# process views
 
+class WorkspaceViewSet(viewsets.ModelViewSet):
+    serializer_class = WorkspaceSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Workspace.objects.all()
+        # Optionally filter by Organization:
+        organization = self.request.query_params.get('organization', None)
+        if organization is not None:
+            queryset = queryset.filter(organization=organization)
+        # Optionally filter by Department:
+        department = self.request.query_params.get('department', None)
+        if organization is not None:
+            queryset = queryset.filter(department=department)
+        return queryset
+
+class WorkspaceAllViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = WorkspaceAllSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Workspace.objects.all()
+        # Optionally filter by Organization:
+        organization = self.request.query_params.get('organization', None)
+        if organization is not None:
+            queryset = queryset.filter(organization=organization)
+        # Optionally filter by Department:
+        department = self.request.query_params.get('department', None)
+        if organization is not None:
+            queryset = queryset.filter(department=department)
+        return queryset
+
+class ZoneViewSet(viewsets.ModelViewSet):
+    serializer_class = ZoneSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Zone.objects.all()
+        # Optionally filter by Organization:
+        organization = self.request.query_params.get('organization', None)
+        if organization is not None:
+            queryset = queryset.filter(organization=organization)
+        # Optionally filter by Department:
+        department = self.request.query_params.get('department', None)
+        if organization is not None:
+            queryset = queryset.filter(department=department)
+        # Optionally filter by Workspace:
+        workspace = self.request.query_params.get('workspace', None)
+        if organization is not None:
+            queryset = queryset.filter(workspace=workspace)
+        return queryset
+
+class NodeViewSet(viewsets.ModelViewSet):
+    serializer_class = NodeSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Node.objects.all()
+        # Optionally filter by Organization:
+        organization = self.request.query_params.get('organization', None)
+        if organization is not None:
+            queryset = queryset.filter(organization=organization)
+        # Optionally filter by Department:
+        department = self.request.query_params.get('department', None)
+        if organization is not None:
+            queryset = queryset.filter(department=department)
+        # Optionally filter by Workspace:
+        workspace = self.request.query_params.get('workspace', None)
+        if organization is not None:
+            queryset = queryset.filter(workspace=workspace)
+        # Optionally filter by Zone:
+        zone = self.request.query_params.get('zone', None)
+        if organization is not None:
+            queryset = queryset.filter(zone=zone)
+        return queryset
 
 
 

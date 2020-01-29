@@ -106,6 +106,7 @@ class Node(models.Model):
     height = models.IntegerField(default=150)
     width = models.IntegerField(default=300)
     color = models.CharField(max_length=50, default="#FFFFFF")
+    draggable = models.BooleanField(default=1)
   
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_nodes")

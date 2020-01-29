@@ -53,7 +53,7 @@ class RoleSerializer(serializers.ModelSerializer):
     rate = serializers.IntegerField(allow_null=True, default='')
     class Meta: 
         model = Role 
-        fields = ('id', 'name', 'description', 'rate', 'last_staffed', 'organization', 'department', 'date_created', 'date_updated', 'worker_ids')
+        fields = ('id', 'name', 'description', 'rate', 'last_staffed', 'organization', 'department', 'date_created', 'date_updated', 'worker_ids','color')
 
     def update(self, instance, validated_data):
 
@@ -76,32 +76,37 @@ class SVGElementSerializer(serializers.ModelSerializer):
         model = SVGElement
         fields = '__all__'
 class WorkspaceSerializer(serializers.ModelSerializer):
-    svg = SVGElementSerializer()
+    # svg = SVGElementSerializer()
     class Meta:
         model = Workspace
         fields = '__all__'
 class ZoneSerializer(serializers.ModelSerializer):
-    svg = SVGElementSerializer()
+    # svg = SVGElementSerializer()
     class Meta:
         model = Zone
         fields = '__all__'
 class NodeSerializer(serializers.ModelSerializer):
-    svg = SVGElementSerializer()
+    # svg = SVGElementSerializer()
+    worker = WorkerSerializer(many=False, read_only=True)
+    role = RoleSerializer(many=False, read_only=True)
     class Meta:
         model = Node
-        fields = '__all__'
+        # fields = '__all__'
+        fields = ('id', 'name','department','organization',
+                'role','volume','worker','zone','workspace',
+                'draggable', 'color','height','width','x','y')
 class FlowpathWorkspaceSerializer(serializers.ModelSerializer):
-    svg = SVGElementSerializer()
+    # svg = SVGElementSerializer()
     class Meta:
         model = FlowpathWorkspace
         fields = '__all__'
 class FlowpathZoneSerializer(serializers.ModelSerializer):
-    svg = SVGElementSerializer()
+    # svg = SVGElementSerializer()
     class Meta:
         model = FlowpathZone
         fields = '__all__'
 class FlowpathNodeSerializer(serializers.ModelSerializer):
-    svg = SVGElementSerializer()
+    # svg = SVGElementSerializer()
     class Meta:
         model = FlowpathNode
         fields = '__all__'
@@ -152,3 +157,11 @@ class OrganizationAllSerializer(serializers.ModelSerializer):
                     'org_workspaces', 'org_zones', 'org_nodes', 'org_workspace_flows', 'org_zone_flows', 'org_node_flows',
                     'org_managers', 'org_workers', 'org_roles',
                     'org_shifts', 'org_jobs')
+
+class WorkspaceAllSerializer(serializers.ModelSerializer):
+    workspace_zones = ZoneSerializer(many=True, read_only=True)
+    workspace_nodes = NodeSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Workspace
+        fields = ('id','name','description','volume', 'organization','department','workspace_zones', 'workspace_nodes')

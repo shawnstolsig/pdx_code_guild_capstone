@@ -27,6 +27,7 @@ export default new Vuex.Store({
         },
         isAuthenticated: false,
         organization: {},
+        workspace: {},
         jwt: {
             access: localStorage.getItem('accessToken'),
             refresh: localStorage.getItem('refreshToken'),
@@ -75,6 +76,7 @@ export default new Vuex.Store({
         refreshToken(state){ return state.jwt.refresh },
         endpoints(state){ return state.endpoints },
         organization(state) { return state.organization },
+        workspace(state){return state.workspace},
         formRules(state){ return state.formRules }
     },    // end Vuex getters
 
@@ -163,6 +165,11 @@ export default new Vuex.Store({
         // Set organization in state
         setOrganization(state, payload){
             state.organization = payload
+        },
+
+        // Set dashboard workspace
+        setDashboardWorkspace(state, payload){
+            state.workspace = payload
         }
 
     },  // end Vuex mutations
@@ -486,7 +493,21 @@ export default new Vuex.Store({
             })
             .then(response => this.commit('setOrganization', response.data))
             .catch(error => console.log(error))
-        }
+        },
+
+        // Load all Organization's information
+        loadWorkspace(context, workspaceId){
+            // Get all information on the organization from backend
+            axios({
+                method: 'get',
+                url: `${this.getters.endpoints.baseAPI}/workspacesall/${workspaceId}`,
+                headers: {
+                    authorization: `Bearer ${this.getters.accessToken}`
+                }
+            })
+            .then(response => this.commit('setDashboardWorkspace', response.data))
+            .catch(error => console.log(error))
+        },
 
     },    // end Vuex actions
     modules: {

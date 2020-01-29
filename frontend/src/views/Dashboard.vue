@@ -1,7 +1,8 @@
 <template>
 	<v-container fluid class="fill-height">
-			<FloatingCard x="100" y="200" :node="testNode"></FloatingCard>
+			<FloatingCard v-for="node in workspace.workspace_nodes" :key="node.id" :nodeProp="node"></FloatingCard>
 			<FloatingButton />		
+	
 	</v-container>
 </template>
 
@@ -19,20 +20,23 @@ export default {
 
 	data(){
 		return {
-			testNode: {
-				name: "Station 2-1",
-				role: {
-					name: 'Grading',
-					color: 'blue',
-				},
-				worker: {
-					full_name: "Joe Dirt",
-					cohort: {
-						name: "DA1",
-						color: "red",
-					}
-				},
-			}
+			// testNode: {
+			// 	name: "Station 2-1",
+			// 	draggable: true,
+			// 	x: 300,
+			// 	y: 500,
+			// 	role: {
+			// 		name: 'Grading',
+			// 		color: 'blue',
+			// 	},
+			// 	worker: {
+			// 		full_name: "Joe Dirt",
+			// 		cohort: {
+			// 			name: "DA1",
+			// 			color: "red",
+			// 		}
+			// 	},
+			// }
 		}
 	},    // end data
 
@@ -49,11 +53,17 @@ export default {
 		rules(){
 				return this.$store.getters.formRules
 		},
+		workspace(){
+			return this.$store.getters.workspace
+		},
 	},     // end computed
 
-
 	mounted(){
+		// set light/dark mode
 		this.$vuetify.theme.dark = this.$store.getters.user.darkModeEnabled
+
+		// load workspace data
+		this.$store.dispatch('loadWorkspace', 1)
 	}     // end mounted
 }
 </script>
