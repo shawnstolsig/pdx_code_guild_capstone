@@ -75,6 +75,7 @@ class Role(models.Model):
     description = models.TextField(null=True)
     rate = models.FloatField(null=True)
     last_staffed = models.CharField(max_length=50, null=True)
+    color = models.CharField(max_length=50, default="#FFFFFF")
 
   
     # relationships

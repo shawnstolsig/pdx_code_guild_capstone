@@ -1,7 +1,7 @@
 from django.db import models
 from django.apps import apps
 from org.models import Organization, Department
-from people.models import Role
+from people.models import Role, Worker
 
 # These models deal with the process elements of an organization:
 # SVGElement (for rendering only)
@@ -45,7 +45,7 @@ class Workspace(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(null=True)
     volume = models.IntegerField(null=True)
-  
+
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_workspaces")
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_workspaces")
@@ -70,6 +70,12 @@ class Zone(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(null=True)
     volume = models.IntegerField(null=True)
+    # for rendering
+    x = models.IntegerField(default=100)
+    y = models.IntegerField(default=100)
+    height = models.IntegerField(default=500)
+    width = models.IntegerField(default=500)
+    color = models.CharField(max_length=50, default="#FFFFFF")
   
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_zones")
@@ -94,6 +100,12 @@ class Node(models.Model):
     # attributes
     name = models.CharField(max_length=50)
     volume = models.IntegerField(null=True)
+    # for rendering
+    x = models.IntegerField(default=100)
+    y = models.IntegerField(default=100)
+    height = models.IntegerField(default=150)
+    width = models.IntegerField(default=300)
+    color = models.CharField(max_length=50, default="#FFFFFF")
   
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_nodes")
@@ -101,6 +113,7 @@ class Node(models.Model):
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="workspace_nodes")
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE, related_name="zone_nodes")
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, related_name="role_nodes")
+    worker = models.OneToOneField(Worker, on_delete=models.SET_NULL, null=True, related_name="role_worker")
     svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True)
 
     # timestamps

@@ -40,6 +40,7 @@ class Department(models.Model):
     # attributes
     name = models.CharField(max_length=150)
     description = models.TextField(null=True)
+    color = models.CharField(max_length=50, default="#FFFFFF")
 
     # relationships
     # (all models using Department as foreign key will SET_NULL on deletion of Department)
@@ -70,6 +71,7 @@ class Cohort(models.Model):
 
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_cohorts")
+    color = models.CharField(max_length=50, default="#FFFFFF")
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)
