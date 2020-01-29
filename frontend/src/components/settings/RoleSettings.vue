@@ -423,23 +423,29 @@ export default {
             this.qualifiedWorkerArray = []          // used for track those who are qualified in role
             this.selectedWorkers = []               // used for rendering workers and tracking changes
             this.selectedRole = item
-
+            console.log("in viewWorkers")
             // get array of worker pk that are qualified in role
             for(let role of this.$store.getters.organization.org_roles){
                 if (role.id == item.id){
                     this.qualifiedWorkerArray = role.worker_ids
                 }
             }
+            console.log("made it past for loop for qualifiedWorkerArray")
             // create array of all workers for displaying in the list
-            // for(let worker of this.$store.getters.organization.org_workers){
             for(let i = 0; i < this.$store.getters.organization.org_workers.length; i++){
                 let worker = this.$store.getters.organization.org_workers[i]
                 if(this.qualifiedWorkerArray.indexOf(worker.id) != -1){
                     this.selectedWorkers.push(i)
                 }
              }
-
+            console.log("made it past for loop for selectedWorkers")
             this.employeeRolesDialog = true
+            console.log("this.qualifiedWorkerArray:")
+            console.log(this.qualifiedWorkerArray)
+            console.log("this.selectedWorkers:")
+            console.log(this.selectedWorkers)
+            console.log("all workers from store")
+            console.log(this.$store.getters.organization.org_workers)
         },
 
         // Save employee roles
