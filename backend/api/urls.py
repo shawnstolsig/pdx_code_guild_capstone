@@ -24,6 +24,7 @@ router.register('workspaces', views.WorkspaceViewSet, basename='workspaces')
 router.register('workspacesall', views.WorkspaceAllViewSet, basename='workspacesall')
 router.register('zones', views.ZoneViewSet, basename='zones')
 router.register('nodes', views.NodeViewSet, basename='nodes')
+router.register('nodecreate', views.NodeCreateViewSet, basename='nodecreate')
 
 # urlconf
 urlpatterns = router.urls

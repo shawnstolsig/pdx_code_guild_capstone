@@ -43,7 +43,7 @@
                                             <v-container>
                                                 <v-form v-model="createRoleValidity">
                                                     <v-row>
-                                                        <v-col cols="12" sm="6" md="4">
+                                                        <v-col cols="12" sm="6">
                                                             <v-text-field 
                                                                 v-model="editedItem.name" 
                                                                 label="Name"
@@ -51,7 +51,7 @@
                                                                 required
                                                             ></v-text-field>
                                                         </v-col>
-                                                        <v-col cols="12" sm="6" md="4">
+                                                        <v-col cols="12" sm="6">
                                                             <v-select 
                                                                 :items="departments" 
                                                                 label="Department" 
@@ -59,7 +59,9 @@
                                                                 required
                                                             ></v-select>
                                                         </v-col>
-                                                        <v-col cols="12" sm="6" md="4">
+                                                    </v-row>
+                                                    <v-row>
+                                                        <v-col cols="12" sm="6">
                                                             <v-text-field 
                                                                 v-model="editedItem.rate" 
                                                                 label="Rate"
@@ -67,8 +69,24 @@
                                                                 required
                                                             ></v-text-field>
                                                         </v-col>
+                                                        <v-col cols="12" sm="6">
+                                                            
+                                                
+                                                            <v-menu top nudge-bottom="105" nudge-left="16" :close-on-content-click="false">
+                                                                <template v-slot:activator="{ on }">
+                                                                    <v-chip v-on="on" :color="editedItem.color" x-large>Color...</v-chip>
+                                                                </template>
+                                                                <v-card>
+                                                                    <v-card-text class="pa-0">
+                                                                        <v-color-picker v-model="editedItem.color" flat />
+                                                                    </v-card-text>
+                                                                </v-card>
+                                                            </v-menu>
+                                                            
+                                                        
+                                                        </v-col>
                                                     </v-row>
-                                                    <v-row>
+                                                    <v-row>    
                                                         <v-col cols="12" >
                                                             <v-textarea 
                                                                 v-model="editedItem.description" 
@@ -233,7 +251,8 @@ export default {
             rate: '',
             count: '',
             description: '',
-            workerArray: []
+            workerArray: [],
+            color: ''
         },
         defaultItem: {
             id: '',
@@ -242,7 +261,8 @@ export default {
             rate: '',
             count: '',
             description: '',
-            workerArray: []
+            workerArray: [],
+            color: ''
         },
         // for adding/removing employee roles
         employeeRolesDialog: false,
@@ -272,7 +292,19 @@ export default {
         },
         allWorkers(){
             return this.$store.getters.organization.org_workers
-        }
+        },
+
+        // swatchStyle() {
+        //     const { color, menu } = this
+        //     return {
+        //         backgroundColor: this.editedItem.color,
+        //         cursor: 'pointer',
+        //         height: '30px',
+        //         width: '30px',
+        //         borderRadius: menu ? '50%' : '4px',
+        //         transition: 'border-radius 200ms ease-in-out'
+        //     }
+        // },
     },      // end of computed
 
     watch: {
@@ -297,7 +329,6 @@ export default {
 
             // Create compiled role list
             this.$store.getters.organization.org_roles.map(x => {
-                console.log(`pushing role ${x}`)
                 this.compiledRoleList.push(
                 {
                     id: x.id,
@@ -306,7 +337,9 @@ export default {
                     rate: x.rate ? x.rate : '-',
                     count: x.worker_ids.length ? x.worker_ids.length : 0,
                     description: x.description,
-                    workerArray: x.worker_ids 
+                    workerArray: x.worker_ids,
+                    color: x.color
+
                 })
             })
         },      // end of initialize
@@ -371,7 +404,8 @@ export default {
                         rate: this.editedItem.rate ? this.editedItem.rate : null,
                         organization: this.$store.getters.organization.id,
                         department: deptId,
-                        worker_ids: this.editedItem.workerArray
+                        worker_ids: this.editedItem.workerArray,
+                        color: this.editedItem.color
                     },
                     headers: {
                         authorization: `Bearer ${this.$store.getters.accessToken}`
@@ -399,7 +433,8 @@ export default {
                         rate: this.editedItem.rate ? this.editedItem.rate : null,
                         organization: this.$store.getters.organization.id,
                         department: deptId,
-                        worker_ids: []
+                        worker_ids: [],
+                        color: this.editedItem.color
                     },
                     headers: {
                         authorization: `Bearer ${this.$store.getters.accessToken}`

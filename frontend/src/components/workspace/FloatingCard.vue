@@ -6,7 +6,8 @@
                     {{node.name}}
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-btn icon @click="node.draggable = !node.draggable">
+                <v-btn icon @click="toggleLock">
+                    <!-- "node.draggable = !node.draggable"> -->
                     <v-icon>{{node.draggable ? 'lock_open' : 'lock'}}</v-icon>
                 </v-btn>
                 <v-menu
@@ -26,7 +27,7 @@
                         <v-list>
 
                             <v-list-item>
-                            <v-list-item-avatar color="node.role.">
+                            <v-list-item-avatar color="node.role.color">
                     
                             </v-list-item-avatar>
                             <v-list-item-content>
@@ -57,7 +58,14 @@
 
             <v-card-text>
                 <v-list dense>
-                    <v-list-item>
+                    <!-- if no assigned worker, leave empty -->
+                    <v-list-item v-if="!node.worker">
+                        <v-list-item-title>No employee assigned</v-list-item-title>
+                        {{node.role.name}}
+                    </v-list-item>
+
+                    <!-- if worker assigned, load name/cohort/colors -->
+                    <v-list-item v-if="node.worker">
                         <v-list-item-avatar :color="node.worker.cohort.color"></v-list-item-avatar>
                         <v-list-item-content>
                             <v-list-item-title>
@@ -114,6 +122,8 @@
                             </v-menu>
                         </v-list-item-icon>
                     </v-list-item>
+
+
                 </v-list>
                
             </v-card-text>
@@ -172,12 +182,30 @@ export default {
             .then(response => {
                 console.log("Position written to db")
                 console.log(response)
-                setTimeout(() => {
-                    this.$store.dispatch('loadWorkspace', 1)
-                }, 300)
             })
             .catch(error => {console.log(error)})
-        }
+        },
+        toggleLock(){
+            // toggle draggable
+            this.node.draggable = !this.node.draggable
+
+            // write status to db
+            axios({
+                method: 'patch',
+                url: `${this.$store.getters.endpoints.baseAPI}/nodes/${this.node.id}/`,
+                data: {
+                    draggable: this.node.draggable
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log("draggable toggled")
+                console.log(response)
+            })
+            .catch(error => {console.log(error)})
+        },
 	},    // end methods
 
     computed: {

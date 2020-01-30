@@ -155,6 +155,9 @@ export default new Vuex.Store({
 
             // clear Org info
             state.organization = {}
+
+            // clear dashboard workspace
+            state.workspace = {}
         },
 
         // Set user org after initial login
@@ -496,11 +499,21 @@ export default new Vuex.Store({
         },
 
         // Load all Organization's information
-        loadWorkspace(context, workspaceId){
+        loadWorkspace(context, payload){
             // Get all information on the organization from backend
+            let workspacePk;
+
+            if(payload.index == undefined){
+                workspacePk = payload.key
+            }
+            else{
+                workspacePk = this.getters.organization.org_workspaces[payload.index].id
+            }
+            
+            console.log(`Loading workspace with id of ${workspacePk}`)
             axios({
                 method: 'get',
-                url: `${this.getters.endpoints.baseAPI}/workspacesall/${workspaceId}`,
+                url: `${this.getters.endpoints.baseAPI}/workspacesall/${workspacePk}`,
                 headers: {
                     authorization: `Bearer ${this.getters.accessToken}`
                 }

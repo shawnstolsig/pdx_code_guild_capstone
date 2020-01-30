@@ -6,7 +6,7 @@ from api.permissions import IsOwnerManagerOrReadOnly
 
 from .serializers import OrganizationSerializer, OrganizationUUIDSerializer, OrganizationAllSerializer, DepartmentSerializer, CohortSerializer
 from .serializers import ManagerSerializer, UserSerializer, WorkerSerializer, RoleSerializer
-from .serializers import WorkspaceSerializer, WorkspaceAllSerializer, ZoneSerializer, NodeSerializer
+from .serializers import WorkspaceSerializer, WorkspaceAllSerializer, ZoneSerializer, NodeSerializer, NodeCreateSerializer
 from django.contrib.auth.models import User
 from org.models import Organization, Department, Cohort
 from people.models import Manager, Worker, Role
@@ -193,6 +193,10 @@ class NodeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(zone=zone)
         return queryset
 
+class NodeCreateViewSet(viewsets.ModelViewSet):
+    serializer_class = NodeCreateSerializer
+    # permission_classes = [IsAuthenticated]
+    queryset = Node.objects.all()
 
 
 # class ManagerListCreateView(ListCreateAPIView):

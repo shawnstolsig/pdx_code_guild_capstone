@@ -10,9 +10,14 @@
 
             <v-spacer></v-spacer>
         
-                <span v-if="authenticated && org.name" color="primary" class="mr-2">
+                <span v-if="authenticated && org.name && !workspace.name" color="primary" class="mr-2">
                     <v-chip color="primary" class="mr-2" label large>
                         {{ org.name }}
+                    </v-chip>
+                </span>
+                <span v-if="authenticated && org.name && workspace.name" color="primary" class="mr-2">
+                    <v-chip color="primary" class="mr-2" label large>
+                        {{ org.name }}: {{workspace.name}}
                     </v-chip>
                 </span>
             <v-toolbar-items >
@@ -73,6 +78,9 @@ export default {
         },
         org(){
             return this.$store.getters.organization
+        },
+        workspace(){
+            return this.$store.getters.workspace
         }
     }
 
