@@ -31,8 +31,7 @@
                     
                             </v-list-item-avatar>
                             <v-list-item-content>
-                                <v-list-item-title>John Leider</v-list-item-title>
-                                <v-list-item-subtitle>john@vuetifyjs.com</v-list-item-subtitle>
+                                <v-list-item-title>Change workstation role</v-list-item-title>
                             </v-list-item-content>
 
                             <v-list-item-action>
@@ -93,7 +92,7 @@
                                     <v-list>
 
                                         <v-list-item>
-                                        <v-list-item-avatar color="node.role.">
+                                        <v-list-item-avatar color="node.role.color">
                                 
                                         </v-list-item-avatar>
                                         <v-list-item-content>
