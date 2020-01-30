@@ -69,22 +69,20 @@
                                                                 required
                                                             ></v-text-field>
                                                         </v-col>
-                                                        <v-col cols="12" sm="6">
-                                                            
-                                                
+                                                        <v-spacer></v-spacer>
+                                                        <v-col cols="12" sm="4">
                                                             <v-menu top nudge-bottom="105" nudge-left="16" :close-on-content-click="false">
                                                                 <template v-slot:activator="{ on }">
-                                                                    <v-chip v-on="on" :color="editedItem.color" x-large>Color...</v-chip>
+                                                                    <v-chip v-on="on" :color="editedItem.color" x-large label>Color...</v-chip>
                                                                 </template>
                                                                 <v-card>
                                                                     <v-card-text class="pa-0">
-                                                                        <v-color-picker v-model="editedItem.color" flat />
+                                                                        <v-color-picker v-model="editedItem.color" hide-inputs hide-mode-switch show-swatches />
                                                                     </v-card-text>
-                                                                </v-card>
+                                                                 </v-card>
                                                             </v-menu>
-                                                            
-                                                        
                                                         </v-col>
+                                                        
                                                     </v-row>
                                                     <v-row>    
                                                         <v-col cols="12" >
@@ -200,6 +198,11 @@
                             </v-card>
                         </v-dialog>
                     </template>
+                
+                    <!-- Custom item.value slot for the color -->
+                    <template v-slot:item.color="{ item }">
+                        <v-chip :color="item.color" label> </v-chip>
+                    </template>
                 </v-data-table>
             </v-col>
         </v-row>
@@ -218,6 +221,11 @@ export default {
                 text: 'Name',
                 sortable: true,
                 value: 'name',
+            },
+            {
+                text: 'Color',
+                sortable: false,
+                value: 'color',
             },
             {
                 text: 'Department',
@@ -401,7 +409,7 @@ export default {
                     data: {
                         name: this.editedItem.name,
                         description: this.editedItem.description,
-                        rate: this.editedItem.rate ? this.editedItem.rate : null,
+                        rate: (this.editedItem.rate == '-') ? undefined : this.editedItem.rate,
                         organization: this.$store.getters.organization.id,
                         department: deptId,
                         worker_ids: this.editedItem.workerArray,
@@ -490,24 +498,24 @@ export default {
             let workers = this.$store.getters.organization.org_workers
             this.selectedWorkers.map(x => workerIds.push(workers[x].id))
             
-            // get department id
-            let deptId;
-            for(let dept of this.$store.getters.organization.org_departments){
-                if(dept.name == this.editedItem.department){
-                    deptId = dept.id
-                }
-            }
+            // // get department id
+            // let deptId;
+            // for(let dept of this.$store.getters.organization.org_departments){
+            //     if(dept.name == this.editedItem.department){
+            //         deptId = dept.id
+            //     }
+            // }
 
             // axios patch call
             axios({
                 method: 'patch',
                 url: `${this.$store.getters.endpoints.baseAPI}/roles/${this.selectedRole.id}/`,
                 data: {
-                    name: this.selectedRole.name,
-                    description: this.selectedRole.description,
-                    rate: this.selectedRole.rate == '-' ? null : this.selectedRole.rate,
-                    organization: this.$store.getters.organization.id,
-                    department: deptId,
+                    // name: this.selectedRole.name,
+                    // description: this.selectedRole.description,
+                    // rate: (this.selectedRole.rate == '-') ? undefined : this.selectedRole.rate,
+                    // organization: this.$store.getters.organization.id,
+                    // department: deptId,
                     worker_ids: workerIds
                 },
                 headers: {
