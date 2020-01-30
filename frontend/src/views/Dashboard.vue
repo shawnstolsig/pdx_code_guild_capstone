@@ -8,6 +8,7 @@
 <script>
 import FloatingButton from '@/components/workspace/FloatingButton.vue'
 import FloatingCard from '@/components/workspace/FloatingCard.vue'
+import axios from 'axios'
 
 export default {
 	name: 'dashboard',
@@ -41,19 +42,52 @@ export default {
 	},     // end computed
 
 	mounted(){
+		console.log("In Mounted")
+
 		// set light/dark mode
 		this.$vuetify.theme.dark = this.$store.getters.user.darkModeEnabled
 
 		// load the first workspace if none is loaded
-		if(this.$store.getters.workspace.id == undefined){
-			console.log("should be here for no workspace loaded")
+		if(this.$store.getters.user.preferredWorkspaceKey == undefined){
+			console.log("First login to site, loading workspace with index 0")
 			// load workspace data
 			this.$store.dispatch('loadWorkspace', {index: 0})
 		} 
-		// reload the same workspace if previously loaded
+		
+		// load user's preferred workspace (which is the same as the last one they visited)
 		else {
-			this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
+			console.log(`Returning back to dashboard with a workspace already loaded, loading workspace with index ${this.$store.getters.user.preferredWorkspaceKey}`)
+			// this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
+			this.$store.dispatch('loadWorkspace', {key: this.$store.getters.user.preferredWorkspaceKey})
 		}
-	}     // end mounted
+
+	},		// end of mounted
+
+	destroyed(){
+		// update state with preferred workspace dashboard
+		this.$store.dispatch('updateStoreWorkspace', this.$store.getters.workspace.id)
+
+		// store last visited workspace
+		axios({
+			method: 'patch',
+			url: `${this.$store.getters.endpoints.baseAPI}/managers/${this.$store.getters.user.userId}/`,
+			data: {
+				preferred_workspace_key: this.$store.getters.workspace.id
+			},
+			headers: {
+				authorization: `Bearer ${this.$store.getters.accessToken}`
+			},
+		})
+		.then(response => {
+			console.log("Stored preferred user workspace: ")
+			console.log(response)
+		})
+		.catch(error => {console.log(error)})
+
+
+
+		this.$store.dispatch('dismountWorkspace')
+	}, 		// end of destroyed
+	     
 }
 </script>

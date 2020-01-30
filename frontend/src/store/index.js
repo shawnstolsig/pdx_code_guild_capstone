@@ -24,10 +24,12 @@ export default new Vuex.Store({
             darkModeEnabled: '',
             organization: '',
             department: '',
+            preferredWorkspaceKey: '',
         },
         isAuthenticated: false,
         organization: {},
         workspace: {},
+        unassignedWorkers: [],
         jwt: {
             access: localStorage.getItem('accessToken'),
             refresh: localStorage.getItem('refreshToken'),
@@ -77,7 +79,8 @@ export default new Vuex.Store({
         endpoints(state){ return state.endpoints },
         organization(state) { return state.organization },
         workspace(state){return state.workspace},
-        formRules(state){ return state.formRules }
+        formRules(state){ return state.formRules },
+        unassignedWorkers(state){ return state.unassignedWorkers }
     },    // end Vuex getters
 
     mutations: {
@@ -99,11 +102,6 @@ export default new Vuex.Store({
 			}
         },
 
-        // Update user information (takes in whatever is sent from API)
-        updateUser(state, managerItem){
-            state.user = managerItem
-        },
-
         // For reactively updating User model info only
         updateUserInfoOnly(state, userPayload){
             state.user['userId'] = userPayload.id
@@ -119,7 +117,7 @@ export default new Vuex.Store({
             state.user['darkModeEnabled'] = managerPayload.dark_mode_enabled
             state.user['organization'] = managerPayload.organization
             state.user['department'] = managerPayload.department
-
+            state.user['preferredWorkspaceKey'] = managerPayload.preferred_workspace_key
         },
 
         // Clear state/log user out
@@ -136,6 +134,7 @@ export default new Vuex.Store({
                 darkModeEnabled: '', 
                 organization: '',
                 department: '',
+                preferredWorkspaceKey: '',
             }
             state.jwt = {
                 access: '',
@@ -158,6 +157,9 @@ export default new Vuex.Store({
 
             // clear dashboard workspace
             state.workspace = {}
+
+            // clear unassignedWorkers
+            state.unassignedWorkers = []
         },
 
         // Set user org after initial login
@@ -173,6 +175,31 @@ export default new Vuex.Store({
         // Set dashboard workspace
         setDashboardWorkspace(state, payload){
             state.workspace = payload
+        },
+
+        // Dismount workspace (necessary to force Vue to re-render)
+        dismountWorkspace(state){
+            state.workspace = {}
+        },
+
+        // Update the store for preferred workspace key
+        updateStoreWorkspace(state, workspaceId){
+            state.user.preferredWorkspaceKey = workspaceId
+        },
+
+        // Initialize unassignedWorkers to all workers
+        initializeUnassignedWorkers(state){
+            state.unassignedWorkers = state.organization.org_workers
+        },
+
+        // Add worker object to unassignedWorkers
+        addWorkerToUnassignedWorkers(state, worker){
+            state.unassignedWorkers.push(worker)
+        },
+
+        // Remove worker from unassignedWorkers
+        removeWorkerFromUnassignedWorkers(state, worker){
+            state.unassignedWorkers.splice(state.unassignedWorkers.indexOf(worker),1)
         }
 
     },  // end Vuex mutations
@@ -520,6 +547,25 @@ export default new Vuex.Store({
             })
             .then(response => this.commit('setDashboardWorkspace', response.data))
             .catch(error => console.log(error))
+        },
+
+        // Forced unload of workspace (to help with re-rendering)
+        dismountWorkspace(){
+            this.commit('dismountWorkspace')
+        },
+
+        // Update store with preferred user's workspace pk
+        updateStoreWorkspace(context, workspaceId){
+            this.commit('updateStoreWorkspace', workspaceId)
+        },
+
+        // Update unassigned Workers.  Send laborMoveObj as objected like {add: {worker obj}}
+        updateUnassignedWorkers(context, laborMoveObj){
+            if(laborMoveObj.add){
+                this.commit('addWorkerToUnassignedWorkers', laborMoveObj.add)
+            } else if (laborMoveObj.remove){
+                this.commit('addWorkerToUnassignedWorkers', laborMoveObj.remove)
+            }
         },
 
     },    // end Vuex actions

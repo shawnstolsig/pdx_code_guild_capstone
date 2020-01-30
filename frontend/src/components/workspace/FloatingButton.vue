@@ -240,12 +240,6 @@ export default {
                 
                 // automatically reload workspace 
                 setTimeout(() => {
-                    // let index;
-                    // for(let i = 0; i < this.$store.getters.organization.org_workspaces.length; i++){
-                    //     if(response.data.workspace == this.$store.getters.organization.org_workspaces[i].id){
-                    //         index = i
-                    //     }
-                    // }
                     this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
                 }, 300)
     
@@ -294,12 +288,6 @@ export default {
                 
                 // automatically reload workspace 
                 setTimeout(() => {
-                    // let index;
-                    // for(let i = 0; i < this.$store.getters.organization.org_workspaces.length; i++){
-                    //     if(response.data.id == this.$store.getters.organization.org_workspaces[i].id){
-                    //         index = i
-                    //     }
-                    // }
                     this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
                 }, 300)
     

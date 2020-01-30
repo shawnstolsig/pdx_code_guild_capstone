@@ -17,7 +17,8 @@ class Manager(models.Model):
     # attributes
     full_name = models.CharField(max_length=180, null=True)
     dark_mode_enabled = models.BooleanField(default=False)
-
+    preferred_workspace_key = models.IntegerField(null=True, blank=True)
+    
     # relationships
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, null=True, related_name="org_managers")
@@ -46,6 +47,7 @@ class Worker(models.Model):
     last_name = models.CharField(max_length=50)
     full_name = models.CharField(max_length=50)
     hire_date = models.DateField(null=True)
+
   
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_workers")

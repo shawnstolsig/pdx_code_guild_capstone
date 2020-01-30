@@ -33,7 +33,7 @@ class ManagerSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     class Meta:
         model = Manager
-        fields = ('id', 'full_name', 'date_created', 'date_updated', 'dark_mode_enabled', 'organization', 'department', 'user')
+        fields = ('id', 'full_name', 'date_created', 'date_updated', 'dark_mode_enabled', 'preferred_workspace_key', 'organization', 'department', 'user')
 
     # must modify update function for updating nested Department and/or Organization
     def update(self, instance, validated_data):
