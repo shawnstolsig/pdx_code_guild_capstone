@@ -207,6 +207,11 @@ export default {
             alert("need editWorkstation implementation")
         },
         removeWorker(){
+            // Confirm worker removal
+            if(!confirm(`Are you sure you want to unassign ${this.node.worker.full_name}?`)){
+                return
+            }
+            // If confirmed, update backend
             axios({
                 method: 'patch',
                 url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${this.node.id}/`,
@@ -224,6 +229,9 @@ export default {
                 this.$store.dispatch('updateUnassignedWorkers', {remove: this.node.worker})
                 // update this node's state
                 this.node.worker = null
+                // reload workspace to update store 
+                this.$store.dispatch('loadOrganization')
+                this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
             })
             .catch(error => {console.log(error)})
         },
@@ -235,19 +243,31 @@ export default {
         addWorkerStart(){
             // get list of qualified, available workers for role
             this.$store.getters.organization.org_workers.map(x => {
-                if(this.node.role.worker_ids.indexOf(x.id) != -1 && this.$store.getters.unassignedWorkers.indexOf(x)){
+                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.worker_node == null){
+                    console.log(`${x.full_name} is trained and available`)
                     this.qualifiedWorkers.push(x)
+                } else {
+                    if(this.node.role.worker_ids.indexOf(x.id) == -1){
+                        console.log(`${x.full_name} is not trained`)
+                    }
+                    if(x.worker_node == null){
+                        console.log(`${x.full_name} is not available}`)
+                    }
                 }
             })
             // show dialog
             this.addWorkerDialog = true
         },
         addWorkerEnd(worker){
-            
-            // update state
-            this.node.worker = worker
+            // If there is already a worker assigned, confirm swap before proceeding
+            if(this.node.worker){
+                if(!confirm(`Are you sure you want to unassign ${this.node.worker.full_name} and assign ${worker.full_name} here instead?`)){
+                    this.addWorkerDialog = false
+                    return
+                }
+            }
 
-            // update backend
+            // update backend and state
             axios({
                 method: 'patch',
                 url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${this.node.id}/`,
@@ -256,11 +276,16 @@ export default {
                 },
                 headers: {
                     authorization: `Bearer ${this.$store.getters.accessToken}`
-            },
+                },
             })
             .then(response => {
                 "Adding worker to "
                 console.log(response)
+                // update state
+                this.node.worker = worker
+                // reload workspace to update store 
+                this.$store.dispatch('loadOrganization')
+                this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
             })
             .catch(error => {console.log(error)})
 

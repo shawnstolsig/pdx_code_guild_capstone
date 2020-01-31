@@ -114,7 +114,7 @@ class Node(models.Model):
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="workspace_nodes")
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE, null=True, related_name="zone_nodes")
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, related_name="role_nodes")
-    worker = models.OneToOneField(Worker, on_delete=models.SET_NULL, null=True, related_name="role_worker")
+    worker = models.OneToOneField(Worker, on_delete=models.SET_NULL, null=True, related_name="worker_node")
     svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True)
 
     # timestamps

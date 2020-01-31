@@ -42,11 +42,6 @@ class ManagerSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class WorkerSerializer(serializers.ModelSerializer):
-    class Meta: 
-        model = Worker 
-        fields = '__all__'
-
 class RoleSerializer(serializers.ModelSerializer):
     # workers = WorkerSerializer(many=True, read_only=False)
     worker_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Worker.objects.all(), source="workers", allow_null=True)
@@ -64,6 +59,18 @@ class RoleSerializer(serializers.ModelSerializer):
                 instance.workers.set(value)
         instance.save()
         return instance
+
+class NodeCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Node
+        fields = '__all__'
+class WorkerSerializer(serializers.ModelSerializer):
+    worker_node = NodeCreateSerializer(many=False, read_only=False)
+
+    class Meta: 
+        model = Worker 
+        # fields = '__all__'
+        fields = ('id', 'first_name', 'last_name', 'full_name', 'is_active', 'organization', 'department', 'cohort', 'worker_node', 'date_updated', 'date_created')
 
 # class RoleWithWorkersSerializer(serializers.ModelSerializer):
 #     class Meta:
@@ -95,10 +102,6 @@ class NodeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name','department','organization',
                 'role','volume','worker','zone','workspace',
                 'draggable', 'color','height','width','x','y')
-class NodeCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Node
-        fields = '__all__'
 class FlowpathWorkspaceSerializer(serializers.ModelSerializer):
     # svg = SVGElementSerializer()
     class Meta:
