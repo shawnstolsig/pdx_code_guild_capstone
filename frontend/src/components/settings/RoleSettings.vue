@@ -115,8 +115,71 @@
                                         </v-card-actions>
                                     </v-card>
                                 </v-dialog>
-                        </v-toolbar>
 
+                                 <!-- Dialog for setting worker roles -->
+                                <v-dialog v-model="employeeRolesDialog" max-width="500px">
+                                    <v-card>
+
+                                        <v-card-title>
+                                            Employee Roles
+                                        </v-card-title>
+
+                                        <v-card-subtitle>
+                                            Add/remove employee's roles.
+                                        </v-card-subtitle>
+
+                                        <v-card-text>
+                                            <v-list
+                                                subheader
+                                                two-line
+                                                flat
+                                            >
+                                        
+                                                <v-list-item-group
+                                                v-model="selectedWorkers"
+                                                multiple
+                                                >
+                                                <v-list-item v-for="worker in allWorkers" :key="worker.id">
+                                                    <template v-slot:default="{ active, toggle }">
+                                                    <v-list-item-action>
+                                                        <v-checkbox
+                                                        v-model="active"
+                                                        color="primary"
+                                                        @click="toggle"
+                                                        ></v-checkbox>
+                                                    </v-list-item-action>
+                                        
+                                                    <v-list-item-content>
+                                                        <v-list-item-title>{{worker.full_name}}</v-list-item-title>
+                                                    </v-list-item-content>
+                                                    </template>
+                                                </v-list-item>
+                                        
+                                                <v-list-item v-if="allWorkers.length == 0">
+                                                    Please add employees to your organization.
+                                                </v-list-item>
+
+                                                </v-list-item-group>
+                                            </v-list>
+                                        </v-card-text>
+
+                                        <v-card-actions>
+                                            <v-spacer></v-spacer>
+                                            <v-btn 
+                                                color="error" 
+                                                text 
+                                                @click="employeeRolesDialog = false"
+                                            >Cancel</v-btn>
+                                            <v-btn 
+                                                color="success" 
+                                                text 
+                                                @click="saveEmployeeRoles"
+                                            >Save</v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-dialog>
+                        
+                        </v-toolbar>
                     </template>
 
                     <!-- Custom item.action slot -->
@@ -138,71 +201,15 @@
                             @click="deleteItem(item)"
                             >delete
                         </v-icon>
-                    
-                        <!-- Dialog for setting worker roles -->
-                        <v-dialog v-model="employeeRolesDialog" max-width="500px">
-                            <v-card>
-
-                                <v-card-title>
-                                    Employee Roles
-                                </v-card-title>
-
-                                <v-card-subtitle>
-                                    Add/remove employee's roles. {{selectedWorkers}}
-                                </v-card-subtitle>
-
-                                <v-card-text>
-                                    <v-list
-                                        subheader
-                                        two-line
-                                        flat
-                                    >
-                                
-                                        <v-list-item-group
-                                        v-model="selectedWorkers"
-                                        multiple
-                                        >
-                                        <v-list-item v-for="worker in allWorkers" :key="worker.id">
-                                            <template v-slot:default="{ active, toggle }">
-                                            <v-list-item-action>
-                                                <v-checkbox
-                                                v-model="active"
-                                                color="primary"
-                                                @click="toggle"
-                                                ></v-checkbox>
-                                            </v-list-item-action>
-                                
-                                            <v-list-item-content>
-                                                <v-list-item-title>{{worker.full_name}}</v-list-item-title>
-                                            </v-list-item-content>
-                                            </template>
-                                        </v-list-item>
-                                
-                                        </v-list-item-group>
-                                    </v-list>
-                                </v-card-text>
-
-                                <v-card-actions>
-                                    <v-spacer></v-spacer>
-                                    <v-btn 
-                                        color="error" 
-                                        text 
-                                        @click="employeeRolesDialog = false"
-                                    >Cancel</v-btn>
-                                    <v-btn 
-                                        color="success" 
-                                        text 
-                                        @click="saveEmployeeRoles"
-                                    >Save</v-btn>
-                                </v-card-actions>
-                            </v-card>
-                        </v-dialog>
                     </template>
                 
                     <!-- Custom item.value slot for the color -->
                     <template v-slot:item.color="{ item }">
                         <v-chip :color="item.color" label> </v-chip>
                     </template>
+                
+                
+                
                 </v-data-table>
             </v-col>
         </v-row>
@@ -278,7 +285,7 @@ export default {
         selectedWorkers: [],
         selectedRole: undefined
 
-    }),
+    }),     // end of data
 
     computed: {
         formTitle () {
@@ -301,18 +308,6 @@ export default {
         allWorkers(){
             return this.$store.getters.organization.org_workers
         },
-
-        // swatchStyle() {
-        //     const { color, menu } = this
-        //     return {
-        //         backgroundColor: this.editedItem.color,
-        //         cursor: 'pointer',
-        //         height: '30px',
-        //         width: '30px',
-        //         borderRadius: menu ? '50%' : '4px',
-        //         transition: 'border-radius 200ms ease-in-out'
-        //     }
-        // },
     },      // end of computed
 
     watch: {
@@ -422,6 +417,7 @@ export default {
                 .then(response => {
                     console.log(response)
                     this.$store.dispatch('loadOrganization')
+
                     
                 })
                 .catch(error => {console.log(error)})
@@ -462,18 +458,21 @@ export default {
         // return: an array of objects representing each worker, each object containing a)id b)name c) cohort d) true/false if trained
         // also, launch dialog
         viewWorkers (item) {
+            // console.log("viewWorkers launched, item is: ")
+            // console.log(item)
+
             // reset arrays
             this.qualifiedWorkerArray = []          // used for track those who are qualified in role
             this.selectedWorkers = []               // used for rendering workers and tracking changes
             this.selectedRole = item
-            console.log("in viewWorkers")
+            // console.log("in viewWorkers")
             // get array of worker pk that are qualified in role
             for(let role of this.$store.getters.organization.org_roles){
                 if (role.id == item.id){
                     this.qualifiedWorkerArray = role.worker_ids
                 }
             }
-            console.log("made it past for loop for qualifiedWorkerArray")
+            // console.log("made it past for loop for qualifiedWorkerArray")
             // create array of all workers for displaying in the list
             for(let i = 0; i < this.$store.getters.organization.org_workers.length; i++){
                 let worker = this.$store.getters.organization.org_workers[i]
@@ -481,14 +480,18 @@ export default {
                     this.selectedWorkers.push(i)
                 }
              }
-            console.log("made it past for loop for selectedWorkers")
+            // console.log("made it past for loop for selectedWorkers")
             this.employeeRolesDialog = true
-            console.log("this.qualifiedWorkerArray:")
-            console.log(this.qualifiedWorkerArray)
-            console.log("this.selectedWorkers:")
-            console.log(this.selectedWorkers)
-            console.log("all workers from store")
-            console.log(this.$store.getters.organization.org_workers)
+            // console.log("this.qualifiedWorkerArray:")
+            // console.log(this.qualifiedWorkerArray)
+            // console.log("this.selectedWorkers:")
+            // console.log(this.selectedWorkers)
+            // console.log("all workers from store")
+            // console.log(this.$store.getters.organization.org_workers)
+        },
+
+        testFunction(item){
+            console.log("you clicked testFunction" + item)
         },
 
         // Save employee roles
@@ -497,25 +500,12 @@ export default {
             let workerIds = []
             let workers = this.$store.getters.organization.org_workers
             this.selectedWorkers.map(x => workerIds.push(workers[x].id))
-            
-            // // get department id
-            // let deptId;
-            // for(let dept of this.$store.getters.organization.org_departments){
-            //     if(dept.name == this.editedItem.department){
-            //         deptId = dept.id
-            //     }
-            // }
 
             // axios patch call
             axios({
                 method: 'patch',
                 url: `${this.$store.getters.endpoints.baseAPI}/roles/${this.selectedRole.id}/`,
                 data: {
-                    // name: this.selectedRole.name,
-                    // description: this.selectedRole.description,
-                    // rate: (this.selectedRole.rate == '-') ? undefined : this.selectedRole.rate,
-                    // organization: this.$store.getters.organization.id,
-                    // department: deptId,
                     worker_ids: workerIds
                 },
                 headers: {

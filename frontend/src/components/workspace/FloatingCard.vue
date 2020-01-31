@@ -296,7 +296,7 @@ export default {
         swapWorkerStart(){
             // get list of qualified, available workers for role
             this.$store.getters.organization.org_workers.map(x => {
-                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.is_active){
+                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.is_active && x.id != this.node.worker.id){
                     this.qualifiedWorkers.push(x)
                 } 
             })
@@ -442,10 +442,7 @@ export default {
                         "Assigning orignal worker to selected worker's old workstation.  Updating store."
                         console.log(response)
   
-                        // update 
-                        // this.node.worker = worker
-                        // console.log(`target node id: ${targetNode.id}`)
-                        // targetNode.worker = currentWorker
+                        // update...this is a bit of a heavy-handed approach since it causes whole workspace to flicker
                         let wsPk = this.$store.getters.workspace.id
                         this.$store.dispatch('dismountWorkspace')
 

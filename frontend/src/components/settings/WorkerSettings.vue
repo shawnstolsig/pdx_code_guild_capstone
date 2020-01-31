@@ -322,6 +322,7 @@ export default {
                         organization: this.$store.getters.organization.id,
                         department: deptId,
                         cohort: cohortId,
+                        worker_node: null,
                     },
                     headers: {
                         authorization: `Bearer ${this.$store.getters.accessToken}`

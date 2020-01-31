@@ -77,7 +77,7 @@ class NodeCreateSerializer(serializers.ModelSerializer):
     #     return instance
 
 class WorkerSerializer(serializers.ModelSerializer):
-    worker_node = NodeCreateSerializer(many=False, read_only=False)
+    worker_node = NodeCreateSerializer(many=False, read_only=False, allow_null=True)
 
     class Meta: 
         model = Worker 
