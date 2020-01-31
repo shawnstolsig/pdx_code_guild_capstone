@@ -66,7 +66,7 @@
                                 </v-list-item-action>
                                 <v-list-item-subtitle>Remove worker</v-list-item-subtitle>
                             </v-list-item>
-                            <v-list-item @click="swapWorker">
+                            <v-list-item @click="swapWorkerStart">
                                 <v-list-item-action>
                                     <v-icon>compare_arrows</v-icon>
                                 </v-list-item-action>
@@ -121,6 +121,17 @@
                     <v-card-title v-if="qualifiedWorkers.length == 0">No employees available for this role.</v-card-title>
                 </v-card>
             </v-dialog>
+            <!-- Add worker to workerstation dialog -->
+            <v-dialog v-model="swapWorkerDialog" max-width="500px">
+                <v-card>
+                    <v-list v-if="qualifiedWorkers.length > 0">
+                        <v-list-item  v-for="worker in qualifiedWorkers" :key="worker.id" @click="swapWorkerEnd(worker)">
+                            {{worker.full_name}}
+                        </v-list-item>
+                    </v-list>
+                    <v-card-title v-if="qualifiedWorkers.length == 0">No employees available to swap.</v-card-title>
+                </v-card>
+            </v-dialog>
         </v-card>
     </VueDraggableResizable>
 </template>
@@ -145,9 +156,12 @@ export default {
             height: 150,
             cardMenu: false,
             node: this.nodeProp,
+            qualifiedWorkers: [],
             // dialog: add worker
             addWorkerDialog: false,
-            qualifiedWorkers: [],
+            // dialog: swap workers
+            swapWorkerDialog: false,
+
 		}
 	},    // end data
 
@@ -235,25 +249,12 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
-
-        // INITIALIZE UNASSIGNEDWORKERS?  In loadOrganization?
-
-        // Or modify models/serializers so that you can see the related name field for what role each worker is in 
-
         addWorkerStart(){
             // get list of qualified, available workers for role
             this.$store.getters.organization.org_workers.map(x => {
-                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.worker_node == null){
-                    console.log(`${x.full_name} is trained and available`)
+                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.worker_node == null && x.is_active){
                     this.qualifiedWorkers.push(x)
-                } else {
-                    if(this.node.role.worker_ids.indexOf(x.id) == -1){
-                        console.log(`${x.full_name} is not trained`)
-                    }
-                    if(x.worker_node == null){
-                        console.log(`${x.full_name} is not available}`)
-                    }
-                }
+                } 
             })
             // show dialog
             this.addWorkerDialog = true
@@ -292,8 +293,174 @@ export default {
             // close dialog (which will trigger watch and reset qualifiedWorkers)
             this.addWorkerDialog = false
         },
-        swapWorker(){
-            alert("need swap worker implementation")
+        swapWorkerStart(){
+            // get list of qualified, available workers for role
+            this.$store.getters.organization.org_workers.map(x => {
+                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.is_active){
+                    this.qualifiedWorkers.push(x)
+                } 
+            })
+            // show dialog
+            this.swapWorkerDialog = true
+        },
+
+        // MAKE SURE THIS SWAP WORKER END FUNCTION WORKS.  
+        // Finish for case when both workers are assigned to workstation
+        // And make sure you can patch the worker.worker_node like below
+
+        swapWorkerEnd(worker){
+            console.log("worker selected for swap")
+            console.log(worker)
+            console.log("this.node")
+            console.log(this.node)
+            // Confirmation: if the target worker is not assigned...
+            if(worker.worker_node == null){
+                if(!confirm(`${worker.full_name} is currently unassigned. \nAre you sure you want to unassign ${this.node.worker.full_name} and assign ${worker.full_name} to ${this.node.name}?`)){
+                    this.swapWorkerDialog = false
+                    return
+                } else {
+
+                    // store currently assigned worker
+                    let currentlyAssignedWorkerId = this.node.worker.id
+
+                    // update backend and state: currently assigned worker
+                    axios({
+                        method: 'patch',
+                        url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${this.node.id}/`,
+                        data: {
+                            worker: worker.id
+                        },
+                        headers: {
+                            authorization: `Bearer ${this.$store.getters.accessToken}`
+                        },
+                    })
+                    .then(response => {
+                        console.log("Swapping workers: receiving into this.node from unassigned")
+                        console.log(response)
+                        // update component so that it's rendered immediately 
+                        this.node.worker = worker
+                        // update db (which will also re-render)
+                        this.$store.dispatch('loadOrganization')
+                        this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
+                    })
+                    .catch(error => {console.log(error)})
+                    
+                    // update backend and state: target worker
+                    axios({
+                        method: 'patch',
+                        url: `${this.$store.getters.endpoints.baseAPI}/workers/${currentlyAssignedWorkerId}/`,
+                        data: {
+                            worker_node: null
+                        },
+                        headers: {
+                            authorization: `Bearer ${this.$store.getters.accessToken}`
+                        },
+                    })
+                    .then(response => {
+                        "Swapping workers: sending to unassigned "
+                        console.log(response)
+                        // reload workspace to update store 
+                        this.$store.dispatch('loadOrganization')
+                        this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
+                    })
+                    .catch(error => {console.log(error)})
+                }
+            }
+            // Confirmation: if the target worker is assigned...
+            else {
+                if(!confirm(`${worker.full_name} is currently assigned to ${worker.worker_node.name}. \nAre you sure you want to send ${this.node.worker.full_name} to ${worker.worker_node.name} and assign ${worker.full_name} to ${this.node.name}?`)){
+                    this.swapWorkerDialog = false
+                    return
+                } else {
+                    // store currently assigned worker and target worker node
+                    // let currentWorker = this.node.worker
+                    let currentWorkerNodeId = this.node.id
+                    let currentWorkerId = this.node.worker.id
+                    let targetNode = worker.worker_node
+                    let targetWorkerNodeId = worker.worker_node.id
+                    let targetWorkerId = worker.id
+                    console.log(`target node id: ${targetNode.id}`)
+
+                    // the swap is a four step process, since a worker can't be assigned to two nodes at once.  unassign both workers, then reassign both.
+                    // first, unassign the current worker
+                    axios({
+                        method: 'patch',
+                        url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${currentWorkerNodeId}/`,
+                        data: {
+                            worker: null
+                        },
+                        headers: {
+                            authorization: `Bearer ${this.$store.getters.accessToken}`
+                        },
+                    })
+                    .then(response => {
+                        "Unassigning current worker"
+                        console.log(response)
+                        // second, unassign the target worker 
+                        return axios({
+                            method: 'patch',
+                            url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${targetWorkerNodeId}/`,
+                            data: {
+                                worker: null
+                            },
+                            headers: {
+                                authorization: `Bearer ${this.$store.getters.accessToken}`
+                            },
+                        })
+                    })
+                    .then(response => {
+                        "Unassigning target worker"
+                        console.log(response)
+                        // then, assign the new worker to the current workstation
+                        return axios({
+                            method: 'patch',
+                            url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${currentWorkerNodeId}/`,
+                            data: {
+                                worker: targetWorkerId
+                            },
+                            headers: {
+                                authorization: `Bearer ${this.$store.getters.accessToken}`
+                            },
+                        })
+                    })
+                    .then(response => {
+                        "Assigning new worker to selected workstation"
+                        console.log(response)
+                        // finally, assign the original worker to their new workstation
+                        return axios({
+                            method: 'patch',
+                            url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${targetWorkerNodeId}/`,
+                            data: {
+                                worker: currentWorkerId
+                            },
+                            headers: {
+                                authorization: `Bearer ${this.$store.getters.accessToken}`
+                            },
+                        })
+                    })                    
+                    .then(response => {
+                        "Assigning orignal worker to selected worker's old workstation.  Updating store."
+                        console.log(response)
+  
+                        // update 
+                        // this.node.worker = worker
+                        // console.log(`target node id: ${targetNode.id}`)
+                        // targetNode.worker = currentWorker
+                        let wsPk = this.$store.getters.workspace.id
+                        this.$store.dispatch('dismountWorkspace')
+
+                        // update backend/store 
+                        this.$store.dispatch('loadOrganization')
+                        this.$store.dispatch('loadWorkspace', {key: wsPk})
+
+                    })
+                    .catch(error => {console.log(error)})
+                }
+            }
+            
+            // close dialog (which will trigger watch and reset qualifiedWorkers)
+            this.swapWorkerDialog = false
+
         },
 	},    // end methods
 
@@ -307,13 +474,18 @@ export default {
     },
 
     watch: {
-
         // empty qualifiedWorkers whenever dialog closes
         addWorkerDialog (val){
             if(!val){
                 this.qualifiedWorkers = []
             }
-        }
+        },
+        // empty qualifiedWorkers whenever dialog closes
+        swapWorkerDialog (val){
+            if(!val){
+                this.qualifiedWorkers = []
+            }
+        },
     }
 }
 </script>

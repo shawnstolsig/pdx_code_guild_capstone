@@ -64,6 +64,18 @@ class NodeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Node
         fields = '__all__'
+
+    # def update(self, instance, validated_data):
+    #     print("validated_data for node create serializer: ")
+    #     print(validated_data)
+    #     for attr, value in validated_data.items():
+    #         if str(attr) != 'worker':
+    #             setattr(instance, attr, value)
+    #         else:
+    #             instance.worker.set(Worker.objects.get(pk=worker.id))
+    #     instance.save()
+    #     return instance
+
 class WorkerSerializer(serializers.ModelSerializer):
     worker_node = NodeCreateSerializer(many=False, read_only=False)
 
