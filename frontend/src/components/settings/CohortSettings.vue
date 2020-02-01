@@ -10,6 +10,9 @@
                         <v-list-item-content>
                             <v-list-item-title>{{cohort.name}}</v-list-item-title>
                         </v-list-item-content>
+                        <v-list-item-action>
+                            <v-chip :color="cohort.color" label></v-chip>
+                        </v-list-item-action>
                     </v-list-item>
                 </v-list-item-group>
                 <v-list-item v-if="org.org_cohorts.length == 0">
@@ -32,20 +35,42 @@
                     <v-card-subtitle class="mt-1">Please type in a name and description for your cohort.</v-card-subtitle>
                     <v-form v-model="cohortCreateFormValidity" ref="cohortCreateForm">
                         <v-card-text>
-                            <v-text-field
-                                v-model="newCohort.name"
-                                :rules="rules.name"
-                                type="text"
-                                label="Name"
-                                required
-                            ></v-text-field>
-                            <v-textarea
-                                solo
-                                v-model="newCohort.description"
-                                :rules="rules.description"
-                                label="Description"
-                                required
-                            ></v-textarea>
+                            <v-container>
+                                <v-row>
+                                    <v-col cols="6">
+                                        <v-text-field
+                                            v-model="newCohort.name"
+                                            :rules="rules.name"
+                                            type="text"
+                                            label="Name"
+                                            required
+                                        ></v-text-field>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <v-menu top nudge-bottom="105" nudge-left="16" :close-on-content-click="false">
+                                            <template v-slot:activator="{ on }">
+                                                <v-chip v-on="on" :color="newCohort.color" x-large label>Color...</v-chip>
+                                            </template>
+                                            <v-card>
+                                                <v-card-text class="pa-0">
+                                                    <v-color-picker v-model="newCohort.color" hide-inputs hide-mode-switch show-swatches />
+                                                </v-card-text>
+                                                </v-card>
+                                        </v-menu>
+                                    </v-col>
+                                </v-row>
+                                <v-row>
+                                    <v-col cols="12">
+                                        <v-textarea
+                                            solo
+                                            v-model="newCohort.description"
+                                            :rules="rules.description"
+                                            label="Description"
+                                            required
+                                        ></v-textarea>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
                         </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
@@ -98,7 +123,8 @@ export default {
         selectedCohort: undefined,
 		newCohort: {
 			name: '',
-			description: '',
+            description: '',
+            color: '#add8e6',
 		},
 	}),     // end data
 
@@ -125,7 +151,8 @@ export default {
 				data: {
 					name: this.newCohort.name,
 					description: this.newCohort.description,
-					organization: this.$store.getters.organization.id
+                    organization: this.$store.getters.organization.id,
+                    color: this.newCohort.color,
 				},
 				headers: {
 					authorization: `Bearer ${this.$store.getters.accessToken}`
@@ -139,6 +166,7 @@ export default {
                 this.newCohort = {
                     name: '',
                     description: '',
+                    color: '#add8e6',
                 }
 			})
 			.catch(error => {console.log(error)})

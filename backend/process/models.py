@@ -103,7 +103,7 @@ class Node(models.Model):
     # for rendering
     x = models.IntegerField(default=100)
     y = models.IntegerField(default=100)
-    height = models.IntegerField(default=150)
+    height = models.IntegerField(default=104)
     width = models.IntegerField(default=300)
     color = models.CharField(max_length=50, default="#FFFFFF")
     draggable = models.BooleanField(default=1)

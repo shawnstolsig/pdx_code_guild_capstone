@@ -46,8 +46,11 @@ export default new Vuex.Store({
 			name: [
 				v => !!v || 'Name is required.',
 				v => (v && v.length) <= 30 || 'Name must be less than 30 characters.',
-				v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
-			],
+				v => (v && v.length) >= 2 || 'Name must be at least 3 characters.',
+            ],
+            workstationName: [
+                v => !!v || 'Workstation name is required.',
+            ],
 			email: [
 				v => !!v || 'E-mail is required.',
 				// v => /.+@.+/.test(v) || 'E-mail must be valid.',

@@ -71,7 +71,7 @@
             </v-card>
         </v-dialog>
         
-        <!-- Change workspace dialog -->
+        <!-- Create workspace dialog -->
         <v-dialog v-model="createWorkspaceDialog" max-width="500px">
             <v-card>
                 <v-card-title>
@@ -143,7 +143,7 @@
                                     <v-text-field 
                                         v-model="newNode.name" 
                                         label="Name"
-                                        :rules="rules.name"
+                                        :rules="rules.workstationName"
                                         required
                                     ></v-text-field>
                                 </v-col>
@@ -209,7 +209,7 @@ export default {
 
     methods: {
         createNode(){
-            // get department id from string that's been selected
+            // get role id from string that's been selected
             let roleId;
             for(let role of this.$store.getters.organization.org_roles){
                 if(role.name == this.newNode.role){
@@ -304,10 +304,6 @@ export default {
             // close dialog
             this.createWorkspaceDialog = false
 		},
-		saveWorkspace(){
-			alert("implement ability to save workspace")
-        },
-
 	},		// end methods
 	
 	mounted(){

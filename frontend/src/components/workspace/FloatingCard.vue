@@ -6,12 +6,17 @@
         @dragstop="onDragStop" 
         :parent="true" 
         :draggable="node.draggable" 
+        :resizeable="node.draggable"
         :x="node.x" :y="node.y">
-        <v-card>
+        <v-card :height="node.height" :width="node.width">
             <v-toolbar dense short :color="node.role.color">
-                <v-toolbar-title>
+                <v-toolbar-title class="font-weight-bold">
                     {{node.name}}
                 </v-toolbar-title>
+                <v-spacer></v-spacer>
+                
+                    {{node.role.name}}
+                
                 <v-spacer></v-spacer>
                 <v-btn icon @click="toggleLock">
                     <v-icon>{{node.draggable ? 'lock_open' : 'lock'}}</v-icon>
@@ -54,25 +59,25 @@
                         <v-divider></v-divider>
 
                         <v-list>
-                            <v-list-item @click="addWorkerStart">
+                            <v-list-item @click="addWorkerStart" v-if="!node.worker">
                                 <v-list-item-action>
                                     <v-icon>add_circle</v-icon>
                                 </v-list-item-action>
                                 <v-list-item-subtitle>Add worker...</v-list-item-subtitle>
                             </v-list-item>
-                            <v-list-item @click="removeWorker">
+                            <v-list-item @click="removeWorker" v-if="node.worker">
                                 <v-list-item-action>
                                     <v-icon>remove_circle_outline</v-icon>
                                 </v-list-item-action>
                                 <v-list-item-subtitle>Remove worker</v-list-item-subtitle>
                             </v-list-item>
-                            <v-list-item @click="swapWorkerStart">
+                            <v-list-item @click="swapWorkerStart" v-if="node.worker">
                                 <v-list-item-action>
                                     <v-icon>compare_arrows</v-icon>
                                 </v-list-item-action>
                                 <v-list-item-subtitle>Swap worker...</v-list-item-subtitle>
                             </v-list-item>
-                            <v-list-item @click="editWorkstation">
+                            <v-list-item @click="editNodeDialog = true">
                                 <v-list-item-action>
                                     <v-icon>settings</v-icon>
                                 </v-list-item-action>
@@ -83,28 +88,22 @@
                 </v-menu>
             </v-toolbar>
 
-            <v-card-text>
-                <v-list dense>
+            <v-card-text  class="pa-0">
+                <v-list dense  class="pa-0">
                     <!-- if no assigned worker, leave empty -->
                     <v-list-item v-if="!node.worker">
-                        <v-list-item-title>No employee assigned</v-list-item-title>
-                        {{node.role.name}}
+                        <v-list-item-title class="subtitle-1 ma-5" > (No employee assigned)</v-list-item-title>
                     </v-list-item>
 
                     <!-- if worker assigned, load name/cohort/colors -->
                     <v-list-item v-if="node.worker">
-                        <v-list-item-avatar :color="node.worker.cohort.color"></v-list-item-avatar>
-                        <v-list-item-content>
-                            <v-list-item-title>
-                                <strong>{{node.role.name}}</strong>
-                            </v-list-item-title>
-                            <v-list-item-subtitle>
+                        <v-list-item-avatar :color="workerColor"></v-list-item-avatar>
+                        <v-list-item-content >
+                            <v-list-item-title class="title">
                                 {{node.worker.full_name}}
-                            </v-list-item-subtitle>   
+                            </v-list-item-title>
                         </v-list-item-content>
-                        <v-list-item-icon>
-                            
-                        </v-list-item-icon>
+
                     </v-list-item>
                 </v-list>
             </v-card-text>
@@ -130,6 +129,58 @@
                         </v-list-item>
                     </v-list>
                     <v-card-title v-if="qualifiedWorkers.length == 0">No employees available to swap.</v-card-title>
+                </v-card>
+            </v-dialog>
+            <!-- Edit node dialog -->
+            <v-dialog v-model="editNodeDialog" max-width="500px">
+                <v-card>
+                    <v-card-title>
+                        <span>
+                        Edit workstation
+                        </span>
+                        <v-spacer></v-spacer>
+                        <v-btn icon @click="deleteNode">
+                            <v-icon>delete</v-icon>
+                        </v-btn>
+                    </v-card-title>
+                    <v-card-text>
+                        <v-container>
+                            <v-form v-model="editNodeFormValid">
+                                <v-row>
+                                    <v-col cols="6">
+                                        <v-text-field 
+                                            v-model="node.name" 
+                                            label="Name"
+                                            :rules="rules.workstationName"
+                                            required
+                                        ></v-text-field>
+                                    </v-col>
+                                    <v-col cols="6">
+                                        <v-select 
+                                            :items="roles" 
+                                            label="Role" 
+                                            v-model="node.role"
+                                            required
+                                        ></v-select>
+                                    </v-col>
+                                </v-row>
+                            </v-form>
+                        </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn 
+                            color="error" 
+                            text 
+                            @click="editNodeDialog = false"
+                        >Cancel</v-btn>
+                        <v-btn 
+                            color="success" 
+                            text 
+                            :disabled="!(editNodeFormValid && !!node.role)" 
+                            @click="editNode"
+                        >Save</v-btn>
+                    </v-card-actions>
                 </v-card>
             </v-dialog>
         </v-card>
@@ -161,6 +212,10 @@ export default {
             addWorkerDialog: false,
             // dialog: swap workers
             swapWorkerDialog: false,
+            // dialog: edit workstation
+            editNodeDialog: false,
+            editNodeFormValid: false,
+
 
 		}
 	},    // end data
@@ -217,8 +272,69 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
-        editWorkstation(){
-            alert("need editWorkstation implementation")
+        editNode(){
+            // get role id from string that's been selected
+            let roleId;
+            for(let role of this.$store.getters.organization.org_roles){
+                if(role.name == this.node.role){
+                    roleId = role.id
+                }
+            }
+            // post new db to db
+            axios({
+                method: 'patch',
+                url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${this.node.id}/`,
+                data: {
+                    name: this.node.name,
+                    role: roleId,
+                    workspace: this.$store.getters.workspace.id,
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log(response)
+
+                // update...this is a bit of a heavy-handed approach since it causes whole workspace to flicker
+                let wsPk = this.$store.getters.workspace.id
+                this.$store.dispatch('dismountWorkspace')
+
+                // update backend/store 
+                this.$store.dispatch('loadOrganization')
+                this.$store.dispatch('loadWorkspace', {key: wsPk})
+
+                // close dialog
+                this.editNodeDialog = false
+            })
+            .catch(error => {console.log(error)})
+        },
+        deleteNode(){
+            if(confirm(`Are you sure you want to delete ${this.node.name}?`)){
+                console.log("delte node now")
+                
+                axios({
+                    method: 'delete',
+                    url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${this.node.id}/`,
+                    headers: {
+                        authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+                })
+                .then(response => {
+                    console.log("Node deleted")
+                    this.editNodeDialog = false
+                    console.log(response)
+
+                     // update...this is a bit of a heavy-handed approach since it causes whole workspace to flicker
+                    let wsPk = this.$store.getters.workspace.id
+                    this.$store.dispatch('dismountWorkspace')
+
+                    // update backend/store 
+                    this.$store.dispatch('loadOrganization')
+                    this.$store.dispatch('loadWorkspace', {key: wsPk})
+                })
+                .catch(error => {console.log(error)})
+            }
         },
         removeWorker(){
             // Confirm worker removal
@@ -296,18 +412,13 @@ export default {
         swapWorkerStart(){
             // get list of qualified, available workers for role
             this.$store.getters.organization.org_workers.map(x => {
-                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.is_active && x.id != this.node.worker.id){
+                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.is_active && (this.node.worker == null || x.id != this.node.worker.id)){
                     this.qualifiedWorkers.push(x)
                 } 
             })
             // show dialog
             this.swapWorkerDialog = true
         },
-
-        // MAKE SURE THIS SWAP WORKER END FUNCTION WORKS.  
-        // Finish for case when both workers are assigned to workstation
-        // And make sure you can patch the worker.worker_node like below
-
         swapWorkerEnd(worker){
             console.log("worker selected for swap")
             console.log(worker)
@@ -468,6 +579,20 @@ export default {
         rules(){
                 return this.$store.getters.formRules
         },
+        roles(){
+            let returnArray = []
+            this.$store.getters.organization.org_roles.map(x => returnArray.push(x.name))
+            return returnArray
+        },
+        workerColor(){
+            let cohorts = this.$store.getters.organization.org_cohorts
+            for(let cohort of cohorts){
+                if(cohort.id == this.node.worker.cohort){
+                    return cohort.color
+                }
+            }
+            return "#FFFFFF"
+        }
     },
 
     watch: {
