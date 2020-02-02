@@ -20,7 +20,8 @@
                         {{ org.name }}: {{workspace.name}}
                     </v-chip>
                 </span>
-            <v-toolbar-items >
+
+            <v-toolbar-items v-if="!kioskMode">
                 <v-btn v-if="authenticated" text to="/" class="mr-2">
                     <span>Dashboard</span>
                     <v-icon right >home</v-icon>
@@ -28,6 +29,10 @@
                 <v-btn v-if="authenticated" text to="/settings" class="mr-2">
                     <span>Settings</span>
                     <v-icon right >settings</v-icon>
+                </v-btn>
+                <v-btn v-if="authenticated" text to="/kiosk" class="mr-2">
+                    <span>Kiosk</span>
+                    <v-icon right >desktop_windows</v-icon>
                 </v-btn>
                 <v-btn text to="/jwttest" class="mr-2">
                     <span>Test JWT</span>
@@ -81,6 +86,9 @@ export default {
         },
         workspace(){
             return this.$store.getters.workspace
+        },
+        kioskMode(){
+            return this.$store.getters.kioskMode
         }
     }
 

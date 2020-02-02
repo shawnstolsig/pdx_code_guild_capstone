@@ -30,6 +30,7 @@ export default new Vuex.Store({
         organization: {},
         workspace: {},
         unassignedWorkers: [],
+        kioskMode: false,
         jwt: {
             access: localStorage.getItem('accessToken'),
             refresh: localStorage.getItem('refreshToken'),
@@ -69,8 +70,7 @@ export default new Vuex.Store({
                 v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
             ],
             code: [ v => !!v || 'Please input Organization code.' ],
-        }
-
+        },
     },      // end Vuex state
 
     getters: {
@@ -83,7 +83,8 @@ export default new Vuex.Store({
         organization(state) { return state.organization },
         workspace(state){return state.workspace},
         formRules(state){ return state.formRules },
-        unassignedWorkers(state){ return state.unassignedWorkers }
+        unassignedWorkers(state){ return state.unassignedWorkers },
+        kioskMode(state){ return state.kioskMode }
     },    // end Vuex getters
 
     mutations: {
@@ -203,6 +204,11 @@ export default new Vuex.Store({
         // Remove worker from unassignedWorkers
         removeWorkerFromUnassignedWorkers(state, worker){
             state.unassignedWorkers.splice(state.unassignedWorkers.indexOf(worker),1)
+        },
+
+        // Enable kiosk mode
+        setKioskMode(state, modeFlag){
+            state.kioskMode = modeFlag
         }
 
     },  // end Vuex mutations
@@ -570,6 +576,11 @@ export default new Vuex.Store({
                 this.commit('addWorkerToUnassignedWorkers', laborMoveObj.remove)
             }
         },
+
+        // Action for setting/removing kiosk mode
+        setKioskMode(context, flag){
+            this.commit('setKoskMode', flag)
+        }
 
     },    // end Vuex actions
     modules: {
