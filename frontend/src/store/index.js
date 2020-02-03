@@ -579,7 +579,7 @@ export default new Vuex.Store({
 
         // Action for setting/removing kiosk mode
         setKioskMode(context, flag){
-            this.commit('setKoskMode', flag)
+            this.commit('setKioskMode', flag)
         }
 
     },    // end Vuex actions

@@ -1,8 +1,10 @@
 <template>
-    <div>
+    <v-container class="fill-height" fluid>
         <v-speed-dial
             v-model="fab"
-           
+            bottom
+            right
+
             direction="top"
             transition="slide-y-reverse-transition"
             >
@@ -22,14 +24,14 @@
                 <span>Create Workstation</span>
             </v-tooltip>
 
-            <!-- <v-tooltip right>
+            <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn fab dark small color="indigo" v-on="on" @click="saveWorkspace">
-                        <v-icon>save</v-icon>
+                    <v-btn fab dark small color="indigo" v-on="on" @click="navDrawer = !navDrawer">
+                        <v-icon>supervisor_account</v-icon>
                     </v-btn>
                 </template>
-                <span>Save Workspace</span>
-            </v-tooltip> -->
+                <span>Toggle Workforce Toolbar</span>
+            </v-tooltip>
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
@@ -176,7 +178,89 @@
             </v-card>
         </v-dialog>
 
-    </div>
+				<!-- Workforce navigation drawer -->
+		<v-navigation-drawer
+			v-model="navDrawer"
+			app
+			clipped
+			right
+			>
+			<v-list>
+                <v-list-item>
+                    <v-list-item-title class="title">
+                        Unassigned Workers
+                    </v-list-item-title>
+                </v-list-item>
+                <v-divider></v-divider>
+                <!-- Cohorts Nested List -->
+                <v-list-group
+                    prepend-icon="account_circle"
+                >
+                    <template v-slot:activator>
+                    <v-list-item-title>Cohorts</v-list-item-title>
+                    </template>
+
+                    <v-list-group
+                    no-action
+                    sub-group
+                    v-for="cohort in org.org_cohorts"
+                    :key="cohort.id"
+                    >
+                        <template v-slot:activator>
+                            <v-list-item-content>
+                            <v-list-item-title>{{`${cohort.name} (${cohortUnassigned(cohort.id).length})`}}</v-list-item-title>
+                            </v-list-item-content>
+                        </template>
+
+                        <v-list-item
+                            v-for="worker in cohortUnassigned(cohort.id)"
+                            :key="worker.id"
+                            link
+                        >
+                            <v-list-item-title v-text="worker.full_name"></v-list-item-title>
+                            <!-- <v-list-item-icon>
+                            <v-icon v-text="admin[1]"></v-icon>
+                            </v-list-item-icon> -->
+                        </v-list-item>
+                    </v-list-group>
+
+                </v-list-group>
+                
+                <!-- Roles Nested List -->
+                <v-list-group
+                    prepend-icon="account_circle"
+                >
+                    <template v-slot:activator>
+                    <v-list-item-title>Roles</v-list-item-title>
+                    </template>
+
+                    <v-list-group
+                    sub-group
+                    no-action
+                    v-for="role in org.org_roles"
+                    :key="role.id"
+                    >
+                        <template v-slot:activator>
+                            <v-list-item-content>
+                            <v-list-item-title>{{`${role.name} (${roleUnassigned(role).length})`}}</v-list-item-title>
+                            </v-list-item-content>
+                        </template>
+                        <v-list-item
+                            v-for="worker in roleUnassigned(role)"
+                            :key="worker.id"
+                            
+                        >
+                            <v-list-item-title v-text="worker.full_name"></v-list-item-title>
+                            <!-- <v-list-item-action>
+                            <v-icon v-text="crud[1]"></v-icon>
+                            </v-list-item-action> -->
+                        </v-list-item>
+                    </v-list-group>
+                </v-list-group>
+			</v-list>
+		</v-navigation-drawer>
+
+    </v-container>
 </template>
 <script>
 import axios from 'axios'
@@ -201,6 +285,9 @@ export default {
             name: '',
             role: '',
         },
+        // for nav drawer
+        navDrawer: true,
+
 
     }),		// end data
     components: {
@@ -303,7 +390,27 @@ export default {
 
             // close dialog
             this.createWorkspaceDialog = false
-		},
+        },
+        cohortUnassigned(cohortId){
+            // get cohort workers
+            let returnArr = [];
+            this.$store.getters.organization.org_workers.map(x => {
+                if(x.worker_node == null && x.cohort == cohortId){
+                    returnArr.push(x)
+                }
+            })
+            return returnArr
+        },
+        roleUnassigned(role){
+            // get cohort workers
+            let returnArr = [];
+            this.$store.getters.organization.org_workers.map(x => {
+                if(x.worker_node == null && (role.worker_ids.indexOf(x.id) != -1)){
+                    returnArr.push(x)
+                }
+            })
+            return returnArr
+        },
 	},		// end methods
 	
 	mounted(){
@@ -329,6 +436,8 @@ export default {
         currentWorkspaceId(){
             return this.$store.getters.workspace.id
         },
+        
+        
 	},     // end computed
 
 

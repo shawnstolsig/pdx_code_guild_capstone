@@ -41,7 +41,7 @@ const routes = [
 		name: 'kiosk',
 		component: Kiosk,
 		beforeEnter (to, from, next){
-			
+			store.dispatch('setKioskMode', true)
 			next()
 		}
 	},

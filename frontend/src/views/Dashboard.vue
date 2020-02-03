@@ -1,5 +1,6 @@
 <template>
-	<v-container fluid class="fill-height">
+	<v-card class="fill-height" fluid color='grey'>
+				
 		<FloatingCard v-for="node in workspace.workspace_nodes" :key="node.id" :nodeProp="node"></FloatingCard>
 		<FloatingButton />		
 				<!-- Create workspace dialog -->
@@ -59,7 +60,8 @@
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
-	</v-container>
+
+	</v-card>
 </template>
 
 <script>

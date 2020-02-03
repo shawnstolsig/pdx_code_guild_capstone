@@ -1,7 +1,7 @@
 <template>
     <nav>
 
-        <v-app-bar app>
+        <v-app-bar app clipped-right>
             
             <v-toolbar-title class="text-uppercase ">
                 <span class="font-weight-light text-lowercase">shift</span>

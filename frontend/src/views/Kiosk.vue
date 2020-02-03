@@ -107,6 +107,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 export default {
     data(){
         return {
@@ -119,9 +120,6 @@ export default {
         }
     },      // end data
     methods: {
-        showWorkstation(){
-
-        }
     },      // end methods
     watch: {
         input(value){
@@ -135,57 +133,71 @@ export default {
             } 
             // process input...
             else {
-                for(let worker of this.$store.getters.organization.org_workers){
 
-                    // if worker is found in db
-                    if(worker.full_name == value){
-                        this.message = ''
+                axios({
+                    method: 'get',
+                    url: `${this.$store.getters.endpoints.baseAPI}/organizationsall/${this.$store.getters.user.organization}`,
+                    headers: {
+                        authorization: `Bearer ${this.$store.getters.accessToken}`
+                    }
+                })
+                .then(response => {
+                    console.log(response)
 
-                        // if worker is not assigned
-                        if(worker.worker_node == null){
-                            this.message = "Unassigned, please see your manager."
+                    for(let worker of response.data.org_workers){
+
+                        // if worker is found in db
+                        if(worker.full_name == value){
+                            this.message = ''
+
+                            // if worker is not assigned
+                            if(worker.worker_node == null){
+                                this.message = "Unassigned, please see your manager."
+                            }
+                            // if worker is assigned
+                            else {
+                                // set workstation
+                                this.workstation = worker.worker_node.name
+
+                                // set department
+                                for(let dept of response.data.org_departments){
+                                    if(dept.id == worker.department){
+                                        this.department = dept.name
+                                    }
+                                }
+                                // set work area
+                                for(let a of response.data.org_workspaces){
+                                    if(a.id == worker.worker_node.workspace){
+                                        this.area = a.name
+                                    }
+                                }
+                                // set role
+                                for(let r of response.data.org_roles){
+                                    if(r.id == worker.worker_node.role){
+                                        this.role = r.name
+                                    }
+                                }
+                            }
+
+                            break
                         }
-                        // if worker is assigned
+                        // if worker is not found in db
                         else {
-                            // set workstation
-                            this.workstation = worker.worker_node.name
+                            this.message = 'Badge not recognized, please see HR.'
+                            this.workstation = ''
+                            this.department = ''
+                            this.role = ''
+                            this.area = ''
+                        }   
+                    }
 
-                            // set department
-                            for(let dept of this.$store.getters.organization.org_departments){
-                                if(dept.id == worker.department){
-                                    this.department = dept.name
-                                }
-                            }
-                            // set work area
-                            for(let a of this.$store.getters.organization.org_workspaces){
-                                if(a.id == worker.worker_node.workspace){
-                                    this.area = a.name
-                                }
-                            }
-                            // set role
-                            for(let r of this.$store.getters.organization.org_roles){
-                                if(r.id == worker.worker_node.role){
-                                    this.role = r.name
-                                }
-                            }
-                        }
-
-                        break
-                    } 
-                    // if worker is not found in db
-                    else {
-                        this.message = 'Badge not recognized, please see HR.'
-                        this.workstation = ''
-                        this.department = ''
-                        this.role = ''
-                        this.area = ''
-                    }        
-                    // clear input field for next employee
-                    setTimeout(() => {
-                        this.input = ''
-                    }, 5000)
-                    
-                }
+                })
+                .catch(error => {console.log(error)})  
+                             
+                // clear input field for next employee
+                setTimeout(() => {
+                    this.input = ''
+                }, 5000) 
             }
         }
     },      // end watch
