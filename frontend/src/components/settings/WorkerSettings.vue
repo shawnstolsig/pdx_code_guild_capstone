@@ -248,7 +248,7 @@ export default {
                     this.$store.dispatch('loadOrganization')
                     setTimeout(() => {
                         this.initialize()
-                    }, 300)
+                    }, 500)
                     
                 })
                 .catch(error => {console.log(error)})
@@ -261,7 +261,8 @@ export default {
                 this.editedItem = Object.assign({}, this.defaultItem)
                 this.editedIndex = -1
                 this.initialize()
-            }, 300)
+            }, 500)
+
         },
 
         save () {
@@ -304,7 +305,7 @@ export default {
                 .then(response => {
                     console.log(response)
                     this.$store.dispatch('loadOrganization')
-                    
+                    this.close()
                 })
                 .catch(error => {console.log(error)})
 
@@ -331,11 +332,11 @@ export default {
                 .then(response => {
                     console.log(response)
                     this.$store.dispatch('loadOrganization')
-                    
+                    this.close()
                 })
                 .catch(error => {console.log(error)})
             }
-            this.close()
+            
         },
     },      // end of methods
 }

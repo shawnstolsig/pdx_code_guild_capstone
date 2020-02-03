@@ -380,8 +380,14 @@ export default {
             setTimeout(() => {
                 this.editedItem = Object.assign({}, this.defaultItem)
                 this.editedIndex = -1
-                this.initialize()
+                this.$store.dispatch('loadOrganization')
             }, 300)
+
+            setTimeout(() => {
+                this.initialize()
+            }, 600)
+
+
         },
 
         saveRole () {
@@ -417,7 +423,9 @@ export default {
                 .then(response => {
                     console.log(response)
                     this.$store.dispatch('loadOrganization')
-
+                    setTimeout(() => {
+                        this.initialize()
+                    }, 300)
                     
                 })
                 .catch(error => {console.log(error)})
