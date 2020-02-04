@@ -77,7 +77,8 @@ class Zone(models.Model):
     height = models.IntegerField(default=500)
     width = models.IntegerField(default=500)
     color = models.CharField(max_length=50, default="#FFFFFF")
-  
+    draggable = models.BooleanField(default=1)
+
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_zones")
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name="dept_zones")
@@ -108,6 +109,7 @@ class Node(models.Model):
     width = models.IntegerField(default=300)
     color = models.CharField(max_length=50, default="#FFFFFF")
     draggable = models.BooleanField(default=1)
+    is_active = models.BooleanField(default=1)
   
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_nodes")

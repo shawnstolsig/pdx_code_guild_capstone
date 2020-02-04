@@ -1,8 +1,7 @@
 <template>
-	<v-container class="fill-height" fluid color='grey'>
-				
-		<FloatingZone v-for="zone in workspace.workspace_zones" :key="zone.id" :zoneProp="zone"></FloatingZone>
-		<FloatingCard v-for="node in workspace.workspace_nodes" :key="node.id" :nodeProp="node"></FloatingCard>
+	<v-container class="fill-height" fluid color='red'>
+		<FloatingZone v-for="zone in workspace.workspace_zones" :key="'zone'+zone.id" :zoneProp="zone"></FloatingZone>
+		<FloatingCard v-for="node in workspace.workspace_nodes" :key="'node'+node.id" :nodeProp="node"></FloatingCard>
 		<FloatingButton />		
 
 				<!-- Create workspace dialog -->
@@ -70,6 +69,7 @@
 import FloatingButton from '@/components/workspace/FloatingButton.vue'
 import FloatingCard from '@/components/workspace/FloatingCard.vue'
 import FloatingZone from '@/components/workspace/FloatingZone.vue'
+
 import axios from 'axios'
 // import VueDraggableResizable from 'vue-draggable-resizable'
 
@@ -93,17 +93,6 @@ export default {
 				description: '',
 				department: '',
 			},
-			// testZones: [
-			// 	{	
-			// 		id: 57,
-			// 		width: 300,
-            // 		height: 150,
-            // 		x: 100,
-            // 		y: 100,
-			// 		z: '999',	
-			// 		draggable: true,
-			// 	}
-			// ],
 		}
 	},    // end data
 

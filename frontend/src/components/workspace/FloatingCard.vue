@@ -6,7 +6,7 @@
         @dragstop="onDragStop" 
         @resizestop="onResizestop"
         class-name="my-node"
-        :parent="true" 
+        :parent="false" 
         :draggable="node.draggable" 
         :resizable="node.draggable"
         :x="node.x" :y="node.y">

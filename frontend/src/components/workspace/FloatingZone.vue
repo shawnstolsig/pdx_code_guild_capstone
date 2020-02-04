@@ -9,11 +9,74 @@
         class-name="my-zone"
         :parent="false" 
         :draggable="zone.draggable" 
+        :resizable="zone.draggable"
         :x="zone.x" :y="zone.y"
         :z="zone.z">
-        <div>
-                {{zone.name}}
-        </div>
+        <v-card color="transparent" :width="zone.width" :height="zone.height" flat>
+            
+            <v-toolbar dense short flat color="transparent">
+                
+                <v-toolbar-title class="font-weight-bold">
+                    <span>
+                        
+                        <!-- Popup menu for each workstation -->
+                        <v-menu
+                            v-model="zoneMenu"
+                            bottom
+                            right
+                            transition="scale-transition"
+                            origin="top left"
+                            >
+                            <template v-slot:activator="{ on }">
+                                <v-btn icon v-on="on">
+                                    <v-icon>more_vert</v-icon>
+                                </v-btn>
+                            </template>
+
+                            <v-card >
+                                <v-list>
+                                    <v-list-item>
+
+                                        <v-list-item-content>
+                                            <v-list-item-title>{{zone.name}}</v-list-item-title>
+                                        </v-list-item-content>
+
+                                        <v-list-item-action>
+                                            <v-btn icon @click="zoneMenu = false">
+                                                <v-icon>mdi-close-circle</v-icon>
+                                            </v-btn>
+                                        </v-list-item-action>
+                                    </v-list-item>
+                                </v-list>
+
+                                <v-divider></v-divider>
+
+                                <v-list>
+                                    <v-list-item @click="toggleLock">
+                                        <v-list-item-action>
+                                            <v-icon>{{zone.draggable ? 'lock' : 'lock_open'}}</v-icon>
+                                        </v-list-item-action>
+                                        <v-list-item-subtitle v-if="zone.draggable">Lock Zone</v-list-item-subtitle>
+                                        <v-list-item-subtitle v-if="!zone.draggable">Unlock Zone</v-list-item-subtitle>
+                                    </v-list-item>
+                                    <v-list-item @click="deleteZone">
+                                        <v-list-item-action>
+                                            <v-icon>delete</v-icon>
+                                        </v-list-item-action>
+                                        <v-list-item-subtitle>Delete Zone</v-list-item-subtitle>
+                                    </v-list-item>
+                                </v-list>
+                            </v-card>
+                        </v-menu>
+                    </span>
+                    {{zone.name}}
+                </v-toolbar-title>
+                
+                
+
+                
+            </v-toolbar>
+        </v-card>
     </VueDraggableResizable>
 </template>
 <script>
@@ -33,6 +96,7 @@ export default {
 		return {
             // properties of zone
             zone: this.zoneProp,
+            zoneMenu: false,
 		}
 	},    // end data
 
@@ -94,14 +158,14 @@ export default {
         },
         toggleLock(){
             // toggle draggable
-            this.node.draggable = !this.node.draggable
+            this.zone.draggable = !this.zone.draggable
 
             // write status to db
             axios({
                 method: 'patch',
-                url: `${this.$store.getters.endpoints.baseAPI}/nodes/${this.zone.id}/`,
+                url: `${this.$store.getters.endpoints.baseAPI}/zones/${this.zone.id}/`,
                 data: {
-                    draggable: this.node.draggable
+                    draggable: this.zone.draggable
                 },
                 headers: {
                     authorization: `Bearer ${this.$store.getters.accessToken}`
@@ -112,6 +176,32 @@ export default {
                 console.log(response)
             })
             .catch(error => {console.log(error)})
+        },
+        deleteZone(){
+            if(confirm(`Are you sure you want to delete ${this.zone.name}?`)){
+                console.log("deleting zone now")
+                
+                axios({
+                    method: 'delete',
+                    url: `${this.$store.getters.endpoints.baseAPI}/zones/${this.zone.id}/`,
+                    headers: {
+                        authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+                })
+                .then(response => {
+                    console.log("Zone deleted")
+                    console.log(response)
+
+                     // update...this is a bit of a heavy-handed approach since it causes whole workspace to flicker
+                    let wsPk = this.$store.getters.workspace.id
+                    this.$store.dispatch('dismountWorkspace')
+
+                    // update backend/store 
+                    this.$store.dispatch('loadOrganization')
+                    this.$store.dispatch('loadWorkspace', {key: wsPk})
+                })
+                .catch(error => {console.log(error)})
+            }
         },
 
 	},    // end methods
@@ -135,7 +225,7 @@ export default {
 <style>
 
 .my-zone {
-    border: solid red 3px 
+    border: solid black 3px 
 }
 
 
