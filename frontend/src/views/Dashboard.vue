@@ -1,7 +1,7 @@
 <template>
 	<v-container class="fill-height" fluid color='grey'>
 				
-		<FloatingZone v-for="zone in testZones" :key="zone.id" :zoneProp="zone"></FloatingZone>
+		<FloatingZone v-for="zone in workspace.workspace_zones" :key="zone.id" :zoneProp="zone"></FloatingZone>
 		<FloatingCard v-for="node in workspace.workspace_nodes" :key="node.id" :nodeProp="node"></FloatingCard>
 		<FloatingButton />		
 
@@ -93,17 +93,17 @@ export default {
 				description: '',
 				department: '',
 			},
-			testZones: [
-				{	
-					id: 57,
-					width: 300,
-            		height: 150,
-            		x: 100,
-            		y: 100,
-					z: '999',	
-					draggable: true,
-				}
-			],
+			// testZones: [
+			// 	{	
+			// 		id: 57,
+			// 		width: 300,
+            // 		height: 150,
+            // 		x: 100,
+            // 		y: 100,
+			// 		z: '999',	
+			// 		draggable: true,
+			// 	}
+			// ],
 		}
 	},    // end data
 

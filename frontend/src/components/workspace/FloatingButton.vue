@@ -9,7 +9,7 @@
             transition="slide-y-reverse-transition"
             >
             <template v-slot:activator>
-                <v-btn v-model="fab" color="blue darken-2" dark fab>
+                <v-btn v-model="fab" color="#FF0000" dark fab>
                     <v-icon v-if="fab">mdi-close</v-icon>
                     <v-icon v-else>dashboard</v-icon>
                 </v-btn>
@@ -17,7 +17,7 @@
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn fab dark small color="green" v-on="on" @click="createNodeDialog = true">
+                    <v-btn fab dark small color="#ff7f00" v-on="on" @click="createNodeDialog = true">
                         <v-icon>mdi-pencil</v-icon>
                     </v-btn>
                 </template>
@@ -26,16 +26,25 @@
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn fab dark small color="indigo" v-on="on" @click="navDrawer = !navDrawer">
-                        <v-icon>vertical_split</v-icon>
+                    <v-btn fab dark small color="#228b22" v-on="on" @click="createZoneDialog = true">
+                        <v-icon>tab_unselected</v-icon>
                     </v-btn>
                 </template>
-                <span>Toggle Workforce Toolbar</span>
+                <span>Create Zone</span>
             </v-tooltip>
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn fab dark small color="red darken-2" v-on="on" @click="changeWorkspaceDialog = true">
+                    <v-btn fab dark small color="#0000FF"  v-on="on" @click="navDrawer = !navDrawer">
+                        <v-icon>vertical_split</v-icon>
+                    </v-btn>
+                </template>
+                <span>Toggle Sidebar</span>
+            </v-tooltip>
+
+            <v-tooltip right>
+                <template v-slot:activator="{ on }">
+                    <v-btn fab dark small color="#4B0082" v-on="on" @click="changeWorkspaceDialog = true">
                         <v-icon>view_carousel</v-icon>
                     </v-btn>
                 </template>
@@ -44,7 +53,7 @@
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn fab dark small color="orange darken-2" v-on="on" @click="createWorkspaceDialog = true">
+                    <v-btn fab dark small color="#9400D3" v-on="on" @click="createWorkspaceDialog = true">
                         <v-icon>mdi-plus</v-icon>
                     </v-btn>
                 </template>
@@ -173,6 +182,45 @@
                         text 
                         :disabled="!(createNodeFormValid && !!newNode.role)" 
                         @click="createNode"
+                    >Save</v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!-- Create zone dialog -->
+        <v-dialog v-model="createZoneDialog" max-width="500px">
+            <v-card>
+                <v-card-title>
+                    Create a zone
+                </v-card-title>
+                <v-card-text>
+                    <v-container>
+                        <v-form v-model="createZoneFormValid">
+                            <v-row>
+                                <v-col cols="6">
+                                    <v-text-field 
+                                        v-model="newZone.name" 
+                                        label="Name"
+                                        :rules="rules.workstationName"
+                                        required
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                        </v-form>
+                    </v-container>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn 
+                        color="error" 
+                        text 
+                        @click="createZoneDialog = false"
+                    >Cancel</v-btn>
+                    <v-btn 
+                        color="success" 
+                        text 
+                        :disabled="!(createZoneFormValid)" 
+                        @click="createZone"
                     >Save</v-btn>
                 </v-card-actions>
             </v-card>
@@ -330,11 +378,17 @@ export default {
             name: '',
             role: '',
         },
+        // for creating zone
+        createZoneDialog: false,
+        createZoneFormValid: false,
+        newZone: {
+            name: '',
+        },
         // for nav drawer
         navDrawer: true,
         activeCohorts: [1,2],
-
     }),		// end data
+
     components: {
 
     },
@@ -385,6 +439,43 @@ export default {
             .catch(error => {console.log(error)})
 
             this.createNodeDialog = false
+        },
+        createZone(){
+
+            // post new db to db
+            axios({
+                method: 'post',
+                url: `${this.$store.getters.endpoints.baseAPI}/zones/`,
+                data: {
+                    name: this.newZone.name,
+                    organization: this.$store.getters.organization.id,
+                    workspace: this.$store.getters.workspace.id,
+                    department: this.$store.getters.workspace.department,
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log(response)
+
+                // reload organization
+                this.$store.dispatch('loadOrganization')
+                
+                // automatically reload workspace 
+                setTimeout(() => {
+                    this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
+                }, 300)
+    
+                // reset newWorkspace (mainly for the form)
+                this.newZone = {
+                    name: '',
+                }
+
+            })
+            .catch(error => {console.log(error)})
+
+            this.createZoneDialog = false
         },
         switchWorkspace(workspaceIndex){
             this.$store.dispatch('loadWorkspace', {index: workspaceIndex})

@@ -68,20 +68,21 @@ class Zone(models.Model):
 
     # attributes
     name = models.CharField(max_length=50)
-    description = models.TextField(null=True)
-    volume = models.IntegerField(null=True)
+    description = models.TextField(null=True, blank=True)
+    volume = models.IntegerField(null=True, blank=True)
     # for rendering
     x = models.IntegerField(default=100)
     y = models.IntegerField(default=100)
+    z = models.IntegerField(default=0)
     height = models.IntegerField(default=500)
     width = models.IntegerField(default=500)
     color = models.CharField(max_length=50, default="#FFFFFF")
   
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_zones")
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, related_name="dept_zones")
-    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="workspace_zones")
-    svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name="dept_zones")
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="workspace_zones", null=True, blank=True)
+    svg = models.OneToOneField(SVGElement, on_delete=models.SET_NULL, null=True, blank=True)
 
     # timestamps
     date_created = models.DateTimeField(auto_now_add=True)

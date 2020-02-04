@@ -4,9 +4,11 @@
         @dragging="onDrag" 
         @resizing="onResize" 
         @dragstop="onDragStop" 
+        @resizestop="onResizestop"
+        class-name="my-node"
         :parent="true" 
         :draggable="node.draggable" 
-        :resizeable="node.draggable"
+        :resizable="node.draggable"
         :x="node.x" :y="node.y">
         <v-card :height="node.height" :width="node.width">
             <v-toolbar dense short :color="node.role.color">
@@ -222,15 +224,15 @@ export default {
 
     methods: {
 		onResize: function (x, y, width, height) {
-			this.x = x
-			this.y = y
-			this.width = width
-			this.height = height
+			this.node.x = x
+			this.node.y = y
+			this.node.width = width
+			this.node.height = height
 		},
 		onDrag: function (x, y) {
             // give to the card on the spot
-            this.x = x
-            this.y = y
+            this.node.x = x
+            this.node.y = y
         },
         onDragStop(x,y){
             // write new position to db
@@ -247,6 +249,27 @@ export default {
             })
             .then(response => {
                 console.log("Position written to db")
+                console.log(response)
+            })
+            .catch(error => {console.log(error)})
+        },
+        onResizestop(x,y,width,height){
+            // write new position to db
+            axios({
+                method: 'patch',
+                url: `${this.$store.getters.endpoints.baseAPI}/nodes/${this.node.id}/`,
+                data: {
+                    x: x,
+                    y: y,
+                    width: width,
+                    height: height
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log("Zone position written to db after resize")
                 console.log(response)
             })
             .catch(error => {console.log(error)})
@@ -624,3 +647,12 @@ export default {
     }
 }
 </script>
+
+<style>
+/* overwrite the default draggable/resizable default class to get rid of border */
+.my-node {
+    
+}
+
+
+</style>

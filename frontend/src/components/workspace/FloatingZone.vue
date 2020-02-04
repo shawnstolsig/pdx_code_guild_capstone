@@ -5,17 +5,20 @@
         @resizing="onResize" 
         @dragstop="onDragStop" 
         @activated="onActivated"
+        @resizestop="onResizestop"
+        class-name="my-zone"
         :parent="false" 
         :draggable="zone.draggable" 
         :x="zone.x" :y="zone.y"
         :z="zone.z">
-        <div style="border: solid;">
-                inside div
+        <div>
+                {{zone.name}}
         </div>
     </VueDraggableResizable>
 </template>
 <script>
 import VueDraggableResizable from 'vue-draggable-resizable'
+import 'vue-draggable-resizable/dist/VueDraggableResizable.css'
 import axios from 'axios'
 export default {
     components: {
@@ -35,38 +38,59 @@ export default {
 
     methods: {
 		onResize: function (x, y, width, height) {
-			this.x = x
-			this.y = y
-			this.width = width
-			this.height = height
+			this.zone.x = x
+			this.zone.y = y
+			this.zone.width = width
+			this.zone.height = height
 		},
 		onDrag: function (x, y) {
             // give to the card on the spot
-            this.x = x
-            this.y = y
+            this.zone.x = x
+            this.zone.y = y
         },
         onDragStop(x,y){
             // write new position to db
-            // axios({
-            //     method: 'patch',
-            //     url: `${this.$store.getters.endpoints.baseAPI}/nodes/${this.node.id}/`,
-            //     data: {
-            //         x: x,
-            //         y: y
-            //     },
-            //     headers: {
-            //         authorization: `Bearer ${this.$store.getters.accessToken}`
-            //     },
-            // })
-            // .then(response => {
-            //     console.log("Position written to db")
-            //     console.log(response)
-            // })
-            // .catch(error => {console.log(error)})
+            axios({
+                method: 'patch',
+                url: `${this.$store.getters.endpoints.baseAPI}/zones/${this.zone.id}/`,
+                data: {
+                    x: x,
+                    y: y
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log("Zone position written to db")
+                console.log(response)
+            })
+            .catch(error => {console.log(error)})
             console.log("implement zone dragstop" + x + y)
         },
+        onResizestop(x,y,width,height){
+            // write new position to db
+            axios({
+                method: 'patch',
+                url: `${this.$store.getters.endpoints.baseAPI}/zones/${this.zone.id}/`,
+                data: {
+                    x: x,
+                    y: y,
+                    width: width,
+                    height: height
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log("Zone position written to db after resize")
+                console.log(response)
+            })
+            .catch(error => {console.log(error)})
+        },
         onActivated(){
-            alert("activated")
+            console.log('activated')
         },
         toggleLock(){
             // toggle draggable
@@ -107,3 +131,12 @@ export default {
 
 }
 </script>
+
+<style>
+
+.my-zone {
+    border: solid red 3px 
+}
+
+
+</style>
