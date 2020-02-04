@@ -34,10 +34,10 @@
                     <span>Kiosk</span>
                     <v-icon right >desktop_windows</v-icon>
                 </v-btn>
-                <v-btn text to="/jwttest" class="mr-2">
+                <!-- <v-btn text to="/jwttest" class="mr-2">
                     <span>Test JWT</span>
                     <v-icon right >lock</v-icon>
-                </v-btn>
+                </v-btn> -->
                 <v-btn v-if="!authenticated" text to="/login" class="mr-2">
                     <span>Sign In / Register</span>
                     <v-icon right >perm_identity</v-icon>

@@ -258,65 +258,49 @@
                     </v-list-group>
                 </v-list-group>
                 <v-divider></v-divider>
-                <v-list-item>
-                    <v-list-item-title class="title">
-                        Auto fill
-                    </v-list-item-title>
+
+                <v-list-group
+                    multiple
+                    >
+                    <template v-slot:activator>
+                        <v-list-item-content>
+                            <v-list-item-title class="title">Active Cohorts</v-list-item-title>
+                        </v-list-item-content>
+                    </template>
+
+                    <v-list-item
+                        v-for="cohort in org.org_cohorts"
+                        :key="cohort.id"
+                    
+                    >
+
+                        <v-list-item-action>
+                            <v-checkbox
+                            v-model="cohort.is_active"
+                            color="primary"
+                            @click="toggleCohort(cohort)"
+                            ></v-checkbox>
+                        </v-list-item-action>
+                        <v-list-item-content>
+                            <v-list-item-title>{{`${cohort.name}`}}</v-list-item-title>
+                        </v-list-item-content>
+                    
+                        <v-list-item-icon>
+                            <v-chip :color="cohort.color" label class="py-0"></v-chip>
+                        </v-list-item-icon>
+                    </v-list-item>
+                </v-list-group>
+                <v-divider></v-divider>
+                <!-- <v-list-item>
+                        <v-btn color='success' @click="" center>
+                            Fill Workstations
+                        </v-btn>
                 </v-list-item>
-                <v-divider></v-divider>
-
-
-<!-- 
+                <v-divider></v-divider> -->
                 <v-list-item>
-                    <v-list-item-title class="title">
-                        Cohort filter
-                    </v-list-item-title>
-                    <v-list-item-actions>
-                        <v-chip v-for="cohort in org.org_cohorts" :key="cohort.id" >
-                    </v-list-item-actions>
-                </v-list-item> -->
-
-                    <v-list-group
-                        multiple
-                        >
-                            <template v-slot:activator>
-                                <v-list-item-content>
-                                    <v-list-item-title class="title">Active Cohorts</v-list-item-title>
-                                </v-list-item-content>
-                            </template>
-
-                            <v-list-item
-                                v-for="cohort in org.org_cohorts"
-                                :key="cohort.id"
-                            
-                            >
-
-                                <v-list-item-action>
-                                    <v-checkbox
-                                    v-model="cohort.is_active"
-                                    color="primary"
-                                    @click="toggleCohort(cohort)"
-                                    ></v-checkbox>
-                                </v-list-item-action>
-                                <v-list-item-content>
-                                    <v-list-item-title>{{`${cohort.name}`}}</v-list-item-title>
-                                </v-list-item-content>
-                            
-                                <v-list-item-icon>
-                                    <v-chip :color="cohort.color" label class="py-0"></v-chip>
-                                </v-list-item-icon>
-                            </v-list-item>
-                        </v-list-group>
-
-
-
-                <v-divider></v-divider>
-                <v-list-item>
-                    <v-list-item-title class="title">
                         <v-btn color='error' @click="clearWorkspaceNodes">
                             Clear Workstations
                         </v-btn>
-                    </v-list-item-title>
                 </v-list-item>
 			</v-list>
 		</v-navigation-drawer>
@@ -466,7 +450,9 @@ export default {
             // get cohort workers
             let returnArr = [];
             this.$store.getters.organization.org_workers.map(x => {
-                if(x.worker_node == null && (role.worker_ids.indexOf(x.id) != -1)){
+                if(x.worker_node == null 
+                    && (role.worker_ids.indexOf(x.id) != -1)
+                    && this.isCohortActive(x.cohort)){
                     returnArr.push(x)
                 }
             })
@@ -512,7 +498,6 @@ export default {
             
         },
         toggleCohort(cohort){
-            alert(`toggling cohort ${cohort.name}`)
             axios({
                 method: 'patch',
                 url: `${this.$store.getters.endpoints.baseAPI}/cohorts/${cohort.id}/`,
@@ -524,7 +509,7 @@ export default {
             },
             })
             .then(response => {
-                console.log(`Toggled ${cohort.name} is_active`)
+                console.log(`Toggled ${cohort.name}. is_active: ${response.data.is_active}`)
                 console.log(response)
                 // after a one second timeout, update workspace
                 setTimeout(() => {
@@ -534,7 +519,14 @@ export default {
 
             })
             .catch(error => {console.log(error)})
-        }
+        },
+        isCohortActive(cohortId){
+            for(let cohort of this.$store.getters.organization.org_cohorts){
+                if(cohort.id == cohortId){
+                    return cohort.is_active
+                }
+            }
+        },
 	},		// end methods
 	
 	mounted(){

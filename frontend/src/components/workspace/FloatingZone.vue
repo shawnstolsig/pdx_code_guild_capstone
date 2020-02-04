@@ -4,9 +4,9 @@
         @dragging="onDrag" 
         @resizing="onResize" 
         @dragstop="onDragStop" 
+        @activated="onActivated"
         :parent="false" 
         :draggable="zone.draggable" 
-        :resizeable="zone.draggable"
         :x="zone.x" :y="zone.y"
         :z="zone.z">
         <div style="border: solid;">
@@ -64,6 +64,9 @@ export default {
             // })
             // .catch(error => {console.log(error)})
             console.log("implement zone dragstop" + x + y)
+        },
+        onActivated(){
+            alert("activated")
         },
         toggleLock(){
             // toggle draggable

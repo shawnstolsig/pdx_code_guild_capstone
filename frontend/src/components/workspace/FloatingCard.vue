@@ -368,7 +368,10 @@ export default {
         addWorkerStart(){
             // get list of qualified, available workers for role
             this.$store.getters.organization.org_workers.map(x => {
-                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.worker_node == null && x.is_active){
+                if(this.node.role.worker_ids.indexOf(x.id) != -1 
+                    && x.worker_node == null 
+                    && x.is_active 
+                    && this.isCohortActive(x.cohort)){
                     this.qualifiedWorkers.push(x)
                 } 
             })
@@ -412,7 +415,10 @@ export default {
         swapWorkerStart(){
             // get list of qualified, available workers for role
             this.$store.getters.organization.org_workers.map(x => {
-                if(this.node.role.worker_ids.indexOf(x.id) != -1 && x.is_active && (this.node.worker == null || x.id != this.node.worker.id)){
+                if(this.node.role.worker_ids.indexOf(x.id) != -1 
+                    && x.is_active 
+                    && (this.node.worker == null || x.id != this.node.worker.id)
+                    && this.isCohortActive(x.cohort)){
                     this.qualifiedWorkers.push(x)
                 } 
             })
@@ -569,6 +575,13 @@ export default {
             // close dialog (which will trigger watch and reset qualifiedWorkers)
             this.swapWorkerDialog = false
 
+        },
+        isCohortActive(cohortId){
+            for(let cohort of this.$store.getters.organization.org_cohorts){
+                if(cohort.id == cohortId){
+                    return cohort.is_active
+                }
+            }
         },
 	},    // end methods
 
