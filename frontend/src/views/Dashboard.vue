@@ -1,8 +1,10 @@
 <template>
-	<v-card class="fill-height" fluid color='grey'>
+	<v-container class="fill-height" fluid color='grey'>
 				
+		<FloatingZone v-for="zone in testZones" :key="zone.id" :zoneProp="zone"></FloatingZone>
 		<FloatingCard v-for="node in workspace.workspace_nodes" :key="node.id" :nodeProp="node"></FloatingCard>
 		<FloatingButton />		
+
 				<!-- Create workspace dialog -->
 		<v-dialog v-model="createWorkspaceDialog" max-width="500px" persistent>
 			<v-card>
@@ -61,12 +63,13 @@
 			</v-card>
 		</v-dialog>
 
-	</v-card>
+	</v-container>
 </template>
 
 <script>
 import FloatingButton from '@/components/workspace/FloatingButton.vue'
 import FloatingCard from '@/components/workspace/FloatingCard.vue'
+import FloatingZone from '@/components/workspace/FloatingZone.vue'
 import axios from 'axios'
 // import VueDraggableResizable from 'vue-draggable-resizable'
 
@@ -75,6 +78,7 @@ export default {
 	components: {
 		FloatingButton,
 		FloatingCard,
+		FloatingZone,
 		// VueDraggableResizable,
 		
 	}, 
@@ -89,6 +93,17 @@ export default {
 				description: '',
 				department: '',
 			},
+			testZones: [
+				{	
+					id: 57,
+					width: 300,
+            		height: 150,
+            		x: 100,
+            		y: 100,
+					z: '999',	
+					draggable: true,
+				}
+			],
 		}
 	},    // end data
 
@@ -173,7 +188,6 @@ export default {
 			this.createWorkspaceDialog = true
 		}
 
-
 		// load the first workspace if none is loaded
 		if(this.$store.getters.user.preferredWorkspaceKey == undefined){
 			// load workspace data
@@ -183,6 +197,7 @@ export default {
 		// load user's preferred workspace (which is the same as the last one they visited)
 		else {
 			// this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
+			// console.log(`LOADING WORKSPACE ${this.$store.getters.user.preferredWorkspaceKey}`)
 			this.$store.dispatch('loadWorkspace', {key: this.$store.getters.user.preferredWorkspaceKey})
 		}
 

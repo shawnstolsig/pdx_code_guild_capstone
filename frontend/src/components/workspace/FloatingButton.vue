@@ -27,7 +27,7 @@
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
                     <v-btn fab dark small color="indigo" v-on="on" @click="navDrawer = !navDrawer">
-                        <v-icon>supervisor_account</v-icon>
+                        <v-icon>vertical_split</v-icon>
                     </v-btn>
                 </template>
                 <span>Toggle Workforce Toolbar</span>
@@ -35,7 +35,7 @@
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn fab dark small color="red" v-on="on" @click="changeWorkspaceDialog = true">
+                    <v-btn fab dark small color="red darken-2" v-on="on" @click="changeWorkspaceDialog = true">
                         <v-icon>view_carousel</v-icon>
                     </v-btn>
                 </template>
@@ -44,7 +44,7 @@
 
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
-                    <v-btn fab dark small color="orange" v-on="on" @click="createWorkspaceDialog = true">
+                    <v-btn fab dark small color="orange darken-2" v-on="on" @click="createWorkspaceDialog = true">
                         <v-icon>mdi-plus</v-icon>
                     </v-btn>
                 </template>
@@ -194,7 +194,7 @@
                 <v-divider></v-divider>
                 <!-- Cohorts Nested List -->
                 <v-list-group
-                    prepend-icon="account_circle"
+                    prepend-icon="group"
                 >
                     <template v-slot:activator>
                     <v-list-item-title>Cohorts</v-list-item-title>
@@ -228,7 +228,7 @@
                 
                 <!-- Roles Nested List -->
                 <v-list-group
-                    prepend-icon="account_circle"
+                    prepend-icon="transfer_within_a_station"
                 >
                     <template v-slot:activator>
                     <v-list-item-title>Roles</v-list-item-title>
@@ -257,6 +257,24 @@
                         </v-list-item>
                     </v-list-group>
                 </v-list-group>
+                <v-divider></v-divider>
+                <v-list-item>
+                    <v-list-item-title class="title">
+                        Clear Workstations
+                    </v-list-item-title>
+                </v-list-item>
+                <v-divider></v-divider>
+                <v-list-item>
+                    <v-list-item-title class="title">
+                        Auto fill
+                    </v-list-item-title>
+                </v-list-item>
+                <v-divider></v-divider>
+                <v-list-item>
+                    <v-list-item-title class="title">
+                        Cohort filter
+                    </v-list-item-title>
+                </v-list-item>
 			</v-list>
 		</v-navigation-drawer>
 
