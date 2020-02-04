@@ -98,5 +98,9 @@ export default {
         },
     },  // end computed
 
+    mounted(){
+        
+    },  // end mounted
+
 }
 </script>

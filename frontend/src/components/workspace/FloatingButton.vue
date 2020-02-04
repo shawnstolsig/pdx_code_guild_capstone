@@ -260,19 +260,62 @@
                 <v-divider></v-divider>
                 <v-list-item>
                     <v-list-item-title class="title">
-                        Clear Workstations
-                    </v-list-item-title>
-                </v-list-item>
-                <v-divider></v-divider>
-                <v-list-item>
-                    <v-list-item-title class="title">
                         Auto fill
                     </v-list-item-title>
                 </v-list-item>
                 <v-divider></v-divider>
+
+
+<!-- 
                 <v-list-item>
                     <v-list-item-title class="title">
                         Cohort filter
+                    </v-list-item-title>
+                    <v-list-item-actions>
+                        <v-chip v-for="cohort in org.org_cohorts" :key="cohort.id" >
+                    </v-list-item-actions>
+                </v-list-item> -->
+
+                    <v-list-group
+                        multiple
+                        >
+                            <template v-slot:activator>
+                                <v-list-item-content>
+                                    <v-list-item-title class="title">Active Cohorts</v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+
+                            <v-list-item
+                                v-for="cohort in org.org_cohorts"
+                                :key="cohort.id"
+                            
+                            >
+
+                                <v-list-item-action>
+                                    <v-checkbox
+                                    v-model="cohort.is_active"
+                                    color="primary"
+                                    @click="toggleCohort(cohort)"
+                                    ></v-checkbox>
+                                </v-list-item-action>
+                                <v-list-item-content>
+                                    <v-list-item-title>{{`${cohort.name}`}}</v-list-item-title>
+                                </v-list-item-content>
+                            
+                                <v-list-item-icon>
+                                    <v-chip :color="cohort.color" label class="py-0"></v-chip>
+                                </v-list-item-icon>
+                            </v-list-item>
+                        </v-list-group>
+
+
+
+                <v-divider></v-divider>
+                <v-list-item>
+                    <v-list-item-title class="title">
+                        <v-btn color='error' @click="clearWorkspaceNodes">
+                            Clear Workstations
+                        </v-btn>
                     </v-list-item-title>
                 </v-list-item>
 			</v-list>
@@ -305,7 +348,7 @@ export default {
         },
         // for nav drawer
         navDrawer: true,
-
+        activeCohorts: [1,2],
 
     }),		// end data
     components: {
@@ -429,6 +472,69 @@ export default {
             })
             return returnArr
         },
+        clearWorkspaceNodes(){
+            // abort if they user doesn't confirm
+            if(!confirm(`Are you sure you want to clear all ${this.$store.getters.workspace.name} workstations?`)){
+                return 
+            }
+            // iterate through all workstations
+            for(let ws of this.$store.getters.workspace.workspace_nodes){
+                // only patch if ws worker is not null
+                if(ws.worker){
+                    axios({
+                        method: 'patch',
+                        url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${ws.id}/`,
+                        data: {
+                            worker: null,
+                        },
+                        headers: {
+                            authorization: `Bearer ${this.$store.getters.accessToken}`
+                    },
+                    })
+                    .then(response => {
+                        console.log(`Removing worker from node ${ws.name}`)
+                        console.log(response)
+                        // update this node's state
+                        ws.worker = null
+
+                    })
+                    .catch(error => {console.log(error)})
+                }
+            }
+
+            // after a one second timeout, update workspace
+            setTimeout(() => {
+        
+                // reload workspace to update store 
+                this.$store.dispatch('loadOrganization')
+                this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
+            }, 1000)
+            
+        },
+        toggleCohort(cohort){
+            alert(`toggling cohort ${cohort.name}`)
+            axios({
+                method: 'patch',
+                url: `${this.$store.getters.endpoints.baseAPI}/cohorts/${cohort.id}/`,
+                data: {
+                    is_active: !cohort.is_active
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+            },
+            })
+            .then(response => {
+                console.log(`Toggled ${cohort.name} is_active`)
+                console.log(response)
+                // after a one second timeout, update workspace
+                setTimeout(() => {
+                    // reload workspace to update store 
+                    this.$store.dispatch('loadOrganization')
+                }, 300)
+
+            })
+            .catch(error => {console.log(error)})
+        }
 	},		// end methods
 	
 	mounted(){

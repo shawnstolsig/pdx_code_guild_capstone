@@ -68,6 +68,7 @@ class Cohort(models.Model):
     # attributes
     name = models.CharField(max_length=50)
     description = models.TextField(null=True)
+    is_active = models.BooleanField(default=True)
 
     # relationships
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="org_cohorts")

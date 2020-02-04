@@ -44,7 +44,7 @@ export default {
 		links: [
 			{text: 'Organization', icon: 'business'},
 			{text: 'Employees', icon: 'people_alt'},
-			{text: 'Account', icon: 'mdi-account'},
+			{text: 'Account', icon: 'account_box'},
 		],
 	}),     // end data
 

@@ -32,7 +32,7 @@
                     >
                     <template v-slot:activator="{ on }">
                         <v-btn icon v-on="on">
-                            <v-icon>mdi-dots-vertical</v-icon>
+                            <v-icon>more_vert</v-icon>
                         </v-btn>
                     </template>
 
