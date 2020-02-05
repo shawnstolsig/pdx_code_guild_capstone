@@ -94,14 +94,14 @@
                 <v-list dense  class="pa-0">
                     <!-- if no assigned worker, leave empty -->
                     <v-list-item v-if="!node.worker">
-                        <v-list-item-title class="subtitle-1 ma-5" > (No employee assigned)</v-list-item-title>
+                        <v-list-item-title class="subtitle-1 ma-5" >-</v-list-item-title>
                     </v-list-item>
 
                     <!-- if worker assigned, load name/cohort/colors -->
                     <v-list-item v-if="node.worker">
                         <v-list-item-avatar :color="workerColor"></v-list-item-avatar>
-                        <v-list-item-content >
-                            <v-list-item-title class="title">
+                        <v-list-item-content>
+                            <v-list-item-title class="subtitle-1 font-weight-bold">
                                 {{node.worker.full_name}}
                             </v-list-item-title>
                         </v-list-item-content>
