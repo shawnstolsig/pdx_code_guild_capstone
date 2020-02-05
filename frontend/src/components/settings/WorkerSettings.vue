@@ -174,7 +174,7 @@ export default {
 
     computed: {
         formTitle () {
-            return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+            return this.editedIndex === -1 ? 'New Employee' : 'Edit Employee Details'
         },
         org(){
             return this.$store.getters.organization

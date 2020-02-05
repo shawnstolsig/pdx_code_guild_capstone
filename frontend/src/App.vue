@@ -1,7 +1,7 @@
 <template>
-  <v-app>
+  <v-app :style="{background: $vuetify.theme.themes[theme].background}">
     <Navbar/>
-    <v-content>
+    <v-content >
       <router-view></router-view>
     </v-content>
   </v-app>
@@ -11,18 +11,24 @@
 import Navbar from '@/components/Navbar'
 
 export default {
-  name: 'App',
+	name: 'App',
 
-  components: {
-    Navbar
-  },
+	components: {
+		Navbar
+	},
 
-  data: () => ({
-    //
-  }),
+	data: () => ({
+		//
+	}),
 
-  created(){
-    this.$store.dispatch('tryAutoLogin')
-  }
+	created(){
+		this.$store.dispatch('tryAutoLogin')
+	},
+
+	computed:{
+			theme(){
+				return (this.$vuetify.theme.dark) ? 'dark' : 'light'
+			}
+	}
 };
 </script>

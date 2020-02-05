@@ -1,5 +1,5 @@
 <template>
-	<v-container>
+	<v-container background="background">
 		<OrgPopup></OrgPopup>
 
 		<v-toolbar flat dark color="primary">

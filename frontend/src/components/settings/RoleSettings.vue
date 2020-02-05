@@ -289,7 +289,7 @@ export default {
 
     computed: {
         formTitle () {
-            return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+            return this.editedIndex === -1 ? 'New Role' : 'Edit Role Details'
         },
         org(){
             return this.$store.getters.organization
