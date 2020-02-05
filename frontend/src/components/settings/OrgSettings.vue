@@ -1,5 +1,6 @@
 <template>
-    <v-container><!-- Start of Organization Settings -->
+    <v-container>
+        <!-- Start of Organization Settings -->
         <v-row v-if="!validOrg">
             <v-col cols="3">
                 <v-card flat>
@@ -9,8 +10,9 @@
                 </v-card>
             </v-col>
         </v-row>
-        <!-- Department Card -->
+
         <v-row v-if="validOrg">
+            <!-- Department Card -->
             <v-col cols="6">
                 <DeptSettings />
             </v-col>
@@ -20,6 +22,7 @@
             </v-col>
         </v-row>
         <v-row v-if="validOrg">
+            <!-- Roles card -->
             <v-col cols="12">
                 <RoleSettings />
             </v-col>
@@ -44,9 +47,7 @@ export default {
 	}),     // end data
 
 	methods: {
-        test(){
-            alert("is this thing on")
-        }
+
 	},      /// end methods	
 
 	computed: {			

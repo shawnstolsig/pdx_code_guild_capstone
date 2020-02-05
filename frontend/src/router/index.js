@@ -10,15 +10,14 @@ import store from '../store/index.js'
 Vue.use(VueRouter)
 
 const routes = [
-  // protected route, must be authenticated to access home
 	{
 		path: '/',
 		name: 'dashboard',
 		component: Dashboard,
+		// Only allow entering dashboard if authenticated
 		beforeEnter (to, from, next){
 		if(store.state.isAuthenticated){
 				next()
-
 			} else {
 				next('/login')
 			}
@@ -28,6 +27,7 @@ const routes = [
 		path: '/settings',
 		name: 'settings',
 		component: Settings,
+		// Only allow entering settings if authenticated
 		beforeEnter (to, from, next){
 			if(store.state.isAuthenticated){
 				next()
@@ -40,9 +40,14 @@ const routes = [
 		path: '/kiosk',
 		name: 'kiosk',
 		component: Kiosk,
+		// Only allow entering kiosk if authenticated
 		beforeEnter (to, from, next){
-			store.dispatch('setKioskMode', true)
-			next()
+			if(store.state.isAuthenticated){
+				store.dispatch('setKioskMode', true)
+				next()
+			} else {
+				next('/login')
+			}
 		}
 	},
 	{

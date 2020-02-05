@@ -1,9 +1,12 @@
 <template>
+    <!-- Cohort settings is subcomponent of OrgSettings -->
     <v-card>
         <v-card-title>
             Cohorts
         </v-card-title>
         <v-card-text>
+
+            <!-- List of exisiting cohorts -->
             <v-list>
                 <v-list-item-group v-model="selectedCohort">
                     <v-list-item v-for="cohort in org.org_cohorts" :key="cohort.id">
@@ -23,8 +26,10 @@
 
 
             </v-list>
+        
         </v-card-text>
         <v-card-actions>
+
             <!-- Dialog for adding Cohort -->
             <v-dialog v-model="cohortCreateDialog" max-width="500">
                 <template v-slot:activator="{ on }">
@@ -93,7 +98,8 @@
                     </v-form>
                 </v-card>
             </v-dialog>
-            <!-- Dialog for adding Cohort -->
+
+            <!-- Dialog for deleting Cohort -->
             <v-dialog v-model="cohortDeleteDialog" max-width="500" v-if="selectedCohort >= 0">
                 <template v-slot:activator="{ on }">
                     <v-btn v-on="on">Delete</v-btn>
@@ -107,6 +113,7 @@
                     </v-card-actions>
                 </v-card>
             </v-dialog>
+
         </v-card-actions>
     </v-card>
 </template>
@@ -144,7 +151,7 @@ export default {
                 }
             }
 
-			console.log("creating cohort")
+            // Write cohort to db
 			axios({
 				method: 'post',
 				url: `${this.$store.getters.endpoints.baseAPI}/cohorts/`,
@@ -174,11 +181,11 @@ export default {
         
         // Delete a Cohort
         deleteCohort(){
-            console.log("deleting cohort")
 
             // Look up dept id.  Names must be unique when created, so looking up by name is reliable.
             let cohortId = this.org.org_cohorts[this.selectedCohort].id
 
+            // Delete cohort in db
             axios({
                 method: 'delete',
                 url: `${this.$store.getters.endpoints.baseAPI}/cohorts/${cohortId}`,
@@ -204,8 +211,5 @@ export default {
             return this.$store.getters.formRules
         },
 	},		// end computed
-
-	created() {
-	},		// end mounted
 }
 </script>

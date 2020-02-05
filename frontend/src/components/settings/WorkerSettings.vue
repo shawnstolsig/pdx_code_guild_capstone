@@ -1,4 +1,6 @@
 <template>
+
+    <!-- data table for showing all org workers -->
     <v-data-table
         :headers="headers"
         :items="workerList"
@@ -7,7 +9,7 @@
         sort-by="lastName"
         class="elevation-3"
     >
-        <!-- Overwrite the top slot with CRUD -->
+        <!-- Overwrite the top slot of data table with CRUD button -->
         <template v-slot:top>
             <v-toolbar flat>
                 <v-toolbar-title>
@@ -22,8 +24,6 @@
                         hide-details
                     ></v-text-field>
                 
-                    <!-- <v-divider class="mx-4" inset vertical></v-divider> -->
-
                     <v-spacer></v-spacer>
 
                     <!-- CRUD dialog -->
@@ -110,14 +110,6 @@
                 >delete
             </v-icon>
         </template>
-
-        <!-- Custom no-data slot -->
-        <!-- <template v-slot:no-data>
-            <v-btn color="primary" @click="initialize">Reset</v-btn>
-            <v-spacer></v-spacer>
-            <v-subheader>No data...please add employees.</v-subheader>
-            <v-spacer></v-spacer>
-        </template> -->
     
     </v-data-table>
 </template>
@@ -170,7 +162,7 @@ export default {
             department: '',
             cohort: '',
         },
-    }),
+    }),     // end of data
 
     computed: {
         formTitle () {
@@ -198,6 +190,7 @@ export default {
     },      // end of computed
 
     watch: {
+        // lauches close() whenever dialog is closed
         dialog (val) {
             val || this.close()
         },
@@ -208,9 +201,10 @@ export default {
     },      // end of created
 
     methods: {
+
+        // initializes info for data table
         initialize () {
             // create array for displaying in list.  
-            // Only needs firstName, lastName, Dept (as string), Cohort(as string)
             let org = this.$store.getters.organization
             this.workerList = []
             let deptPairs = {}
@@ -228,12 +222,14 @@ export default {
             }
         },      // end of initialize
 
+        // loads worker when edit button is clicked
         editItem (item) {
             this.editedIndex = this.workerList.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialog = true
         },
 
+        // deletes worker when trash button is clicked
         deleteItem (item) {
             if(confirm('Are you sure you want to delete this item?')){
                 axios({
@@ -255,6 +251,7 @@ export default {
             } 
         },
 
+        // updates/re-initilizes table when dialog is closed
         close () {
             this.dialog = false
             setTimeout(() => {
@@ -265,6 +262,7 @@ export default {
 
         },
 
+        // writes changes to db for both creating and editing workers
         save () {
             // Check to make sure token is valid
             this.$store.dispatch('verifyLogin')
@@ -284,8 +282,8 @@ export default {
             }
             // If worker is edited, make axios patch
             if (this.editedIndex > -1) {
-                // axios patch call
-                // Object.assign(this.workerList[this.editedIndex], this.editedItem)
+
+                // update worker in db
                 let workerPk = this.workerList[this.editedIndex].id
                 axios({
                     method: 'patch',
@@ -338,6 +336,7 @@ export default {
             }
             
         },
+        
     },      // end of methods
 }
 </script>

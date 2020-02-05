@@ -1,7 +1,10 @@
 <template>
 	<v-container class="fill-height" fluid color='red'>
+		<!-- Render all zones -->
 		<FloatingZone v-for="zone in workspace.workspace_zones" :key="'zone'+zone.id" :zoneProp="zone"></FloatingZone>
+		<!-- Render all nodes/workstations -->
 		<FloatingCard v-for="node in workspace.workspace_nodes" :key="'node'+node.id" :nodeProp="node"></FloatingCard>
+		<!-- Floating speed dial -->
 		<FloatingButton />		
 
 				<!-- Create workspace dialog -->
@@ -71,16 +74,13 @@ import FloatingCard from '@/components/workspace/FloatingCard.vue'
 import FloatingZone from '@/components/workspace/FloatingZone.vue'
 
 import axios from 'axios'
-// import VueDraggableResizable from 'vue-draggable-resizable'
 
 export default {
 	name: 'dashboard',
 	components: {
 		FloatingButton,
 		FloatingCard,
-		FloatingZone,
-		// VueDraggableResizable,
-		
+		FloatingZone,		
 	}, 
 
 	data(){
@@ -98,6 +98,7 @@ export default {
 
 
 	methods: {
+		// Method for creating workspace if none already exist
 		createWorkspace(){
             // get department id from string that's been selected
             let deptId;
@@ -119,7 +120,8 @@ export default {
                 headers: {
                     authorization: `Bearer ${this.$store.getters.accessToken}`
                 },
-            })
+			})
+			// Once db post is complete, load the new workspace
             .then(response => {
                 console.log(response)
 
@@ -167,7 +169,9 @@ export default {
         },
 	},     // end computed
 
+	// Set dark mode, load detailed workspace info
 	mounted(){
+		console.log("starting mounted")
 
 		// set light/dark mode
 		this.$vuetify.theme.dark = this.$store.getters.user.darkModeEnabled
@@ -185,13 +189,12 @@ export default {
 		
 		// load user's preferred workspace (which is the same as the last one they visited)
 		else {
-			// this.$store.dispatch('loadWorkspace', {key: this.$store.getters.workspace.id})
-			// console.log(`LOADING WORKSPACE ${this.$store.getters.user.preferredWorkspaceKey}`)
 			this.$store.dispatch('loadWorkspace', {key: this.$store.getters.user.preferredWorkspaceKey})
 		}
 
 	},		// end of mounted
 
+	// Unload detailed workspace info (to help reset Vue caching) and set user's preferred workspace
 	destroyed(){
 		// update state with preferred workspace dashboard
 		this.$store.dispatch('updateStoreWorkspace', this.$store.getters.workspace.id)
@@ -208,7 +211,6 @@ export default {
 			},
 		})
 		.then(response => {
-			console.log("Stored preferred user workspace: ")
 			console.log(response)
 		})
 		.catch(error => {console.log(error)})

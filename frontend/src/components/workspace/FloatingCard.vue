@@ -1,4 +1,6 @@
 <template>
+
+    <!-- A draggable and resizable card representing a workstation/node -->
     <VueDraggableResizable 
         :w="node.width" :h="node.height" 
         @dragging="onDrag" 
@@ -11,6 +13,8 @@
         :resizable="node.draggable"
         :x="node.x" :y="node.y">
         <v-card :height="node.height" :width="node.width">
+
+            <!-- Card toolbar for node name/role/color/menu/buttons -->
             <v-toolbar dense short :color="node.role.color">
                 <v-toolbar-title class="font-weight-bold">
                     {{node.name}}
@@ -60,6 +64,7 @@
 
                         <v-divider></v-divider>
 
+                        <!-- List of actions in menu popup.  Not all options are available, depends if node has worker assigned -->
                         <v-list>
                             <v-list-item @click="addWorkerStart" v-if="!node.worker">
                                 <v-list-item-action>
@@ -111,6 +116,7 @@
             </v-card-text>
 
             <!----------------------------------------------------- Dialogs:  ------------------------------------->
+           
             <!-- Add worker to workerstation dialog -->
             <v-dialog v-model="addWorkerDialog" max-width="500px">
                 <v-card>
@@ -122,6 +128,7 @@
                     <v-card-title v-if="qualifiedWorkers.length == 0">No employees available for this role.</v-card-title>
                 </v-card>
             </v-dialog>
+
             <!-- Add worker to workerstation dialog -->
             <v-dialog v-model="swapWorkerDialog" max-width="500px">
                 <v-card>
@@ -133,6 +140,7 @@
                     <v-card-title v-if="qualifiedWorkers.length == 0">No employees available to swap.</v-card-title>
                 </v-card>
             </v-dialog>
+
             <!-- Edit node dialog -->
             <v-dialog v-model="editNodeDialog" max-width="500px">
                 <v-card>
@@ -185,6 +193,7 @@
                     </v-card-actions>
                 </v-card>
             </v-dialog>
+
         </v-card>
     </VueDraggableResizable>
 </template>
@@ -217,23 +226,26 @@ export default {
             // dialog: edit workstation
             editNodeDialog: false,
             editNodeFormValid: false,
-
-
 		}
 	},    // end data
 
     methods: {
+        // called when card is resized.  it will update the node based on the resize action.
 		onResize: function (x, y, width, height) {
 			this.node.x = x
 			this.node.y = y
 			this.node.width = width
 			this.node.height = height
-		},
+        },
+
+        // called when card is dragged.  it will update the node based on the drag action.
 		onDrag: function (x, y) {
             // give to the card on the spot
             this.node.x = x
             this.node.y = y
         },
+
+        // called when card stops being dragged.  it will write new position to db.
         onDragStop(x,y){
             // write new position to db
             axios({
@@ -253,6 +265,8 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
+
+        // called when card stops being resized.  it will write new size to db.
         onResizestop(x,y,width,height){
             // write new position to db
             axios({
@@ -274,6 +288,8 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
+
+        // toggles draggable/resizeable state of card
         toggleLock(){
             // toggle draggable
             this.node.draggable = !this.node.draggable
@@ -290,11 +306,12 @@ export default {
                 },
             })
             .then(response => {
-                console.log("draggable toggled")
                 console.log(response)
             })
             .catch(error => {console.log(error)})
         },
+
+        // saves node edits to db and reloads org/workspace
         editNode(){
             // get role id from string that's been selected
             let roleId;
@@ -332,10 +349,10 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
+
+        // deletes node from db and reloads org/workspace
         deleteNode(){
-            if(confirm(`Are you sure you want to delete ${this.node.name}?`)){
-                console.log("delte node now")
-                
+            if(confirm(`Are you sure you want to delete ${this.node.name}?`)){              
                 axios({
                     method: 'delete',
                     url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${this.node.id}/`,
@@ -359,6 +376,8 @@ export default {
                 .catch(error => {console.log(error)})
             }
         },
+
+        // removes worker from node, updates db, refreshes org/workspace
         removeWorker(){
             // Confirm worker removal
             if(!confirm(`Are you sure you want to unassign ${this.node.worker.full_name}?`)){
@@ -388,6 +407,8 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
+
+        // preps a list of available, qualified workers for adding to node
         addWorkerStart(){
             // get list of qualified, available workers for role
             this.$store.getters.organization.org_workers.map(x => {
@@ -401,6 +422,8 @@ export default {
             // show dialog
             this.addWorkerDialog = true
         },
+
+        // adds worker to node, updates db, refreshes org/workspace
         addWorkerEnd(worker){
             // If there is already a worker assigned, confirm swap before proceeding
             if(this.node.worker){
@@ -422,7 +445,6 @@ export default {
                 },
             })
             .then(response => {
-                "Adding worker to "
                 console.log(response)
                 // update state
                 this.node.worker = worker
@@ -435,6 +457,8 @@ export default {
             // close dialog (which will trigger watch and reset qualifiedWorkers)
             this.addWorkerDialog = false
         },
+
+        // preps a list of available, qualified workers for swapping to node
         swapWorkerStart(){
             // get list of qualified, available workers for role
             this.$store.getters.organization.org_workers.map(x => {
@@ -448,6 +472,8 @@ export default {
             // show dialog
             this.swapWorkerDialog = true
         },
+
+        // swaps worker nodes, updates db, refreshes org/workspace
         swapWorkerEnd(worker){
             console.log("worker selected for swap")
             console.log(worker)
@@ -599,6 +625,8 @@ export default {
             this.swapWorkerDialog = false
 
         },
+
+        // when given a cohort id, it returns true/false if cohort is active
         isCohortActive(cohortId){
             for(let cohort of this.$store.getters.organization.org_cohorts){
                 if(cohort.id == cohortId){
@@ -629,7 +657,7 @@ export default {
             }
             return "#FFFFFF"
         }
-    },
+    },      // end of computed
 
     watch: {
         // empty qualifiedWorkers whenever dialog closes
@@ -644,7 +672,7 @@ export default {
                 this.qualifiedWorkers = []
             }
         },
-    }
+    }       // end of watch
 }
 </script>
 

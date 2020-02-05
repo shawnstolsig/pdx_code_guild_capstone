@@ -1,5 +1,9 @@
 <template>
+
+    <!-- Subcomponent of Settings.  This is a dialog that forces user to link account with an Organization -->
     <v-dialog v-model="popupFlag" persistent max-width="500px">
+
+        <!-- If linking to existing org... -->
         <v-card v-if="!createMode" class="pa-3">
             <v-card-title>Select Organization</v-card-title>
             <v-card-subtitle class="mt-1">Please input your organization code before proceeding.</v-card-subtitle>
@@ -7,7 +11,7 @@
                 <v-card-text>
                     <v-text-field
                         v-model="orgCode"
-                        :rules="validationRules.code"
+                        :rules="rules.code"
                         v-mask="codeMask"
                         type="text"
                         label="Organization Code"
@@ -20,6 +24,8 @@
                 </v-card-actions>
             </v-form>
         </v-card>
+
+        <!-- If creating new org... -->
         <v-card v-if="createMode" class="pa-3">
             <v-card-title>Create New Organization</v-card-title>
             <v-card-subtitle class="mt-1">Please type in a name and description for your organization.</v-card-subtitle>
@@ -27,7 +33,7 @@
                 <v-card-text>
                         <v-text-field
                             v-model="orgName"
-                            :rules="validationRules.name"
+                            :rules="rules.name"
                             type="text"
                             v-mask=""
                             label="Name"
@@ -36,7 +42,7 @@
                         <v-textarea
                             solo
                             v-model="orgDescription"
-                            :rules="validationRules.description"
+                            :rules="rules.description"
                             label="Description"
                             required
                         ></v-textarea>
@@ -47,6 +53,7 @@
                 </v-card-actions>
             </v-form>
         </v-card>
+
     </v-dialog>
 </template>
 
@@ -66,23 +73,17 @@ export default {
             orgId: '',
             organizations: '',
             orgDescription: '',
+            // this is the format for a uuid4
             codeMask: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-            validationRules:{
-                code: [ v => !!v || 'Please input Organization code.' ],
-                name: [
-                    v => !!v || 'Name is required.',
-                    v => (v && v.length) <= 30 || 'Name must be less than 30 characters.',
-                    v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
-                ],
-                description: [
-                    v => !!v || 'Description is required.',
-                    v => (v && v.length) >= 3 || 'Name must be at least 3 characters.',
-                ],
-            }
         }
-    },
+    },      // end data
+
+    // for uuid mask
     directives: {mask},
+
     methods: {
+
+        // For selecting an existing org and linking it to user's account
         selectOrg(){
 
             // if org id is not set (if user is not coming from org creation)
@@ -123,9 +124,11 @@ export default {
                 })
             }
         },
+
+        // For creating a new org and linking it to the user's account
         createOrg(){
             if(this.createFormValid){
-                // Create a new organization
+                // Create a new organization, post to db
                 axios({
                     method: 'post',
                     url: `${this.$store.getters.endpoints.baseAPI}/organizations/`,
@@ -149,7 +152,18 @@ export default {
                 })
             }
         }
-    },
+    },      // end methods
+
+    computed: {			
+		org(){
+			return this.$store.getters.organization
+        },
+        rules(){
+            return this.$store.getters.formRules
+        },
+	},		// end computed
+
+    // figure out of if popup should be shown
     created(){
         // set flag
         this.popupFlag = !this.$store.getters.user.organization
@@ -164,6 +178,6 @@ export default {
         })
         .then(response => this.organizations = response.data)
         .catch(error => console.log(error))
-    }
+    }       // end created
 }
 </script>

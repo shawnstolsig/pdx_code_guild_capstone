@@ -3,6 +3,7 @@
 
         <v-app-bar app clipped-right>
             
+            <!-- Site logo/title -->
             <v-toolbar-title class="text-uppercase ">
                 <span class="font-weight-light text-lowercase title">shift</span>
                 <span class="primary--text title">MANAGR</span>
@@ -10,6 +11,7 @@
 
             <v-spacer></v-spacer>
         
+                <!-- if there is an org and/or workspace, displays title on navbar -->
                 <span v-if="authenticated && org.name && !workspace.name" color="primary" class="mr-2">
                     <v-chip color="primary" class="mr-2 title" label large>
                         {{ org.name }}
@@ -21,6 +23,7 @@
                     </v-chip>
                 </span>
 
+            <!-- Toolbar buttons.  Visibility varies depending on if user is authenticated -->
             <v-toolbar-items v-if="!kioskMode">
                 <v-btn v-if="authenticated" text to="/" class="mr-2">
                     <span>Dashboard</span>
@@ -34,10 +37,7 @@
                     <span>Settings</span>
                     <v-icon right >settings</v-icon>
                 </v-btn>
-                <!-- <v-btn text to="/jwttest" class="mr-2">
-                    <span>Test JWT</span>
-                    <v-icon right >lock</v-icon>
-                </v-btn> -->
+
                 <v-btn v-if="!authenticated" text to="/login" class="mr-2">
                     <span>Sign In / Register</span>
                     <v-icon right >perm_identity</v-icon>
@@ -45,7 +45,14 @@
                 <v-btn v-if="authenticated" text @click="logOut" class="mr-2">
                     <span>Sign Out</span>
                     <v-icon right >exit_to_app</v-icon>
-            </v-btn>
+                </v-btn>
+
+                <!-- this is a link to a testing page for JWT authentication -->
+                <!-- <v-btn text to="/jwttest" class="mr-2">
+                    <span>Test JWT</span>
+                    <v-icon right >lock</v-icon>
+                </v-btn> -->
+
             </v-toolbar-items>
         </v-app-bar>
     </nav>
@@ -61,12 +68,6 @@ export default {
             primaryDrawer: {
                 model: false,
             }
-            // links: [
-            //     { label: `${this.userInfo.username}'s Dashboard`, link: '/', icon: 'home', test: this.authenticated, action: null},
-            //     { label: `Test JWT`, link: '/jwttest', icon: 'lock', test: true, action: null},
-            //     { label: `Sign In / Register`, link: '/login', icon: 'perm_identity', test: !this.authenticated, action: null},
-            //     { label: `Sign Out`, link: '/', icon: 'home', test: this.authenticated, action: 'logOut'},
-            // ]
         }
     },
     methods: {

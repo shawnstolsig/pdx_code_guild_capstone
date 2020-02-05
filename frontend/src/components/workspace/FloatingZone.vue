@@ -1,10 +1,11 @@
 <template>
+
+    <!-- A draggable, resizable, and transparent card representing a zone -->
     <VueDraggableResizable 
         :w="zone.width" :h="zone.height" 
         @dragging="onDrag" 
         @resizing="onResize" 
         @dragstop="onDragStop" 
-        @activated="onActivated"
         @resizestop="onResizestop"
         class-name="my-zone"
         :parent="false" 
@@ -14,11 +15,11 @@
         :z="zone.z">
         <v-card color="transparent" :width="zone.width" :height="zone.height" flat>
             
+            <!-- Transparent card toolbar for node name/menu-->
             <v-toolbar dense short flat color="transparent">
                 
                 <v-toolbar-title class="font-weight-bold">
-                    <span>
-                        
+                    <span>  
                         <!-- Popup menu for each workstation -->
                         <v-menu
                             v-model="zoneMenu"
@@ -71,10 +72,6 @@
                     </span>
                     {{zone.name}}
                 </v-toolbar-title>
-                
-                
-
-                
             </v-toolbar>
         </v-card>
     </VueDraggableResizable>
@@ -101,17 +98,23 @@ export default {
 	},    // end data
 
     methods: {
-		onResize: function (x, y, width, height) {
+
+        // called when zone is resized.  it will update the zone based on the resize action.
+    	onResize: function (x, y, width, height) {
 			this.zone.x = x
 			this.zone.y = y
 			this.zone.width = width
 			this.zone.height = height
-		},
+        },
+        
+        // called when zone is dragged.  it will update zone based on drag action
 		onDrag: function (x, y) {
             // give to the card on the spot
             this.zone.x = x
             this.zone.y = y
         },
+
+        // called when zone stops being dragged.  writes new position to db
         onDragStop(x,y){
             // write new position to db
             axios({
@@ -132,6 +135,8 @@ export default {
             .catch(error => {console.log(error)})
             console.log("implement zone dragstop" + x + y)
         },
+
+        // called when zone stops being resized.   writes new position to db
         onResizestop(x,y,width,height){
             // write new position to db
             axios({
@@ -153,9 +158,8 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
-        onActivated(){
-            console.log('activated')
-        },
+
+        // toggles draggable/resizable state of zone
         toggleLock(){
             // toggle draggable
             this.zone.draggable = !this.zone.draggable
@@ -177,6 +181,8 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
+
+        // deletes zone from workspace and updates org/workspace
         deleteZone(){
             if(confirm(`Are you sure you want to delete ${this.zone.name}?`)){
                 console.log("deleting zone now")
@@ -214,19 +220,14 @@ export default {
                 return this.$store.getters.formRules
         },
     },  // end computed
-
-    mounted(){
-        
-    },  // end mounted
-
 }
 </script>
 
 <style>
 
+/* Puts a solid black border around all zones */
 .my-zone {
     border: solid black 3px 
 }
-
 
 </style>

@@ -2,6 +2,8 @@
     <v-container>
         <v-row>
             <v-col cols="12">
+
+                <!-- Data table for showing all roles in org -->
                 <v-data-table
                     :headers="headers"
                     :items="compiledRoleList"
@@ -24,12 +26,10 @@
                                     single-line
                                     hide-details
                                 ></v-text-field>
-                            
-                                <!-- <v-divider class="mx-4" inset vertical></v-divider> -->
 
                                 <v-spacer></v-spacer>
 
-                                <!-- CRUD dialog -->
+                                <!-- CRUD dialog, with "New" button -->
                                 <v-dialog v-model="newRoleDialog" max-width="500px">
                                     <template v-slot:activator="{ on }">
                                         <v-btn color="primary" dark class="mb-2" v-on="on">New</v-btn>
@@ -182,7 +182,7 @@
                         </v-toolbar>
                     </template>
 
-                    <!-- Custom item.action slot -->
+                    <!-- Custom item.action slot for having additional CRUD icon buttons-->
                     <template v-slot:item.action="{ item }">
                         <v-icon
                             small
@@ -207,9 +207,7 @@
                     <template v-slot:item.color="{ item }">
                         <v-chip :color="item.color" label> </v-chip>
                     </template>
-                
-                
-                
+    
                 </v-data-table>
             </v-col>
         </v-row>
@@ -311,16 +309,19 @@ export default {
     },      // end of computed
 
     watch: {
+        // runs close() when dialog closes
         newRoleDialog (val) {
             val || this.close()
         },
     },      // end of watch
 
+    // loads roles into data table
     created () {
         this.initialize()
     },      // end of created
 
     methods: {
+        // loads roles into data table
         initialize () {
             // create array for displaying in list.  
             // Clear slate
@@ -345,14 +346,16 @@ export default {
 
                 })
             })
-        },      // end of initialize
+        },     
 
+        // loads existing role information into form if editing
         editItem (item) {
             this.editedIndex = this.compiledRoleList.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.newRoleDialog = true
         },
 
+        // deletes role when trash button clicked
         deleteItem (item) {
             if(confirm('Are you sure you want to delete this item?')){
                 axios({
@@ -374,6 +377,7 @@ export default {
             } 
         },
 
+        // reloads org and roles data table infromation whenever role dialog is closed
         close () {
             this.newRoleDialog = false
 
@@ -386,10 +390,9 @@ export default {
             setTimeout(() => {
                 this.initialize()
             }, 600)
-
-
         },
 
+        // updates db with role information (for both creation and editing)
         saveRole () {
             // Check to make sure token is valid
             this.$store.dispatch('verifyLogin')
@@ -462,25 +465,20 @@ export default {
             this.close()
         },
 
-        // given: role id
-        // return: an array of objects representing each worker, each object containing a)id b)name c) cohort d) true/false if trained
-        // also, launch dialog
+        // loads worker arrays with workers who are qualified in a particular role
         viewWorkers (item) {
-            // console.log("viewWorkers launched, item is: ")
-            // console.log(item)
-
             // reset arrays
             this.qualifiedWorkerArray = []          // used for track those who are qualified in role
             this.selectedWorkers = []               // used for rendering workers and tracking changes
             this.selectedRole = item
-            // console.log("in viewWorkers")
+            
             // get array of worker pk that are qualified in role
             for(let role of this.$store.getters.organization.org_roles){
                 if (role.id == item.id){
                     this.qualifiedWorkerArray = role.worker_ids
                 }
             }
-            // console.log("made it past for loop for qualifiedWorkerArray")
+            
             // create array of all workers for displaying in the list
             for(let i = 0; i < this.$store.getters.organization.org_workers.length; i++){
                 let worker = this.$store.getters.organization.org_workers[i]
@@ -488,18 +486,9 @@ export default {
                     this.selectedWorkers.push(i)
                 }
              }
-            // console.log("made it past for loop for selectedWorkers")
+            
+            // open dialog
             this.employeeRolesDialog = true
-            // console.log("this.qualifiedWorkerArray:")
-            // console.log(this.qualifiedWorkerArray)
-            // console.log("this.selectedWorkers:")
-            // console.log(this.selectedWorkers)
-            // console.log("all workers from store")
-            // console.log(this.$store.getters.organization.org_workers)
-        },
-
-        testFunction(item){
-            console.log("you clicked testFunction" + item)
         },
 
         // Save employee roles
@@ -530,9 +519,11 @@ export default {
             })
             .catch(error => {console.log(error)})
 
+            // reset dialog and item to be edited
             this.selectedRole = undefined
             this.employeeRolesDialog = false
         }
+        
     },      // end of methods
 }
 </script>

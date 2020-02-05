@@ -1,5 +1,7 @@
 <template>
-    <v-container><!-- Start of Account -->
+    <v-container>
+
+        <!-- Start of Account Form, prepopulated with user's data -->
         <v-form v-model="accountFormValidity" ref='accountForm' dense>
             <v-row>
                 <v-col cols="12" md="6">
@@ -59,7 +61,6 @@
                     </v-text-field>
                 </v-col>
             </v-row>
-
             <v-row>
                 <v-card flat>
                     <v-card-text>
@@ -79,7 +80,7 @@
             </v-row>
 
         </v-form>
-    </v-container><!-- End of Account -->
+    </v-container>
 </template>
 
 <script>
@@ -100,8 +101,8 @@ export default {
 
 		// Save account settings based on input to the Account Settings tab
 		saveAccountSettings(){
+            // Only submit update if form is valid
 			if (this.$refs.accountForm.validate()){
-				
 				const payload = {
 					userId: this.$store.getters.user.userId,
 					username: this.account.username,
@@ -130,6 +131,7 @@ export default {
         },
 	},		// end computed
 
+    // pre-load user's info into form
 	mounted() {
 
 		let user = this.$store.getters.user

@@ -1,5 +1,7 @@
 <template>
 	<v-container background="background">
+		
+		<!-- Modal to force user to input/create organization if none detected -->
 		<OrgPopup></OrgPopup>
 
 		<v-toolbar flat dark color="primary">
@@ -10,6 +12,8 @@
 				<v-icon left>{{link.icon}}</v-icon>
 				{{link.text}}
 			</v-tab>
+
+			<!-- Each part of settings is broken into three components: OrgSettings, WorkerSettings, AccountSettings -->
     		<v-tab-item>	
 				<OrgSettings></OrgSettings>
 			</v-tab-item>	
@@ -40,6 +44,7 @@ export default {
 		AccountSettings,
 		WorkerSettings,
 	},
+
 	data: () => ({
 		links: [
 			{text: 'Organization', icon: 'business'},
@@ -54,8 +59,9 @@ export default {
 	computed: {			
 	},		// end computed
 
+	// set dark mode, if applicable
 	mounted() {
 		this.$vuetify.theme.dark = this.$store.getters.user.darkModeEnabled
-	},		// end created
+	},		// end mounted
 }
 </script>

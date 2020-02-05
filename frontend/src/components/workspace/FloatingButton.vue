@@ -1,5 +1,7 @@
 <template>
     <v-container class="fill-height" fluid>
+
+        <!-- This is the floating button/speed dial on the dashboard -->
         <v-speed-dial
             v-model="fab"
             bottom
@@ -15,6 +17,7 @@
                 </v-btn>
             </template>
 
+            <!-- Below are the five buttons that slide out of speed dial, with tooltips -->
             <v-tooltip right>
                 <template v-slot:activator="{ on }">
                     <v-btn fab dark small color="#ff7f00" v-on="on" @click="createNodeDialog = true">
@@ -59,6 +62,7 @@
                 </template>
                 <span>Create Workspace</span>
             </v-tooltip>
+
         </v-speed-dial>
 
         <!-- Change workspace dialog -->
@@ -226,7 +230,7 @@
             </v-card>
         </v-dialog>
 
-				<!-- Workforce navigation drawer -->
+        <!-- Workforce navigation drawer -->
 		<v-navigation-drawer
 			v-model="navDrawer"
 			app
@@ -339,12 +343,15 @@
                     </v-list-item>
                 </v-list-group>
                 <v-divider></v-divider>
+
+                <!-- Placeholder for adding "auto fill" button -->
                 <!-- <v-list-item>
                         <v-btn color='success' @click="" center>
                             Fill Workstations
                         </v-btn>
                 </v-list-item>
                 <v-divider></v-divider> -->
+
                 <v-list-item>
                         <v-btn color='error' @click="clearWorkspaceNodes">
                             Clear Workstations
@@ -387,13 +394,11 @@ export default {
         // for nav drawer
         navDrawer: true,
         activeCohorts: [1,2],
-    }),		// end data
-
-    components: {
-
-    },
+    }),		// end of data
 
     methods: {
+
+        // creates a node/workstation.
         createNode(){
             // get role id from string that's been selected
             let roleId;
@@ -440,6 +445,8 @@ export default {
 
             this.createNodeDialog = false
         },
+
+        // creates a zone
         createZone(){
 
             // post new db to db
@@ -477,10 +484,14 @@ export default {
 
             this.createZoneDialog = false
         },
+
+        // switches between created workspaces
         switchWorkspace(workspaceIndex){
             this.$store.dispatch('loadWorkspace', {index: workspaceIndex})
             this.changeWorkspaceDialog = false
         },
+
+        // creates a new workspace when floating button clicked
 		createWorkspace(){
             // get department id from string that's been selected
             let deptId;
@@ -527,6 +538,8 @@ export default {
             // close dialog
             this.createWorkspaceDialog = false
         },
+
+        // returns list of unassigned workers by cohort
         cohortUnassigned(cohortId){
             // get cohort workers
             let returnArr = [];
@@ -537,6 +550,8 @@ export default {
             })
             return returnArr
         },
+
+        // returns a list of unassigned workers by role (which are filtered by active cohorts)
         roleUnassigned(role){
             // get cohort workers
             let returnArr = [];
@@ -549,6 +564,8 @@ export default {
             })
             return returnArr
         },
+
+        // clears all workstations in active workspace
         clearWorkspaceNodes(){
             // abort if they user doesn't confirm
             if(!confirm(`Are you sure you want to clear all ${this.$store.getters.workspace.name} workstations?`)){
@@ -588,6 +605,8 @@ export default {
             }, 1000)
             
         },
+
+        // activates/deactivates a cohort
         toggleCohort(cohort){
             axios({
                 method: 'patch',
@@ -611,6 +630,8 @@ export default {
             })
             .catch(error => {console.log(error)})
         },
+
+        // when provided a cohort id, returns true/false if cohort is active
         isCohortActive(cohortId){
             for(let cohort of this.$store.getters.organization.org_cohorts){
                 if(cohort.id == cohortId){
@@ -618,10 +639,8 @@ export default {
                 }
             }
         },
+
 	},		// end methods
-	
-	mounted(){
-	},		// end mounted
 
 	computed: {
 		org(){
@@ -643,10 +662,6 @@ export default {
         currentWorkspaceId(){
             return this.$store.getters.workspace.id
         },
-        
-        
 	},     // end computed
-
-
-  }
+}
 </script>

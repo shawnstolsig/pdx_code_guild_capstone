@@ -1,6 +1,8 @@
 <template>
     <v-container>
         <v-card class="mt-5">
+
+            <!-- Employe badge entry form -->
             <v-row>
                 <v-spacer></v-spacer>
                 <v-col cols="12" md="6" class="pb-0 mt-5">
@@ -39,6 +41,7 @@
                 <v-spacer></v-spacer>
             </v-row>
             
+            <!-- Employee assignment display card -->
             <v-row>
                 <v-spacer></v-spacer>
                 <v-col cols="12" md="6" class="pb-0">
@@ -119,9 +122,12 @@ export default {
             area: '',
         }
     },      // end data
+
     methods: {
     },      // end methods
+
     watch: {
+        // watching the scan badge input v-model...this function triggers whenever badge is entered/cleared
         input(value){
             // clear out data if input value is zero
             if(value=='' || !value){
@@ -131,9 +137,8 @@ export default {
                 this.role = ''
                 this.area = ''
             } 
-            // process input...
+            // process input if not null
             else {
-
                 axios({
                     method: 'get',
                     url: `${this.$store.getters.endpoints.baseAPI}/organizationsall/${this.$store.getters.user.organization}`,
@@ -201,10 +206,12 @@ export default {
             }
         }
     },      // end watch
+
     computed: {
         org(){
             return this.$store.getters.organization
         },
     },      // end computed
+    
 }
 </script>

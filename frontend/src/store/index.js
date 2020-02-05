@@ -303,11 +303,6 @@ export default new Vuex.Store({
                 let expirationTime = this.state.jwt.accessExpiration * 1000
                 this.dispatch('setLogoutTimer', expirationTime - now)
 
-                // Send to dashboard screen...use delay to time the response from org update
-                setTimeout(() => {
-                    router.push({name: 'dashboard'})
-                }, 300)
-
                 // Get Manager/User info
                 let userId = jwt_decode(this.state.jwt.access).user_id
                 return axios({
@@ -325,6 +320,11 @@ export default new Vuex.Store({
                 this.commit('updateUserInfoOnly', response.data.user)
                 this.commit('updateManagerInfoOnly', response.data)
                 this.dispatch('loadOrganization')
+
+                // Send to dashboard screen...use delay to time the response from org update
+                setTimeout(() => {
+                    router.push({name: 'dashboard'})
+                }, 300)
             })
             // Catch errors
             .catch(error => {
@@ -359,19 +359,6 @@ export default new Vuex.Store({
                 // Get expirations
                 const accessExp = this.state.jwt.accessExpiration
                 const refreshExp = this.state.jwt.refreshExpiration
-                
-                if(accessExp - (Date.now() / 1000) > 0 ){
-                    console.log("I think my access token is good")
-                }
-                if(accessExp - (Date.now() / 1000) < 0 ){
-                    console.log("I think my access token is bad")
-                }
-                if(refreshExp - (Date.now() / 1000) > 0){
-                    console.log("I think my refresh token is good")
-                }
-                if(refreshExp - (Date.now() / 1000) < 0){
-                    console.log("I think my refresh token is bad")
-                }
 
                 // Access token is good, do nothing.  Still has at least 5 seconds left.
                 if (accessExp - (Date.now() / 1000) >= 5) {
@@ -546,7 +533,7 @@ export default new Vuex.Store({
                 workspacePk = this.getters.organization.org_workspaces[payload.index].id
             }
             
-            console.log(`Loading workspace with id of ${workspacePk}`)
+            // Load workspace info for user's preferred workspace
             axios({
                 method: 'get',
                 url: `${this.getters.endpoints.baseAPI}/workspacesall/${workspacePk}`,

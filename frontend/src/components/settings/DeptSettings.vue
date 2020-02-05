@@ -1,9 +1,12 @@
 <template>
     <v-card>
+        <!-- Department settings is subcomponent of OrgSettings -->
         <v-card-title>
             Departments
         </v-card-title>
         <v-card-text>
+
+            <!-- List of exisiting departments -->
             <v-list >
                 <v-list-item-group v-model="selectedDept">
                     <v-list-item v-for="department in org.org_departments" :key="department.id">
@@ -18,8 +21,10 @@
                     </v-list-item-content>
                 </v-list-item>
             </v-list>
+
         </v-card-text>
         <v-card-actions>
+
             <!-- Dialog for adding Department -->
             <v-dialog v-model="deptCreateDialog" max-width="500">
                 <template v-slot:activator="{ on }">
@@ -66,6 +71,7 @@
                     </v-form>
                 </v-card>
             </v-dialog>
+
             <!-- Dialog for deleting Department -->
             <v-dialog v-model="deptDeleteDialog" max-width="500" v-if="selectedDept >= 0">
                 <template v-slot:activator="{ on }">
@@ -80,6 +86,7 @@
                     </v-card-actions>
                 </v-card>
             </v-dialog>
+
         </v-card-actions>
     </v-card>
 </template>
@@ -117,7 +124,7 @@ export default {
                 }
             }
 
-            console.log("Creating department.")
+            // Post new dept to db
             axios({
                 method: 'post',
                 url: `${this.$store.getters.endpoints.baseAPI}/departments/`,
@@ -149,7 +156,7 @@ export default {
             // Look up dept id.  Names must be unique when created, so looking up by name is reliable.
             let deptId = this.org.org_departments[this.selectedDept].id
   
-            console.log("deleting dept")
+            // Delete dept in db
             axios({
                 method: 'delete',
                 url: `${this.$store.getters.endpoints.baseAPI}/departments/${deptId}`,
@@ -175,9 +182,6 @@ export default {
             return this.$store.getters.formRules
         },
 	},		// end computed
-
-	created() {
-	},		// end mounted
 }
 
 </script>
