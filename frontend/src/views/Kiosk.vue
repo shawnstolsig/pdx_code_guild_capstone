@@ -188,7 +188,8 @@ export default {
                         }
                         // if worker is not found in db
                         else {
-                            this.message = 'Badge not recognized, please see HR.'
+                            this.message = ''
+                            // this.message = 'Badge not recognized, please see HR.'
                             this.workstation = ''
                             this.department = ''
                             this.role = ''
@@ -202,7 +203,7 @@ export default {
                 // clear input field for next employee
                 setTimeout(() => {
                     this.input = ''
-                }, 5000) 
+                }, 10000) 
             }
         }
     },      // end watch
