@@ -230,6 +230,11 @@
             </v-card>
         </v-dialog>
 
+        <!-- Autofill dialog -->
+        <v-dialog v-model="autofillDialog" max-width="500px" persistent>
+            <Autofill @close-autofill="autofillDialog = false"/>
+        </v-dialog>
+
         <!-- Workforce navigation drawer -->
 		<v-navigation-drawer
 			v-model="navDrawer"
@@ -311,6 +316,7 @@
                 </v-list-group>
                 <v-divider></v-divider>
 
+                <!-- Cohort selector -->
                 <v-list-group
                     multiple
                     >
@@ -323,7 +329,6 @@
                     <v-list-item
                         v-for="cohort in org.org_cohorts"
                         :key="cohort.id"
-                    
                     >
 
                         <v-list-item-action>
@@ -344,27 +349,33 @@
                 </v-list-group>
                 <v-divider></v-divider>
 
-                <!-- Placeholder for adding "auto fill" button -->
-                <!-- <v-list-item>
-                        <v-btn color='success' @click="" center>
+                <!-- Autofill button -->
+                <v-list-item>
+                        <v-btn color='success' @click="autofillDialog = true" center>
                             Fill Workstations
                         </v-btn>
                 </v-list-item>
-                <v-divider></v-divider> -->
+                <v-divider></v-divider>
 
+                <!-- Clear workstations button -->
                 <v-list-item>
                         <v-btn color='error' @click="clearWorkspaceNodes">
                             Clear Workstations
                         </v-btn>
                 </v-list-item>
+
 			</v-list>
 		</v-navigation-drawer>
 
     </v-container>
 </template>
 <script>
+import Autofill from '@/components/workspace/Autofill.vue'
 import axios from 'axios'
 export default {
+    components: {
+        Autofill,
+    },
 
     data: () => ({
 		fab: false,
@@ -393,7 +404,9 @@ export default {
         },
         // for nav drawer
         navDrawer: true,
-        activeCohorts: [1,2],
+        // for autofill
+        autofillDialog: false,
+
     }),		// end of data
 
     methods: {
