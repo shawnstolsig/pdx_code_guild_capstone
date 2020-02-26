@@ -113,7 +113,7 @@ class NodeSerializer(serializers.ModelSerializer):
         # fields = '__all__'
         fields = ('id', 'name','department','organization',
                 'role','volume','worker','zone','workspace',
-                'draggable', 'color','height','width','x','y')
+                'draggable', 'color','height','width','x','y', 'is_active')
 class FlowpathWorkspaceSerializer(serializers.ModelSerializer):
     # svg = SVGElementSerializer()
     class Meta:

@@ -26,11 +26,13 @@
                <v-row align="center"> 
                    <v-col cols="12">
                        <v-select
+                       v-model="selectedCohorts"
                         :items="org.org_cohorts"
                         :item-text="cohortText"
                         multiple
                         chips
                         label="Cohorts"
+                        return-object
                        ></v-select>
                    </v-col>
                </v-row>
@@ -43,6 +45,7 @@
                         multiple
                         chips
                         label="Workstations"
+                        return-object
                        >
                                 <template v-slot:selection="{ item, index }">
                                     <v-chip v-if="index === 0">
@@ -89,6 +92,7 @@ export default {
     data(){
 		return {
             selectedNodes: undefined,
+            selectedCohorts: undefined,
 		}
 	},    // end data
 
@@ -119,7 +123,7 @@ export default {
             return this.$store.getters.workspace
         },
         rules(){
-                return this.$store.getters.formRules
+            return this.$store.getters.formRules
         },
         workspaceDept(){
             for(let dept of this.$store.getters.organization.org_departments){
@@ -134,6 +138,26 @@ export default {
         },
 
     },  // end computed
+
+    // set up initial lists for active cohorts and nodes
+    mounted(){
+        let activeCohortList = []
+        let activeNodeList = []
+
+        for (let cohort of this.$store.getters.organization.org_cohorts){
+            if(cohort.is_active){
+                activeCohortList.push(cohort)
+            }
+        }
+        for (let node of this.$store.getters.workspace.workspace_nodes){
+            if(node.is_active){
+                activeNodeList.push(node)
+            }
+        }
+
+        this.selectedCohorts = activeCohortList
+        this.selectedNodes = activeNodeList
+    },  // end mounted
 }
 </script>
 

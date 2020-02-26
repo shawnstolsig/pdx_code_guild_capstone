@@ -24,7 +24,10 @@
                     {{node.role.name}}
                 
                 <v-spacer></v-spacer>
-                <v-btn icon @click="toggleLock">
+                <v-btn icon @click="toggleActive" small>
+                    <v-icon>{{node.is_active ? 'check_circle' : 'not_interested'}}</v-icon>
+                </v-btn>
+                <v-btn icon @click="toggleLock" small>
                     <v-icon>{{node.draggable ? 'lock_open' : 'lock'}}</v-icon>
                 </v-btn>
 
@@ -37,7 +40,7 @@
                     origin="top right"
                     >
                     <template v-slot:activator="{ on }">
-                        <v-btn icon v-on="on">
+                        <v-btn icon v-on="on" small>
                             <v-icon>more_vert</v-icon>
                         </v-btn>
                     </template>
@@ -300,6 +303,28 @@ export default {
                 url: `${this.$store.getters.endpoints.baseAPI}/nodes/${this.node.id}/`,
                 data: {
                     draggable: this.node.draggable
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log(response)
+            })
+            .catch(error => {console.log(error)})
+        },
+
+        // toggles if node is active
+        toggleActive(){
+            // toggle active
+            this.node.is_active = !this.node.is_active
+
+            // write status to db
+            axios({
+                method: 'patch',
+                url: `${this.$store.getters.endpoints.baseAPI}/nodes/${this.node.id}/`,
+                data: {
+                    is_active: this.node.is_active
                 },
                 headers: {
                     authorization: `Bearer ${this.$store.getters.accessToken}`
