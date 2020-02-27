@@ -108,10 +108,31 @@ export default {
             return `${item.name} (${item.role.name})` 
         },
         
-        // generate shift assignments
+        // generate shift assignments (main function for autofill)
         generateAssignments(){
+
+            // iterate through all nodes being filled
+            // store number of each role needed
+            // create a list of available (in cohort) employees trained in each role, sorted alphabetically by last name
+            // create a rating of how hard each node will be to staff.  # workers available / # workers needed (lower is harder, below one is impossible)
+            // put all nodes in list, order each node by rating
+            // look at first node in node list
+            // assign first employee after the last_staffed employee
+            // remove assigned employee from available employee lists for all roles
+            // remove node from list of nodes to be filled (reverse order? adjust i--?)
+            // recaculate difficulty for each role
+            // reorder node list based on updated  
+            // repeat last 5 steps
+
+
+
+            // close dialog
             this.$emit('close-autofill')
         },
+
+        // helper functions for generateAssignments: ------------------------------------------------------
+
+        // ------------------------------------------------------------------------------------------------
 
 	},    // end methods
 
