@@ -111,7 +111,93 @@ export default {
         // generate shift assignments (main function for autofill)
         generateAssignments(){
 
-            // nodes
+            // get an arrray of available (active and in select cohorts) employees
+            let workerArray = this.getAvailableWorkersArray()
+
+            // given list of available workers, add a difficulty rating to each selected node and sort by rating 
+            this.addRatingToSelectedNodesAndSort(workerArray)
+
+            // at this point, all nodes are in an array sorted by rating, from most to least difficult to fill
+            // also, workerArray contains all workers who are active and on shift 
+
+            console.log("workerArray:")
+            console.log(workerArray)
+            console.log("selectedNodes")
+            console.log(this.selectedNodes)
+
+            // ---------------------------- auto fill process ----------------------------
+            // look at first node in node list
+            for(let node of this.selectedNodes){
+
+                // create array of worker objects who are trained in role and are available
+                let roleWorkers = []
+
+                for(let workerId of node.role.worker_ids){
+                    for(let w of this.$store.getters.organization.org_workers){
+                        if(workerId == w.id && workerArray.map(x => x.id).includes(w.id)){
+                            roleWorkers.push(w)
+                        }
+                    }
+                }
+                
+                // check to see if there are no available roleWorkers
+                if(roleWorkers.length == 0){
+                    alert(`There are no available workers in role ${node.role.name} for workstation ${node.name}.`)
+                    break
+                } else {
+
+                    // order alphabetically by last
+                    // roleWorkers.sort(function(a, b) {
+                    //     var nameA = a.last_name.toUpperCase(); // ignore upper and lowercase
+                    //     var nameB = b.last_name.toUpperCase(); // ignore upper and lowercase
+                    //     if (nameA < nameB) {
+                    //         return -1;
+                    //     }
+                    //     if (nameA > nameB) {
+                    //         return 1;
+                    //     }
+
+                    //     // names must be equal
+                    //     return 0;
+                    // });
+
+                    // randomly assign employee from list
+                    let randomWorker = roleWorkers[Math.floor(Math.random()*roleWorkers.length)]
+                    console.log(`${randomWorker.full_name} selected for node.name`)
+                    
+                }
+            }
+
+
+            // remove assigned employee from available employee lists for all roles
+            // remove node from list of nodes to be filled (reverse order? adjust i--?)
+            // recaculate difficulty for each role
+            // reorder node list based on updated  
+            // repeat last 5 steps
+
+            // reset arrays
+            this.selectedNodes = null
+            this.selectedCohorts = null
+
+
+            // close dialog
+            this.$emit('close-autofill')
+        },
+
+        // helper functions for generateAssignments: ------------------------------------------------------
+        getAvailableWorkersArray(){
+            let returnArr = []
+            // create a list of available (in cohort and active) employees
+            for(let worker of this.$store.getters.organization.org_workers){
+                if(this.selectedCohorts.map(x => x.id).includes(worker.cohort) && worker.is_active){
+                    returnArr.push(worker)
+                }
+            }
+            return returnArr
+        },
+        addRatingToSelectedNodesAndSort(workerArray){
+
+            // declare starting object literal 
             let rolesObj = {}
 
             // iterate through all nodes being filled and store number of employees needed
@@ -125,14 +211,6 @@ export default {
                 }
                 else{
                     rolesObj[node.role.id].count++
-                }
-            }
-
-            // create a list of available (in cohort and active) employees
-            let workerArray = []
-            for(let worker of this.$store.getters.organization.org_workers){
-                if(this.selectedCohorts.map(x => x.id).includes(worker.cohort) && worker.is_active){
-                    workerArray.push(worker)
                 }
             }
 
@@ -160,15 +238,7 @@ export default {
                 }
 
             }
-
-
-            console.log("rolesObj")
-            console.log(rolesObj)
-            console.log("workerArray:")
-            console.log(workerArray)
-            console.log("rolesObj after calculating rating:")
-            console.log(rolesObj)
-
+            
             // put all nodes in list, order each node by rating:
             // add rating to all selectedNodes
             for(let node of this.selectedNodes){
@@ -179,73 +249,10 @@ export default {
             this.selectedNodes.sort(function(a,b){
                 return a.rating - b.rating
             })
-
-
-            // look at first node in node list
-            for(let node of this.selectedNodes){
-
-                // get list of workers trained in role
-                let roleWorkers = []
-
-                for(let workerId of node.role.worker_ids){
-                    for(let w of this.$store.getters.organization.org_workers){
-                        if(workerId == w.id && workerArray.map(x => x.id).includes(w.id)){
-                            roleWorkers.push(w)
-                        }
-                    }
-                }
-                
-                // check to see if there are no available roleWorkers
-                if(roleWorkers.length == 0){
-                    alert(`There are no available workers in role ${node.role.name} for workstation ${node.name}.`)
-                    break
-                } else {
-
-                    // order alphabetically 
-                    roleWorkers.sort(function(a, b) {
-                        var nameA = a.last_name.toUpperCase(); // ignore upper and lowercase
-                        var nameB = b.last_name.toUpperCase(); // ignore upper and lowercase
-                        if (nameA < nameB) {
-                            return -1;
-                        }
-                        if (nameA > nameB) {
-                            return 1;
-                        }
-
-                        // names must be equal
-                        return 0;
-                    });
-
-                    // assign first employee after the last_staffed employee:
-                    // edge case: no employee previously assigned
-                    if(node.role.last_assigned == undefined){
-                        console.log(`assigning ${roleWorkers[0].full_name} to ${node.name}`)
-                        // PICK UP HERE, NEED TO DO AXIOS CALLS TO ACTUALLY ASSIGN WORKER.  ALSO NEED TO UPDATE ARRAYS.
-                    } 
-                    // else {
-
-                    // }
-                }
-            }
-
-
-            // remove assigned employee from available employee lists for all roles
-            // remove node from list of nodes to be filled (reverse order? adjust i--?)
-            // recaculate difficulty for each role
-            // reorder node list based on updated  
-            // repeat last 5 steps
-
-            // reset arrays
-            this.selectedNodes = null
-            this.selectedCohorts = null
-
-
-            // close dialog
-            this.$emit('close-autofill')
         },
+        assignWorker(){
 
-        // helper functions for generateAssignments: ------------------------------------------------------
-
+        },
         // ------------------------------------------------------------------------------------------------
 
 	},    // end methods
