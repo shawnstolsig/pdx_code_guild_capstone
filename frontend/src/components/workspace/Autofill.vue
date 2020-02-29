@@ -111,6 +111,9 @@ export default {
         
         // generate shift assignments (main function for autofill)
         generateAssignments(){
+            if(!this.clearWorkspaceNodes()){
+                return
+            }
 
             // get an arrray of available (active and in select cohorts) employees
             let workerArray = this.getAvailableWorkersArray()
@@ -289,6 +292,40 @@ export default {
             }
 
             return true
+        },
+         // clears all workstations in active workspace
+        clearWorkspaceNodes(){
+            // abort if they user doesn't confirm
+            if(!confirm(`This will clear all ${this.$store.getters.workspace.name} workstations.  Continue?`)){
+                return false
+            }
+            // iterate through all workstations
+            for(let ws of this.$store.getters.workspace.workspace_nodes){
+                // only patch if ws worker is not null
+                if(ws.worker){
+                    axios({
+                        method: 'patch',
+                        url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${ws.id}/`,
+                        data: {
+                            worker: null,
+                        },
+                        headers: {
+                            authorization: `Bearer ${this.$store.getters.accessToken}`
+                    },
+                    })
+                    .then(response => {
+                        console.log(`Removing worker from node ${ws.name}`)
+                        console.log(response)
+                        // update this node's state
+                        ws.worker = null
+
+                    })
+                    .catch(error => {console.log(error)})
+                }
+            }
+
+            return true
+            
         },
         // ------------------------------------------------------------------------------------------------
 
