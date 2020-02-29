@@ -82,7 +82,7 @@
 
 <script>
 
-// import axios from 'axios'
+import axios from 'axios'
 export default {
    
     props: {
@@ -93,6 +93,7 @@ export default {
 		return {
             selectedNodes: undefined,
             selectedCohorts: undefined,
+            nodeProcessCounter: undefined,
 		}
 	},    // end data
 
@@ -120,67 +121,18 @@ export default {
             // at this point, all nodes are in an array sorted by rating, from most to least difficult to fill
             // also, workerArray contains all workers who are active and on shift 
 
-            console.log("workerArray:")
-            console.log(workerArray)
-            console.log("selectedNodes")
-            console.log(this.selectedNodes)
-
             // ---------------------------- auto fill process ----------------------------
-            // look at first node in node list
-            for(let node of this.selectedNodes){
+            this.autofill(workerArray)
+            // setTimeout(() => {
 
-                // create array of worker objects who are trained in role and are available
-                let roleWorkers = []
+            // }, 5000)
 
-                for(let workerId of node.role.worker_ids){
-                    for(let w of this.$store.getters.organization.org_workers){
-                        if(workerId == w.id && workerArray.map(x => x.id).includes(w.id)){
-                            roleWorkers.push(w)
-                        }
-                    }
-                }
-                
-                // check to see if there are no available roleWorkers
-                if(roleWorkers.length == 0){
-                    alert(`There are no available workers in role ${node.role.name} for workstation ${node.name}.`)
-                    break
-                } else {
+            let wsPk = this.$store.getters.workspace.id
+            this.$store.dispatch('dismountWorkspace')
 
-                    // order alphabetically by last
-                    // roleWorkers.sort(function(a, b) {
-                    //     var nameA = a.last_name.toUpperCase(); // ignore upper and lowercase
-                    //     var nameB = b.last_name.toUpperCase(); // ignore upper and lowercase
-                    //     if (nameA < nameB) {
-                    //         return -1;
-                    //     }
-                    //     if (nameA > nameB) {
-                    //         return 1;
-                    //     }
-
-                    //     // names must be equal
-                    //     return 0;
-                    // });
-
-                    // randomly assign employee from list
-                    let randomWorker = roleWorkers[Math.floor(Math.random()*roleWorkers.length)]
-                    console.log(`${randomWorker.full_name} selected for node.name`)
-                    
-                }
-            }
-
-
-            // remove assigned employee from available employee lists for all roles
-            // remove node from list of nodes to be filled (reverse order? adjust i--?)
-            // recaculate difficulty for each role
-            // reorder node list based on updated  
-            // repeat last 5 steps
-
-            // reset arrays
-            this.selectedNodes = null
-            this.selectedCohorts = null
-
-
-            // close dialog
+            // update backend/store 
+            this.$store.dispatch('loadOrganization')
+            this.$store.dispatch('loadWorkspace', {key: wsPk})
             this.$emit('close-autofill')
         },
 
@@ -250,8 +202,93 @@ export default {
                 return a.rating - b.rating
             })
         },
-        assignWorker(){
+        assignWorker(worker, node){
+            console.log(`${worker.full_name} selected for ${node.name}`)
 
+            // update backend and state
+            axios({
+                method: 'patch',
+                url: `${this.$store.getters.endpoints.baseAPI}/nodecreate/${node.id}/`,
+                data: {
+                    worker: worker.id
+                },
+                headers: {
+                    authorization: `Bearer ${this.$store.getters.accessToken}`
+                },
+            })
+            .then(response => {
+                console.log(response)
+            })
+            .catch(error => {console.log(error)})
+        },
+        initializeSelections(){
+            let activeCohortList = []
+            let activeNodeList = []
+
+            for (let cohort of this.$store.getters.organization.org_cohorts){
+                if(cohort.is_active){
+                    activeCohortList.push(cohort)
+                }
+            }
+            for (let node of this.$store.getters.workspace.workspace_nodes){
+                if(node.is_active){
+                    activeNodeList.push(node)
+                }
+            }
+
+            this.selectedCohorts = activeCohortList
+            this.selectedNodes = activeNodeList
+        },
+        autofill(workerArray){
+            // Keep track of roles that ran out of employees and nodes that are unfilled
+            let depletedRoles = []
+            let unfilledNodes = []
+
+            // look at first node in node list
+            for(let node of this.selectedNodes){
+
+                // create array of worker objects who are trained in role and are available
+                let roleWorkers = []
+
+                for(let workerId of node.role.worker_ids){
+                    for(let w of this.$store.getters.organization.org_workers){
+                        if(workerId == w.id && workerArray.map(x => x.id).includes(w.id)){
+                            roleWorkers.push(w)
+                        }
+                    }
+                }
+                
+                // check to see if there are no available roleWorkers
+                if(roleWorkers.length == 0){
+                    depletedRoles.push(node.role.name)
+                    unfilledNodes.push(node.name)
+                } else {
+
+                    // randomly pick employee from list
+                    let randomWorker = roleWorkers[Math.floor(Math.random()*roleWorkers.length)]
+
+                    // assign worker to workstation
+                    this.assignWorker(randomWorker, node)
+                    
+                    // remove them from workerArray
+                    workerArray = workerArray.filter(function(value){
+                        return value.id != randomWorker.id
+                    })
+                    console.log(`Removed ${randomWorker.full_name}.  workerArray is now: `)
+                    console.log(workerArray)
+                    
+                }
+            }
+
+            // print results message:
+            if(unfilledNodes.length == 0){
+                alert("All workstations filled.")
+            } else {
+                alert(`Could not fill all of the following roles: ${depletedRoles}\n
+                The following workstations need to be filled manually: ${unfilledNodes}`)
+            }
+
+            return true
         },
         // ------------------------------------------------------------------------------------------------
 
@@ -283,22 +320,7 @@ export default {
 
     // set up initial lists for active cohorts and nodes
     mounted(){
-        let activeCohortList = []
-        let activeNodeList = []
-
-        for (let cohort of this.$store.getters.organization.org_cohorts){
-            if(cohort.is_active){
-                activeCohortList.push(cohort)
-            }
-        }
-        for (let node of this.$store.getters.workspace.workspace_nodes){
-            if(node.is_active){
-                activeNodeList.push(node)
-            }
-        }
-
-        this.selectedCohorts = activeCohortList
-        this.selectedNodes = activeNodeList
+        this.initializeSelections()
     },  // end mounted
 }
 </script>
